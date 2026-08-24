@@ -112,7 +112,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="+id/tvTotalSessions"
+                        android:id="@+id/tvTotalSessions"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="12"
@@ -140,7 +140,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="+id/tvBestScore"
+                        android:id="@+id/tvBestScore"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="85"
@@ -160,7 +160,7 @@
 
         <!-- Chart Placeholder -->
         <androidx.cardview.widget.CardView
-            android:id="+id/cardChart"
+            android:id="@+id/cardChart"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
