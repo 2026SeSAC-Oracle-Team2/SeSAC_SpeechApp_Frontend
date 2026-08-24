@@ -8,13 +8,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.sesac.speech.databinding.ActivityChatBinding
-import com.sesac.speech.databinding.OverlayRecordingBinding
 import java.util.Locale
 
 class ChatActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityChatBinding
-    private lateinit var overlayBinding: OverlayRecordingBinding
     private val viewModel: ChatViewModel by viewModels()
     private val chatAdapter = ChatAdapter()
 
@@ -26,9 +24,6 @@ class ChatActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        // Include된 overlay 레이아웃 바인딩
-        overlayBinding = OverlayRecordingBinding.bind(binding.recordingOverlay)
 
         setupRecyclerView()
         observeMessages()
@@ -62,7 +57,7 @@ class ChatActivity : AppCompatActivity() {
     }
 
     private fun setupStopButton() {
-        overlayBinding.btnStop.setOnClickListener {
+        binding.btnStop.setOnClickListener {
             stopRecordingTimer()
             hideRecordingOverlay()
             viewModel.onRecordingStopped()
@@ -72,14 +67,14 @@ class ChatActivity : AppCompatActivity() {
     // ─── Recording Overlay ─────────────────────────────────────
 
     private fun showRecordingOverlay() {
-        overlayBinding.root.visibility = View.VISIBLE
+        binding.recordingOverlay.visibility = View.VISIBLE
         binding.micFab.visibility = View.GONE
         elapsedSeconds = 0
         updateTimerUI()
     }
 
     private fun hideRecordingOverlay() {
-        overlayBinding.root.visibility = View.GONE
+        binding.recordingOverlay.visibility = View.GONE
         binding.micFab.visibility = View.VISIBLE
     }
 
@@ -110,9 +105,9 @@ class ChatActivity : AppCompatActivity() {
     private fun updateTimerUI() {
         val minutes = elapsedSeconds / 60
         val seconds = elapsedSeconds % 60
-        overlayBinding.tvTimer.text =
+        binding.tvTimer.text =
             String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
-        overlayBinding.progressTimer.progress = elapsedSeconds
+        binding.progressTimer.progress = elapsedSeconds
     }
 
     override fun onDestroy() {

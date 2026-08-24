@@ -32,15 +32,75 @@
         app:layout_constraintStart_toStartOf="parent"
         app:rippleColor="@color/primary_light" />
 
-    <!-- Recording Overlay -->
-    <include
+    <!-- Recording Overlay (merged from overlay_recording.xml) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/recordingOverlay"
-        layout="@layout/overlay_recording"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:background="@color/background"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Recording Status -->
+        <TextView
+            android:id="@+id/tvRecordingStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="80dp"
+            android:text="녹음 중..."
+            android:textAppearance="@style/TextAppearance.SeSAC.H2"
+            android:textColor="@color/text_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Timer -->
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="00:00"
+            android:textAppearance="@style/TextAppearance.SeSAC.Display"
+            android:textColor="@color/primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvRecordingStatus" />
+
+        <!-- Progress Bar (30 seconds max) -->
+        <ProgressBar
+            android:id="@+id/progressTimer"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="6dp"
+            android:layout_marginHorizontal="48dp"
+            android:layout_marginTop="32dp"
+            android:max="30"
+            android:progressDrawable="@drawable/bg_recording_overlay"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTimer" />
+
+        <!-- Stop Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="80dp"
+            android:backgroundTint="@color/error"
+            android:text="@string/recording_stop"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@android:color/white"
+            app:cornerRadius="14dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
