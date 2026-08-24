@@ -56,6 +56,38 @@ Android Studio에서 `File → Sync Project with Gradle Files` 실행
 
 ---
 
+### 백엔드 서버 URL 설정
+
+API 서버 주소는 **소스코드에 하드코딩하지 않고** `local.properties`에서 관리합니다. 이 파일은 Git에 포함되지 않으므로 IP가 외부에 노출되지 않습니다.
+
+#### 1. local.properties 수정
+
+프로젝트 루트의 `local.properties` 파일에 아래 줄을 추가하세요:
+
+```properties
+sdk.dir=C:\\Users\\Master\\AppData\\Local\\Android\\Sdk
+# 아래 줄을 추가 (VM의 실제 IP 주소로 변경)
+SERVER_BASE_URL=http://VM_IP_주소:8080/
+```
+
+**예시:**
+```properties
+SERVER_BASE_URL=http://146.56.42.123:8080/
+```
+
+> ⚠️ `local.properties`는 `.gitignore`에 등록되어 있어 **GitHub에 올라가지 않습니다.**
+
+#### 2. BuildConfig 자동 생성
+
+Gradle Sync 시 `BuildConfig.SERVER_BASE_URL`가 자동 생성됩니다.
+
+| 환경 | 설정 방법 |
+|------|----------|
+| 에뮬레이터 테스트 | `SERVER_BASE_URL=http://10.0.2.2:8080/` (기본값) |
+| 실제 휴대폰 테스트 | `SERVER_BASE_URL=http://VM_실제_IP:8080/` |
+
+---
+
 ## 🛠 기술 스택
 
 | 영역 | 라이브러리 |
