@@ -4,6 +4,14 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// local.properties에서 SERVER_BASE_URL 읽기 (BuildConfig 주입용)
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+val serverBaseUrl = localProperties.getProperty("SERVER_BASE_URL", "http://10.0.2.2:8080/")
+
 android {
     namespace = "com.sesac.speech"
     compileSdk = 34
@@ -17,13 +25,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // local.properties에서 SERVER_BASE_URL 읽어 BuildConfig에 주입
-        val localProperties = java.util.Properties()
-        val localPropertiesFile = rootProject.file("local.properties")
-        if (localPropertiesFile.exists()) {
-            localPropertiesFile.inputStream().use { localProperties.load(it) }
-        }
-        val serverBaseUrl = localProperties.getProperty("SERVER_BASE_URL", "http://10.0.2.2:8080/")
+        // BuildConfig에 서버 URL 주입
         buildConfigField("String", "SERVER_BASE_URL", "\"$serverBaseUrl\"")
     }
 
