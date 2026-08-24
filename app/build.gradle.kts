@@ -15,11 +15,11 @@ if (localPropertiesFile.exists()) {
 val serverBaseUrl = localProperties.getProperty("SERVER_BASE_URL", "http://10.0.2.2:8080/")
 
 android {
-    namespace = "com.sesac.speech"
+    namespace = "com.sesac.speechapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sesac.speech"
+        applicationId = "com.sesac.speechapp"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
