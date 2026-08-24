@@ -1,5 +1,6 @@
 package com.sesac.speech.ui.profile
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -23,7 +24,18 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // TODO: 닉네임, 프로필 사진 표시 (P2-11)
+
+        // 설정 버튼 → SettingActivity
+        binding.btnSettings.setOnClickListener {
+            startActivity(Intent(requireContext(), SettingActivity::class.java))
+        }
+
+        // 로그아웃 버튼 (Stub)
+        binding.btnLogout.setOnClickListener {
+            // TODO: P2-09 Firebase Auth 로그아웃
+            //  AuthRepository.signOut()
+            //  → LoginActivity로 이동
+        }
     }
 
     override fun onDestroyView() {

@@ -21,6 +21,12 @@ class DashboardFragment : Fragment() {
         return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        // 하드코딩된 데이터는 XML에 직접 표시됨
+        // TODO: P4-09 차트 라이브러리 연동 (MPAndroidChart 등)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
