@@ -1,11 +1,13 @@
 package com.sesac.speech.ui.learn
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.sesac.speech.databinding.FragmentLearnBinding
+import com.sesac.speech.ui.chat.ChatActivity
 
 class LearnFragment : Fragment() {
 
@@ -23,7 +25,11 @@ class LearnFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        // TODO: 오늘의 학습 Hero Card, 퀵 액션 (P2-10)
+
+        // 시작하기 버튼 -> ChatActivity 이동
+        binding.btnStart.setOnClickListener {
+            startActivity(Intent(requireContext(), ChatActivity::class.java))
+        }
     }
 
     override fun onDestroyView() {
