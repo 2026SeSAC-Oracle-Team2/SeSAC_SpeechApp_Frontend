@@ -25,10 +25,18 @@ class ChatActivity : AppCompatActivity() {
         binding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupToolbar()
         setupRecyclerView()
         observeMessages()
         setupMicButton()
         setupStopButton()
+    }
+
+    private fun setupToolbar() {
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+        binding.toolbar.setNavigationOnClickListener { finish() }
     }
 
     private fun setupRecyclerView() {
