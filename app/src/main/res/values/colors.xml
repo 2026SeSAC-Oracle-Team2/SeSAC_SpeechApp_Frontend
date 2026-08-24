@@ -30,4 +30,7 @@
     <color name="user_bubble_bg_end">#3A7BC8</color>
     <color name="feedback_card_bg">#E8F1FA</color>
     <color name="feedback_card_border">#264A90D9</color>
+
+    <!-- Divider -->
+    <color name="divider">#E8ECF2</color>
 </resources>
