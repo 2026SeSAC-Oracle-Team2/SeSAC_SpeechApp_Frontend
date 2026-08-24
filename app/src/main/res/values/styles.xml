@@ -146,7 +146,7 @@
     </style>
 
     <!-- FAB: Mic -->
-    <style name="Widget.SeSAC.FAB.Mic" parent="Widget.Material3.FloatingActionButton">
+    <style name="Widget.SeSAC.FAB.Mic" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="android:layout_width">64dp</item>
         <item name="android:layout_height">64dp</item>
         <item name="android:backgroundTint">@android:color/transparent</item>
