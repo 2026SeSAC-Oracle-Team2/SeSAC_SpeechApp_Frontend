@@ -2,6 +2,8 @@ package com.sesac.speech.ui.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.sesac.speech.MainActivity
@@ -12,18 +14,57 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val viewModel: LoginViewModel by viewModels()
 
+    private val signInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        viewModel.handleSignInResult(result.data)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // TODO: Firebase Google Sign-In 연동 (P2-09)
-        //  현재는 바로 MainActivity로 이동 (스텁)
+        // 자동 로그인 체크
+        if (viewModel.isLoggedIn()) {
+            navigateToMain()
+            return
+        }
+
+        observeLoginState()
 
         binding.btnGoogleSignIn.setOnClickListener {
-            // Stub: 바로 메인으로 이동
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+            signInLauncher.launch(viewModel.googleSignInIntent)
         }
+    }
+
+    private fun observeLoginState() {
+        viewModel.loginState.observe(this) { state ->
+            when (state) {
+                is LoginState.Loading -> {
+                    binding.btnGoogleSignIn.isEnabled = false
+                    binding.btnGoogleSignIn.text = "로그인 중..."
+                }
+                is LoginState.Success -> {
+                    binding.btnGoogleSignIn.isEnabled = true
+                    binding.btnGoogleSignIn.text = "Google로 계속하기"
+                    navigateToMain()
+                }
+                is LoginState.Error -> {
+                    binding.btnGoogleSignIn.isEnabled = true
+                    binding.btnGoogleSignIn.text = "Google로 계속하기"
+                    Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
+                }
+                else -> {
+                    binding.btnGoogleSignIn.isEnabled = true
+                    binding.btnGoogleSignIn.text = "Google로 계속하기"
+                }
+            }
+        }
+    }
+
+    private fun navigateToMain() {
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }

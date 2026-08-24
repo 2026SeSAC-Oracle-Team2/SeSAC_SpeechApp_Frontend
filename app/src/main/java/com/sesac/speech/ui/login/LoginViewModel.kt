@@ -1,22 +1,46 @@
 package com.sesac.speech.ui.login
 
+import android.app.Application
+import android.content.Intent
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.sesac.speech.data.repository.AuthRepository
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _isLoading = MutableLiveData(false)
-    val isLoading: LiveData<Boolean> = _isLoading
+    private val authRepository = AuthRepository(application.applicationContext)
 
-    private val _loginError = MutableLiveData<String?>(null)
-    val loginError: LiveData<String?> = _loginError
+    private val _loginState = MutableLiveData<LoginState>()
+    val loginState: LiveData<LoginState> = _loginState
 
-    // TODO: Firebase Auth 연동 (P2-09)
-    //  signInWithGoogle(idToken: String) -> POST /api/v1/auth/firebase
+    val googleSignInIntent: Intent
+        get() = authRepository.getSignInIntent()
 
-    fun onGoogleSignInClick() {
-        _isLoading.value = true
-        // Stub
+    init {
+        _loginState.value = LoginState.Idle
     }
+
+    fun handleSignInResult(data: Intent?) {
+        viewModelScope.launch {
+            _loginState.value = LoginState.Loading
+            val result = authRepository.handleSignInResult(data)
+            _loginState.value = if (result.isSuccess) {
+                LoginState.Success
+            } else {
+                LoginState.Error(result.exceptionOrNull()?.message ?: "로그인 실패")
+            }
+        }
+    }
+
+    fun isLoggedIn(): Boolean = authRepository.isLoggedIn()
+}
+
+sealed class LoginState {
+    object Idle : LoginState()
+    object Loading : LoginState()
+    object Success : LoginState()
+    data class Error(val message: String) : LoginState()
 }
