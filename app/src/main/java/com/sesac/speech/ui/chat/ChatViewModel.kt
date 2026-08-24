@@ -3,11 +3,17 @@ package com.sesac.speech.ui.chat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class ChatViewModel : ViewModel() {
 
     private val _messages = MutableLiveData<List<ChatMessage>>()
     val messages: LiveData<List<ChatMessage>> = _messages
+
+    private val _isUploading = MutableLiveData(false)
+    val isUploading: LiveData<Boolean> = _isUploading
 
     // 하드코딩된 스텁 데이터 (API 연동 전)
     init {
@@ -41,7 +47,53 @@ class ChatViewModel : ViewModel() {
         _messages.value = stubList
     }
 
-    // 녹음 완료 후 호출 (P3-10 연동 시)
+    /**
+     * 녹음 중단 후 스텁 플로우
+     * 실제 구현 시: upload -> WebSocket -> AI 응답 -> 채점 결과
+     */
+    fun onRecordingStopped() {
+        val current = _messages.value?.toMutableList() ?: mutableListOf()
+
+        // 1. 사용자 녹음 메시지 추가 (STT 텍스트 스텁)
+        current.add(
+            ChatMessage.UserMessage(
+                id = System.currentTimeMillis(),
+                timestamp = "방금",
+                content = "음... 공원에서 산책하고 커피 마셨어요"
+            )
+        )
+        _messages.value = current.toList()
+
+        // 2. 약간의 딜레이 후 AI 응답 + 턴 결과 추가 (업로드/처리 시뮬레이션)
+        viewModelScope.launch {
+            delay(1500)
+
+            val updated = _messages.value?.toMutableList() ?: mutableListOf()
+
+            // AI 응답
+            updated.add(
+                ChatMessage.AiMessage(
+                    id = System.currentTimeMillis(),
+                    timestamp = "방금",
+                    content = "산책하면서 어떤 대화를 나누셨나요?"
+                )
+            )
+
+            // 턴 결과 (랜덤 스텁 점수)
+            updated.add(
+                ChatMessage.TurnResult(
+                    id = System.currentTimeMillis(),
+                    timestamp = "방금",
+                    overallScore = (65..85).random(),
+                    feedbackText = "구체적인 상황 설명이 좋았어요! 다음에는 감정 표현도 함께 말해보세요."
+                )
+            )
+
+            _messages.value = updated.toList()
+        }
+    }
+
+    // API 연동 시 사용할 메서드들
     fun addUserMessage(content: String) {
         val current = _messages.value?.toMutableList() ?: mutableListOf()
         current.add(
@@ -51,10 +103,9 @@ class ChatViewModel : ViewModel() {
                 content = content
             )
         )
-        _messages.value = current
+        _messages.value = current.toList()
     }
 
-    // API 응답 시 호출 (P3-10 연동 시)
     fun addAiResponse(content: String) {
         val current = _messages.value?.toMutableList() ?: mutableListOf()
         current.add(
@@ -64,10 +115,9 @@ class ChatViewModel : ViewModel() {
                 content = content
             )
         )
-        _messages.value = current
+        _messages.value = current.toList()
     }
 
-    // 채점 결과 수신 시 호출 (P3-10 연동 시)
     fun addTurnResult(score: Int, feedback: String) {
         val current = _messages.value?.toMutableList() ?: mutableListOf()
         current.add(
@@ -78,6 +128,6 @@ class ChatViewModel : ViewModel() {
                 feedbackText = feedback
             )
         )
-        _messages.value = current
+        _messages.value = current.toList()
     }
 }
