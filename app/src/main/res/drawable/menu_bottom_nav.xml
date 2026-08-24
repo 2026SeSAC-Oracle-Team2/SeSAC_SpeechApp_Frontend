@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Bottom Nav menu -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/nav_learn"
+          android:icon="@drawable/ic_school_24"
+          android:title="학습"
+          app:iconTint="@color/nav_item_color" />
+    <item android:id="@+id/nav_history"
+          android:icon="@drawable/ic_history_24"
+          android:title="이력"
+          app:iconTint="@color/nav_item_color" />
+    <item android:id="@+id/nav_dashboard"
+          android:icon="@drawable/ic_analytics_24"
+          android:title="대시보드"
+          app:iconTint="@color/nav_item_color" />
+    <item android:id="@+id/nav_profile"
+          android:icon="@drawable/ic_person_24"
+          android:title="프로필"
+          app:iconTint="@color/nav_item_color" />
+</menu>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/learnFragment"
+        android:icon="@drawable/ic_school_24"
+        android:title="@string/tab_learn" />
+    <item
+        android:id="@+id/historyFragment"
+        android:icon="@drawable/ic_history_24"
+        android:title="@string/tab_history" />
+    <item
+        android:id="@+id/dashboardFragment"
+        android:icon="@drawable/ic_analytics_24"
+        android:title="@string/tab_dashboard" />
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@drawable/ic_person_24"
+        android:title="@string/tab_profile" />
+</menu>

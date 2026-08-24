@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary Palette -->
+    <color name="primary">#4A90D9</color>
+    <color name="primary_dark">#3A7BC8</color>
+    <color name="primary_light">#E8F1FA</color>
+    <color name="primary_ghost">#0D4A90D9</color>
+
+    <!-- Neutral Palette -->
+    <color name="text_primary">#1A1A2E</color>
+    <color name="text_secondary">#8B92A8</color>
+    <color name="text_muted">#B0B8CC</color>
+    <color name="background">#F7F9FC</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="border">#E8ECF2</color>
+
+    <!-- Accent -->
+    <color name="accent">#FFD166</color>
+    <color name="accent_bg">#FFF8E8</color>
+
+    <!-- Semantic -->
+    <color name="success">#5CB85C</color>
+    <color name="warning">#F5A623</color>
+    <color name="error">#E8715A</color>
+    <color name="error_border">#F5D0C8</color>
+
+    <!-- Chat Specific -->
+    <color name="ai_bubble_bg">#FFFFFF</color>
+    <color name="user_bubble_bg_start">#4A90D9</color>
+    <color name="user_bubble_bg_end">#3A7BC8</color>
+    <color name="feedback_card_bg">#E8F1FA</color>
+    <color name="feedback_card_border">#264A90D9</color>
+</resources>

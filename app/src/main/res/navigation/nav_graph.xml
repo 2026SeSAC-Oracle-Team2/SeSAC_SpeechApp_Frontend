@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/learnFragment">
+
+    <fragment
+        android:id="@+id/learnFragment"
+        android:name="com.sesac.speech.ui.learn.LearnFragment"
+        android:label="학습"
+        tools:layout="@layout/fragment_learn" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.sesac.speech.ui.history.HistoryFragment"
+        android:label="이력"
+        tools:layout="@layout/fragment_history" />
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.sesac.speech.ui.dashboard.DashboardFragment"
+        android:label="대시보드"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.sesac.speech.ui.profile.ProfileFragment"
+        android:label="프로필"
+        tools:layout="@layout/fragment_profile" />
+
+    <!-- ChatActivity는 Activity이므로 Navigation Graph에서 직접 이동은 별도 Intent로 -->
+
+</navigation>

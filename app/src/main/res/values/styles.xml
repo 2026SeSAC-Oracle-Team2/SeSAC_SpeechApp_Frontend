@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Font Family: Noto Sans KR (add to build.gradle) -->
+    <!-- implementation "com.google.android.material:material:1.12.0" -->
+
+    <!-- Display / Splash Title -->
+    <style name="TextAppearance.SeSAC.Display" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:lineHeight">36sp</item>
+    </style>
+
+    <!-- H1: Screen Title -->
+    <style name="TextAppearance.SeSAC.H1" parent="TextAppearance.Material3.HeadlineLarge">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">32sp</item>
+    </style>
+
+    <!-- H2: Section Title (Greeting) -->
+    <style name="TextAppearance.SeSAC.H2" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">28sp</item>
+    </style>
+
+    <!-- H3: Card Title, Question -->
+    <style name="TextAppearance.SeSAC.H3" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">26sp</item>
+    </style>
+
+    <!-- H4: List Title, Button Label -->
+    <style name="TextAppearance.SeSAC.H4" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">24sp</item>
+    </style>
+
+    <!-- Body: Main Text, Bubble Content -->
+    <style name="TextAppearance.SeSAC.Body" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">24sp</item>
+    </style>
+
+    <!-- Body Large: Emphasized Body (Question text) -->
+    <style name="TextAppearance.SeSAC.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">26sp</item>
+    </style>
+
+    <!-- Caption: Hint, Description -->
+    <style name="TextAppearance.SeSAC.Caption" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:lineHeight">20sp</item>
+    </style>
+
+    <!-- Overline: Section Label, Badge -->
+    <style name="TextAppearance.SeSAC.Overline" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.05</item>
+    </style>
+
+    <!-- Tiny: System Message -->
+    <style name="TextAppearance.SeSAC.Tiny" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textColor">@color/text_muted</item>
+    </style>
+
+    <!-- ============================================ -->
+    <!-- Component Styles -->
+    <!-- ============================================ -->
+
+    <!-- Primary Button (CTA) -->
+    <style name="Widget.SeSAC.Button.Primary" parent="Widget.Material3.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.SeSAC.H4</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@drawable/bg_btn_primary</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:elevation">0dp</item>
+    </style>
+
+    <!-- Secondary Button (Ghost) -->
+    <style name="Widget.SeSAC.Button.Secondary" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">48dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.SeSAC.H4</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="strokeColor">@color/border</item>
+        <item name="strokeWidth">1.5dp</item>
+        <item name="backgroundTint">@color/surface</item>
+        <item name="cornerRadius">14dp</item>
+    </style>
+
+    <!-- Card: Standard -->
+    <style name="Widget.SeSAC.Card" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">20dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/border</item>
+        <item name="contentPadding">20dp</item>
+    </style>
+
+    <!-- Card: Hero -->
+    <style name="Widget.SeSAC.Card.Hero" parent="Widget.SeSAC.Card">
+        <item name="cardCornerRadius">24dp</item>
+        <item name="cardElevation">8dp</item>
+        <item name="cardBackgroundColor">@android:color/transparent</item>
+        <item name="strokeWidth">0dp</item>
+        <item name="contentPadding">28dp</item>
+    </style>
+
+    <!-- Input: TextField -->
+    <style name="Widget.SeSAC.TextField" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">14dp</item>
+        <item name="boxCornerRadiusTopEnd">14dp</item>
+        <item name="boxCornerRadiusBottomStart">14dp</item>
+        <item name="boxCornerRadiusBottomEnd">14dp</item>
+        <item name="boxStrokeColor">@color/border</item>
+        <item name="hintTextColor">@color/text_muted</item>
+    </style>
+
+    <!-- Bottom Navigation -->
+    <style name="Widget.SeSAC.BottomNav" parent="Widget.Material3.BottomNavigationView">
+        <item name="android:background">@color/surface</item>
+        <item name="elevation">4dp</item>
+        <item name="itemIconSize">24dp</item>
+        <item name="itemTextAppearanceActive">@style/TextAppearance.SeSAC.Tiny</item>
+        <item name="itemTextAppearanceInactive">@style/TextAppearance.SeSAC.Tiny</item>
+        <item name="itemActiveIndicatorStyle">@android:color/transparent</item>
+    </style>
+
+    <!-- FAB: Mic -->
+    <style name="Widget.SeSAC.FAB.Mic" parent="Widget.Material3.FloatingActionButton">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:backgroundTint">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+        <item name="elevation">6dp</item>
+        <item name="rippleColor">@color/primary_light</item>
+    </style>
+</resources>
