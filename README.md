@@ -23,15 +23,31 @@
 1. [Firebase Console](https://console.firebase.google.com) 접속
 2. 프로젝트 생성 또는 기존 프로젝트 선택
 3. **프로젝트 설정 → 일반**에서 **Android 앱 추가**
-4. 패키지명: `com.sesac.speech`
+4. 패키지명: `com.sesac.speechapp`
 5. SHA-1 지문 등록 (아래 명령어로 확인)
-   ```bash
-   # Windows (PowerShell)
-   ./gradlew signingReport
-   
-   # Linux/Mac
-   ./gradlew signingReport
-   ```
+
+#### SHA-1 지문 확인 방법
+
+Android Studio에 내장된 JDK의 `keytool`을 사용합니다.
+
+**Windows (CMD):**
+```cmd
+set JAVA_TOOL_OPTIONS=-Duser.language=en -Duser.country=US
+
+cd "C:\Program Files\Android\Android Studio\jbr\bin"
+
+keytool -list -v -keystore "%USERPROFILE%\.android\debug.keystore" -alias androiddebugkey -storepass android -keypass android
+```
+
+> ⚠️ **한국어 Windows 사용자 참고:** `keytool` 명령어에 `-v` 옵션을 붙이면 한국어 로케일 환경에서 `IllegalFormatConversionException`이 발생할 수 있습니다. 위 명령어의 `set JAVA_TOOL_OPTIONS`로 출력 언어를 영어로 변경하면 문제를 회피할 수 있습니다.
+
+출력 결과에서 `SHA1:` (또는 `Certificate fingerprint (SHA-1):`) 뒤의 값을 복사해서 Firebase Console에 붙여넣으세요.
+
+**Linux/Mac:**
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
 6. `google-services.json` 다운로드
 
 #### 2. google-services.json 배치
@@ -114,7 +130,7 @@ Gradle Sync 시 `BuildConfig.SERVER_BASE_URL`가 자동 생성됩니다.
 ## 📁 프로젝트 구조
 
 ```
-app/src/main/java/com/sesac/speech/
+app/src/main/java/com/sesac/speechapp/
 ├── MainActivity.kt
 ├── data/
 │   ├── model/          # 데이터 모델
