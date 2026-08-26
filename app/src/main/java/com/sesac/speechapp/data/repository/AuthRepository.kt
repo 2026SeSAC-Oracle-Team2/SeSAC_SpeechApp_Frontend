@@ -88,12 +88,15 @@ class AuthRepository(private val context: Context) {
         val loginData = body.data
             ?: throw Exception("Login data is null")
 
+        val user = loginData.user
+            ?: throw Exception("Login user data is null")
+
         // 토큰 저장
         tokenManager.saveAccessToken(loginData.accessToken)
         tokenManager.saveRefreshToken(loginData.refreshToken)
         tokenManager.saveUserInfo(
-            uuid = loginData.user.uuid,
-            email = loginData.user.email
+            uuid = user.uuid,
+            email = user.email
         )
     }
 
