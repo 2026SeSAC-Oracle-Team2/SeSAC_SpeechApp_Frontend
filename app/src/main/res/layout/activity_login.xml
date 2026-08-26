@@ -3,28 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/primary">
 
-    <!-- Logo Area -->
-    <androidx.cardview.widget.CardView
+    <!-- Logo -->
+    <ImageView
         android:id="@+id/logoArea"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="160dp"
-        app:cardBackgroundColor="@color/primary"
-        app:cardCornerRadius="20dp"
-        app:cardElevation="0dp"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:background="@drawable/bg_icon_circle"
+        android:contentDescription="로고"
+        app:layout_constraintBottom_toTopOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="center"
-            android:contentDescription="@string/app_name"
-            android:src="@drawable/bg_icon_circle" />
-    </androidx.cardview.widget.CardView>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <!-- Title -->
     <TextView
@@ -32,9 +24,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="@string/splash_title"
-        android:textAppearance="@style/TextAppearance.SeSAC.Display"
-        android:textColor="@color/primary"
+        android:text="SeSAC Speech"
+        android:textAppearance="@style/TextAppearance.SeSAC.H1"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@id/tvSubtitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/logoArea" />
@@ -45,9 +38,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="@string/splash_subtitle"
-        android:textAppearance="@style/TextAppearance.SeSAC.H2"
-        android:textColor="@color/text_secondary"
+        android:text="AI와 함께하는 발화 연습"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/primary_light"
+        app:layout_constraintBottom_toTopOf="@id/btnGoogleSignIn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
@@ -55,25 +49,15 @@
     <!-- Google Sign-In Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGoogleSignIn"
-        style="@style/Widget.SeSAC.Button.Primary"
         android:layout_width="0dp"
         android:layout_height="52dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="16dp"
-        android:text="@string/login_google"
-        app:layout_constraintBottom_toTopOf="@id/btnKakaoSignIn"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <!-- Kakao Sign-In Button (Stub) -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnKakaoSignIn"
-        style="@style/Widget.SeSAC.Button.Secondary"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="48dp"
-        android:text="@string/login_kakao"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="32dp"
+        android:backgroundTint="@android:color/white"
+        android:text="Google로 계속하기"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textColor="@color/text_primary"
+        app:cornerRadius="14dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

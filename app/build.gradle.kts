@@ -1,20 +1,34 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("com.google.gms.google-services")
 }
 
+// local.properties에서 SERVER_BASE_URL 읽기 (BuildConfig 주입용)
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+val serverBaseUrl = localProperties.getProperty("SERVER_BASE_URL", "http://10.0.2.2:8080/")
+
 android {
-    namespace = "com.sesac.speech"
+    namespace = "com.sesac.speechapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sesac.speech"
+        applicationId = "com.sesac.speechapp"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BuildConfig에 서버 URL 주입
+        buildConfigField("String", "SERVER_BASE_URL", "\"$serverBaseUrl\"")
     }
 
     buildTypes {
@@ -35,6 +49,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
