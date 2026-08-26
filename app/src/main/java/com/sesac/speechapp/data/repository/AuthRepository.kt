@@ -64,7 +64,7 @@ class AuthRepository(private val context: Context) {
         val authResult = firebaseAuth.signInWithCredential(credential).await()
         val user = authResult.user ?: throw Exception("Firebase user is null")
 
-        return user.getIdToken(false).await()?.token
+        return user.getIdToken(true).await()?.token
             ?: throw Exception("Failed to get Firebase ID Token")
     }
 
