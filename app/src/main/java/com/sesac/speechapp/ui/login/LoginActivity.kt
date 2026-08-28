@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.sesac.speechapp.MainActivity
 import com.sesac.speechapp.databinding.ActivityLoginBinding
+import com.sesac.speechapp.ui.signup.SignUpActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -48,7 +49,12 @@ class LoginActivity : AppCompatActivity() {
                 is LoginState.Success -> {
                     binding.btnGoogleSignIn.isEnabled = true
                     binding.btnGoogleSignIn.text = "Google로 계속하기"
-                    navigateToMain()
+                    // 신규 유저이거나 닉네임이 아직 없으면 회원가입 화면으로
+                    if (state.isNewUser || state.nickname == null) {
+                        navigateToSignUp()
+                    } else {
+                        navigateToMain()
+                    }
                 }
                 is LoginState.Error -> {
                     binding.btnGoogleSignIn.isEnabled = true
@@ -65,6 +71,11 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToMain() {
         startActivity(Intent(this, MainActivity::class.java))
+        finish()
+    }
+
+    private fun navigateToSignUp() {
+        startActivity(Intent(this, SignUpActivity::class.java))
         finish()
     }
 }
