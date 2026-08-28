@@ -36,7 +36,7 @@ class AuthRepository(private val context: Context) {
     /**
      * Google Sign-In 결과 처리 → Firebase 인증 → 서버 로그인
      */
-    suspend fun handleSignInResult(data: Intent?): Result<Boolean> {
+    suspend fun handleSignInResult(data: Intent?): Result<LoginResult> {
         return try {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
             val account = task.getResult(ApiException::class.java)
@@ -46,9 +46,9 @@ class AuthRepository(private val context: Context) {
             val idToken = firebaseAuthWithGoogle(account)
 
             // 서버에 ID Token 전송 → JWT 발급
-            serverLogin(idToken)
+            val loginResult = serverLogin(idToken)
 
-            Result.success(true)
+            Result.success(loginResult)
         } catch (e: ApiException) {
             Result.failure(Exception("Google Sign-In failed: ${e.statusCode}"))
         } catch (e: Exception) {
@@ -70,8 +70,12 @@ class AuthRepository(private val context: Context) {
 
     /**
      * 서버 로그인 API 호출
+     *
+     * user 객체는 응답에 포함되지 않을 수 있으므로 nullable로 취급하고,
+     * uuid/email은 로컬 저장분이나 ID Token으로 보완한다.
+     * isNewUser/nickname은 LoginResult로 반환해 회원가입 분기에 사용한다.
      */
-    private suspend fun serverLogin(idToken: String) {
+    private suspend fun serverLogin(idToken: String): LoginResult {
         val response = apiService.firebaseAuth(FirebaseAuthRequest(idToken))
 
         if (!response.isSuccessful) {
@@ -88,16 +92,42 @@ class AuthRepository(private val context: Context) {
         val loginData = body.data
             ?: throw Exception("Login data is null")
 
+        // user는 응답에서 생략될 수 있다 (nullable)
         val user = loginData.user
-            ?: throw Exception("Login user data is null")
 
         // 토큰 저장
         tokenManager.saveAccessToken(loginData.accessToken)
         tokenManager.saveRefreshToken(loginData.refreshToken)
         tokenManager.saveUserInfo(
-            uuid = user.uuid,
-            email = user.email
+            uuid = user?.uuid ?: tokenManager.getUserUuid() ?: "",
+            email = user?.email ?: tokenManager.getUserEmail() ?: extractEmailFromIdToken(idToken)
         )
+
+        return LoginResult(
+            isNewUser = loginData.isNewUser,
+            nickname = user?.nickname
+        )
+    }
+
+    /**
+     * Firebase ID Token(JWT) payload에서 email 추출 (보완용)
+     */
+    private fun extractEmailFromIdToken(idToken: String): String {
+        return try {
+            val parts = idToken.split(".")
+            if (parts.size < 2) return ""
+            val payload = String(
+                android.util.Base64.decode(
+                    parts[1],
+                    android.util.Base64.URL_SAFE or android.util.Base64.NO_WRAP or android.util.Base64.NO_PADDING
+                ),
+                Charsets.UTF_8
+            )
+            val json = org.json.JSONObject(payload)
+            json.optString("email", "")
+        } catch (_: Exception) {
+            ""
+        }
     }
 
     /**
@@ -118,4 +148,55 @@ class AuthRepository(private val context: Context) {
      * 자동 로그인 체크
      */
     fun isLoggedIn(): Boolean = tokenManager.isLoggedIn()
+
+    /**
+     * 회원탈퇴
+     * 1) DELETE /api/v1/users/me (서버에서 사용자 데이터 + Firebase 계정 삭제)
+     * 2) 실패 시 로컬 Firebase 계정 삭제 시도
+     * 3) 로컬 토큰/유저정보 전체 삭제
+     */
+    suspend fun withdraw(): Result<Unit> {
+        return try {
+            val response = apiService.withdraw()
+
+            val body = response.body()
+            val serverDeleted = when {
+                response.code() == 204 -> true // No Content
+                body != null -> body.success
+                else -> response.isSuccessful
+            }
+
+            if (!serverDeleted) {
+                val message = body?.error?.message
+                    ?: "회원탈퇴 실패 (${response.code()})"
+                return Result.failure(Exception(message))
+            }
+
+            // 서버에서 Firebase 계정까지 삭제 처리하지만, 로컬 Firebase에 계정이
+            // 남아있는 경우를 대비해 클라이언트에서도 삭제 시도 (실패해도 무시)
+            try {
+                firebaseAuth.currentUser?.delete()?.await()
+            } catch (_: Exception) {
+                // 이미 삭제되었거나 재인증 필요 등 — 무시
+            }
+
+            googleSignInClient.signOut().await()
+            tokenManager.clear()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
+
+/**
+ * 로그인 결과 — 회원가입 분기에 필요한 메타데이터
+ *
+ * isNewUser: 첫 로그인 1회 true
+ * nickname: 미설정(회원가입 필요) 시 null
+ */
+data class LoginResult(
+    val isNewUser: Boolean,
+    val nickname: String?,
+)

@@ -13,6 +13,7 @@ okhttp = "4.12.0"
 firebaseBom = "32.7.2"
 playServicesAuth = "21.1.0"
 media3 = "1.3.0"
+coil = "2.6.0"
 junit = "4.13.2"
 junitExt = "1.1.5"
 espresso = "3.5.1"
@@ -45,6 +46,9 @@ play-services-auth = { group = "com.google.android.gms", name = "play-services-a
 
 # ExoPlayer (Media3)
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
+
+# Coil (image loading)
+coil = { group = "io.coil-kt", name = "coil", version.ref = "coil" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
