@@ -17,17 +17,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Profile Image -->
-    <ImageView
+    <!-- Profile Image (circular) -->
+    <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivProfile"
         android:layout_width="96dp"
         android:layout_height="96dp"
         android:layout_marginTop="24dp"
-        android:background="@drawable/bg_icon_circle"
+        android:background="@drawable/bg_profile_circle"
         android:contentDescription="프로필 사진"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
 
     <!-- Nickname -->
     <TextView
@@ -35,11 +37,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="NonokEE"
+        android:text="사용자"
         android:textAppearance="@style/TextAppearance.SeSAC.H2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivProfile" />
+
+    <!-- Email -->
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:text=""
+        android:textAppearance="@style/TextAppearance.SeSAC.Caption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvNickname" />
 
     <!-- Level Badge -->
     <TextView
@@ -50,12 +64,23 @@
         android:background="@drawable/bg_badge"
         android:paddingHorizontal="12dp"
         android:paddingVertical="4dp"
-        android:text="Lv. 3"
+        android:text="Lv. 1"
         android:textAppearance="@style/TextAppearance.SeSAC.Label"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvNickname" />
+        app:layout_constraintTop_toBottomOf="@id/tvEmail" />
+
+    <!-- Loading Progress -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvLevel" />
 
     <!-- Stats Row -->
     <androidx.cardview.widget.CardView
@@ -69,7 +94,7 @@
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLevel">
+        app:layout_constraintTop_toBottomOf="@id/progressBar">
 
         <LinearLayout
             android:layout_width="match_parent"
