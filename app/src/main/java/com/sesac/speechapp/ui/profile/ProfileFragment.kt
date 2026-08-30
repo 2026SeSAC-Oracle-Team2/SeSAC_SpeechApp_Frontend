@@ -101,8 +101,9 @@ class ProfileFragment : Fragment() {
     /**
      * 프로필 사진 로드 — GET api/v1/users/me/profile-image (Authorization 필요)
      *
-     * profile_image_url은 상대경로일 수 있으므로 BASE_URL과 결합한다.
-     * null/빈 값이면 placeholder만 표시 (Coil에 빈 URL을 넘기면 예외 발생).
+     * 서버는 스트리밍 전용 엔드포인트(/api/v1/users/me/profile-image)로 이미지를 내려준다.
+     * 응답의 profileImageUrl은 Object Storage **키**({uuid}/profile.png)이지
+     * HTTP URL이 아니다. → 항상 전용 엔드포인트를 호출하고, 키 존재 여부만 판단한다.
      */
     private fun loadProfileImage(profileImageUrl: String?) {
         if (profileImageUrl.isNullOrBlank()) {
@@ -110,7 +111,7 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val fullUrl = resolveImageUrl(profileImageUrl)
+        val fullUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/api/v1/users/me/profile-image"
 
         binding.ivProfile.load(fullUrl, AuthImageLoader.get(requireContext())) {
             placeholder(R.drawable.ic_person_24)
