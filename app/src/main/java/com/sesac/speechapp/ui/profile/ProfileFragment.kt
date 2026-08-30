@@ -112,8 +112,7 @@ class ProfileFragment : Fragment() {
 
         val fullUrl = resolveImageUrl(profileImageUrl)
 
-        binding.ivProfile.load(fullUrl) {
-            imageLoader = AuthImageLoader.get(requireContext())
+        binding.ivProfile.load(fullUrl, AuthImageLoader.get(requireContext())) {
             placeholder(R.drawable.ic_person_24)
             error(R.drawable.ic_person_24)
             crossfade(true)
