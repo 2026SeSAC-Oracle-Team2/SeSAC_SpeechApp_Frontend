@@ -108,15 +108,24 @@ class ProfileFragment : Fragment() {
     private fun loadProfileImage(profileImageUrl: String?) {
         if (profileImageUrl.isNullOrBlank()) {
             binding.ivProfile.setImageResource(R.drawable.ic_person_24)
+            binding.spinnerProfile.visibility = View.GONE
             return
         }
 
         val fullUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/api/v1/users/me/profile-image"
 
+        // 스피너 ON → 이미지 로드 성공/실패 시 OFF
+        binding.spinnerProfile.visibility = View.VISIBLE
+
         binding.ivProfile.load(fullUrl, AuthImageLoader.get(requireContext())) {
             placeholder(R.drawable.ic_person_24)
             error(R.drawable.ic_person_24)
             crossfade(true)
+            listener(
+                onStart = { binding.spinnerProfile.visibility = View.VISIBLE },
+                onSuccess = { _, _ -> binding.spinnerProfile.visibility = View.GONE },
+                onError = { _, _ -> binding.spinnerProfile.visibility = View.GONE }
+            )
         }
     }
 

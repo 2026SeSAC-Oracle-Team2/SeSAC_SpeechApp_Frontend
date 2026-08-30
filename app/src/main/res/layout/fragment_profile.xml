@@ -18,18 +18,36 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Profile Image (circular) -->
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/ivProfile"
+    <FrameLayout
+        android:id="@+id/frameProfileImage"
         android:layout_width="96dp"
         android:layout_height="96dp"
         android:layout_marginTop="24dp"
-        android:background="@drawable/bg_profile_circle"
-        android:contentDescription="프로필 사진"
-        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
+        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@drawable/bg_profile_circle"
+            android:contentDescription="프로필 사진"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
+
+        <!-- 이미지 로딩 스피너: 이미지가 실제로 그려지는 동안에만 표시 -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/spinnerProfile"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/primary"
+            app:indicatorSize="28dp"
+            app:trackThickness="3dp" />
+    </FrameLayout>
 
     <!-- Nickname -->
     <TextView
