@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -17,45 +18,90 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Profile Image -->
-    <ImageView
-        android:id="@+id/ivProfile"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/bg_icon_circle"
-        android:contentDescription="프로필 사진"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
-
-    <!-- Nickname -->
+    <!-- Profile Image (circular) -->
     <TextView
         android:id="@+id/tvNickname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="NonokEE"
+        android:text="사용자"
         android:textAppearance="@style/TextAppearance.SeSAC.H2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ivProfile" />
+        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
 
-    <!-- Level Badge -->
+    <TextView
+        android:id="@+id/tvEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text=""
+        android:textAppearance="@style/TextAppearance.SeSAC.Caption"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvNickname" />
+
     <TextView
         android:id="@+id/tvLevel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/bg_badge"
         android:paddingHorizontal="12dp"
         android:paddingVertical="4dp"
-        android:text="Lv. 3"
+        android:text="Lv. 1"
         android:textAppearance="@style/TextAppearance.SeSAC.Label"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvNickname" />
+        app:layout_constraintTop_toBottomOf="@+id/tvEmail" />
+
+    <FrameLayout
+        android:id="@+id/frameProfileImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvLevel">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivProfile"
+            android:layout_width="96dp"
+            android:layout_height="96dp"
+            android:background="@drawable/bg_profile_circle"
+            android:contentDescription="프로필 사진"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
+
+        <!-- 이미지 로딩 스피너: 이미지가 실제로 그려지는 동안에만 표시 -->
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/spinnerProfile"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/primary"
+            app:indicatorSize="28dp"
+            app:trackThickness="3dp" />
+    </FrameLayout>
+
+    <!-- Nickname -->
+
+    <!-- Email -->
+
+    <!-- Level Badge -->
+
+    <!-- Loading Progress -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvLevel" />
 
     <!-- Stats Row -->
     <androidx.cardview.widget.CardView
@@ -63,13 +109,13 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="20dp"
         app:cardBackgroundColor="@android:color/white"
         app:cardCornerRadius="16dp"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLevel">
+        app:layout_constraintTop_toBottomOf="@+id/frameProfileImage">
 
         <LinearLayout
             android:layout_width="match_parent"

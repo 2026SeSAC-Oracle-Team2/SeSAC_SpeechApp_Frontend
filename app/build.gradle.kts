@@ -84,6 +84,9 @@ dependencies {
     // ExoPlayer (Media3)
     implementation(libs.media3.exoplayer)
 
+    // Coil (image loading with auth header)
+    implementation(libs.coil)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

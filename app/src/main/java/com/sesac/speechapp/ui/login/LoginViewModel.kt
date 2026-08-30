@@ -27,10 +27,13 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             val result = authRepository.handleSignInResult(data)
-            _loginState.value = if (result.isSuccess) {
-                LoginState.Success
-            } else {
-                LoginState.Error(result.exceptionOrNull()?.message ?: "로그인 실패")
+            val loginResult = result.getOrNull()
+            _loginState.value = when {
+                loginResult != null -> LoginState.Success(
+                    isNewUser = loginResult.isNewUser,
+                    nickname = loginResult.nickname
+                )
+                else -> LoginState.Error(result.exceptionOrNull()?.message ?: "로그인 실패")
             }
         }
     }
@@ -41,6 +44,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 sealed class LoginState {
     object Idle : LoginState()
     object Loading : LoginState()
-    object Success : LoginState()
+    data class Success(
+        val isNewUser: Boolean = false,
+        val nickname: String? = null,
+    ) : LoginState()
     data class Error(val message: String) : LoginState()
 }
