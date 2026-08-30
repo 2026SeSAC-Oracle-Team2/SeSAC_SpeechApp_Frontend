@@ -1,6 +1,7 @@
 package com.sesac.speechapp.data.local
 
 import android.content.Context
+import android.content.SharedPreferences
 
 /**
  * JWT 토큰 관리 (SharedPreferences)

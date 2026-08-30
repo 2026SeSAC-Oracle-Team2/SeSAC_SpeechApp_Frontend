@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import coil.ImageLoader
 import coil.load
 import com.sesac.speechapp.BuildConfig
 import com.sesac.speechapp.R
