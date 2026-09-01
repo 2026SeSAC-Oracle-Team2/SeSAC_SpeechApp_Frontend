@@ -79,6 +79,8 @@ interface ApiService {
     @POST("api/v1/voice/upload")
     suspend fun uploadVoice(
         @Part file: MultipartBody.Part,
-        @Part("session_id") sessionId: RequestBody? = null
+        @Part("userId") userId: RequestBody,
+        @Part("contentType") contentType: RequestBody,
+        @Part("sessionId") sessionId: RequestBody? = null
     ): Response<ApiResponse<VoiceUploadResponse>>
 }
