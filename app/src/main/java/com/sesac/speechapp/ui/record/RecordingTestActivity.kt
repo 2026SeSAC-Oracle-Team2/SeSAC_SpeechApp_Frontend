@@ -141,7 +141,8 @@ class RecordingTestActivity : AppCompatActivity() {
             "file", file.name,
             file.asRequestBody("audio/mp4".toMediaTypeOrNull())
         )
-        val userIdPart = "1".toRequestBody("text/plain".toMediaTypeOrNull())
+        val userId = tokenManager.getUserId().takeIf { it != -1L }?.toString() ?: "21"
+        val userIdPart = userId.toRequestBody("text/plain".toMediaTypeOrNull())
         val contentTypePart = contentType.toRequestBody("text/plain".toMediaTypeOrNull())
 
         lifecycleScope.launch {
