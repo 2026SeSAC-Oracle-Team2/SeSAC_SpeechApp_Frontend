@@ -70,7 +70,7 @@ class ProfileFragment : Fragment() {
                 ?: "사용자"
 
             // 이메일
-            binding.tvEmail.text = user.email.ifEmpty {
+            binding.tvEmail.text = user.email?.ifEmpty {
                 TokenManager(requireContext()).getUserEmail() ?: ""
             }
 
