@@ -84,7 +84,12 @@ class RecordingTestActivity : AppCompatActivity() {
 
     private fun startRecording() {
         outputFile = File(cacheDir, "test_recording_${System.currentTimeMillis()}.m4a")
-        mediaRecorder = MediaRecorder().apply {
+        mediaRecorder = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            MediaRecorder(this)
+        } else {
+            @Suppress("DEPRECATION")
+            MediaRecorder()
+        }.apply {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)

@@ -17,8 +17,9 @@ data class LoginResponse(
 )
 
 data class UserDto(
+    val id: Long = -1,
     val uuid: String = "",
-    val email: String = "",
+    val email: String? = null,
     val nickname: String? = null,
     val profileImageUrl: String? = null,
     val level: Int? = null,

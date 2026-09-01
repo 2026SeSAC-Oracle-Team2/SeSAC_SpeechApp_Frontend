@@ -99,6 +99,7 @@ class AuthRepository(private val context: Context) {
         tokenManager.saveAccessToken(loginData.accessToken)
         tokenManager.saveRefreshToken(loginData.refreshToken)
         tokenManager.saveUserInfo(
+            userId = user?.id ?: -1,
             uuid = user?.uuid ?: tokenManager.getUserUuid() ?: "",
             email = user?.email ?: tokenManager.getUserEmail() ?: extractEmailFromIdToken(idToken)
         )
