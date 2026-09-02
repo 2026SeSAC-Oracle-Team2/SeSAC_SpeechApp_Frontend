@@ -4,9 +4,17 @@ import com.sesac.speechapp.data.remote.dto.ApiResponse
 import com.sesac.speechapp.data.remote.dto.FirebaseAuthRequest
 import com.sesac.speechapp.data.remote.dto.LoginResponse
 import com.sesac.speechapp.data.remote.dto.TokenRefreshRequest
+import com.sesac.speechapp.data.remote.dto.TokenRefreshResponse
 import com.sesac.speechapp.data.remote.dto.UpdateProfileRequest
 import com.sesac.speechapp.data.remote.dto.UserDto
 import com.sesac.speechapp.data.remote.dto.VoiceUploadResponse
+import com.sesac.speechapp.data.remote.dto.session.FinishData
+import com.sesac.speechapp.data.remote.dto.session.HintData
+import com.sesac.speechapp.data.remote.dto.session.ListenSubmitData
+import com.sesac.speechapp.data.remote.dto.session.ListenSubmitRequest
+import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
+import com.sesac.speechapp.data.remote.dto.session.TalkData
+import com.sesac.speechapp.data.remote.dto.session.VoiceSubmitData
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -17,6 +25,8 @@ import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Part
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -31,11 +41,12 @@ interface ApiService {
 
     /**
      * POST /api/v1/auth/refresh
+     * 응답 data = TokenRefreshResponse (accessToken camelCase — 실계약 2026-09-03)
      */
     @POST("api/v1/auth/refresh")
     suspend fun refreshToken(
         @Body request: TokenRefreshRequest
-    ): Response<ApiResponse<Map<String, Any>>>
+    ): Response<ApiResponse<TokenRefreshResponse>>
 
     /**
      * POST /api/v1/auth/logout
@@ -83,4 +94,94 @@ interface ApiService {
         @Part("contentType") contentType: RequestBody,
         @Part("sessionId") sessionId: RequestBody? = null
     ): Response<ApiResponse<VoiceUploadResponse>>
+
+    // ═══════════════════════════════════════════════════════════
+    // 세션 플로우 (P3-26) — 실계약: userId는 쿼리파라미터
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * 4.1 세션 생성 — "오늘의 학습" (실경로 /sessions/v2, 데모 2026-09-03)
+     * 스텁 응답 2~3초 — 로딩 화면 필수
+     */
+    @POST("api/v1/sessions/v2")
+    suspend fun createSession(
+        @Query("userId") userId: Long
+    ): Response<ApiResponse<SessionCreateData>>
+
+    /**
+     * 4.3 LISTEN 제출 — 백엔드 자체 채점 (즉시)
+     * 실계약: selected는 Int (선택지 order 1-based)
+     */
+    @POST("api/v1/sessions/{sessionId}/turns/{turnId}/listen")
+    suspend fun submitListen(
+        @Path("sessionId") sessionId: Long,
+        @Path("turnId") turnId: Long,
+        @Body request: ListenSubmitRequest
+    ): Response<ApiResponse<ListenSubmitData>>
+
+    /**
+     * 4.3 NAMING 제출 (음성 multipart + userId 쿼리파라미터 필수)
+     */
+    @Multipart
+    @POST("api/v1/sessions/{sessionId}/turns/{turnId}/naming")
+    suspend fun submitNaming(
+        @Path("sessionId") sessionId: Long,
+        @Path("turnId") turnId: Long,
+        @Query("userId") userId: Long,
+        @Part file: MultipartBody.Part
+    ): Response<ApiResponse<VoiceSubmitData>>
+
+    /**
+     * 4.3 SHADOWING 제출 (음성 multipart)
+     */
+    @Multipart
+    @POST("api/v1/sessions/{sessionId}/turns/{turnId}/shadowing")
+    suspend fun submitShadowing(
+        @Path("sessionId") sessionId: Long,
+        @Path("turnId") turnId: Long,
+        @Query("userId") userId: Long,
+        @Part file: MultipartBody.Part
+    ): Response<ApiResponse<VoiceSubmitData>>
+
+    /**
+     * 4.3 SELF_TALK 제출 (음성 multipart)
+     */
+    @Multipart
+    @POST("api/v1/sessions/{sessionId}/turns/{turnId}/selftalk")
+    suspend fun submitSelfTalk(
+        @Path("sessionId") sessionId: Long,
+        @Path("turnId") turnId: Long,
+        @Query("userId") userId: Long,
+        @Part file: MultipartBody.Part
+    ): Response<ApiResponse<VoiceSubmitData>>
+
+    /**
+     * 4.4 NAMING 힌트 — 의미단서(1) → 조음단서(2) 순서, 최대 2개
+     */
+    @POST("api/v1/sessions/{sessionId}/turns/{turnId}/hint")
+    suspend fun requestHint(
+        @Path("sessionId") sessionId: Long,
+        @Path("turnId") turnId: Long
+    ): Response<ApiResponse<HintData>>
+
+    /**
+     * 4.5 이야기 턴 — 첫 호출 file=null (AI 첫 대사), 이후 음성 multipart
+     * 4번째 제출(3턴 하드캡 초과)은 E0401 에러 응답
+     */
+    @Multipart
+    @POST("api/v1/sessions/{sessionId}/turns/talk")
+    suspend fun talk(
+        @Path("sessionId") sessionId: Long,
+        @Query("userId") userId: Long,
+        @Part file: MultipartBody.Part?
+    ): Response<ApiResponse<TalkData>>
+
+    /**
+     * 4.6 세션 종료 + 리포트 — 동기 응답 (스텁 2~3초, 로딩 대기)
+     */
+    @POST("api/v1/sessions/{sessionId}/finish")
+    suspend fun finishSession(
+        @Path("sessionId") sessionId: Long,
+        @Query("userId") userId: Long
+    ): Response<ApiResponse<FinishData>>
 }
