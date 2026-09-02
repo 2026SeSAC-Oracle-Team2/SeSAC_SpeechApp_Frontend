@@ -1,7 +1,8 @@
 <resources>
-    <string name="app_name">SeSAC Speech</string>
-    <string name="splash_title">SeSAC</string>
-    <string name="splash_subtitle">발화 연습</string>
+    <!-- 앱 정체성: 덕담 (Duck談 — 마스코트 오리, 한자 談=말씀 담) -->
+    <string name="app_name">덕담</string>
+    <string name="splash_title">덕담 🦆</string>
+    <string name="splash_subtitle">말하기 연습에 담은 덕담</string>
     <string name="login_title">로그인</string>
     <string name="login_google">Google로 계속하기</string>
     <string name="login_kakao">카카오로 계속하기</string>
@@ -12,6 +13,34 @@
     <string name="mic_desc">녹음 시작</string>
     <string name="recording_stop">중단</string>
     <string name="recording_timer_default">00:00</string>
-    <string name="ai_name">SeSAC AI</string>
+    <string name="ai_name">덕담 AI</string>
     <string name="hint_type_message">메시지를 입력하세요</string>
+
+    <!-- 로딩/세션 (P3-26) -->
+    <string name="loading_session">문제를 준비하고 있어요…</string>
+    <string name="loading_session_fail">문제를 불러오지 못했어요</string>
+    <string name="btn_retry">다시 시도</string>
+    <string name="progress_turn_fmt">%1$d / %2$d</string>
+    <string name="talk_exit">대화 종료</string>
+    <string name="talk_exit_confirm">대화를 종료하고 결과를 확인할까요?</string>
+    <string name="talk_cap_notice">오늘 대화는 여기까지! 결과를 확인해볼까요?</string>
+    <string name="btn_finish">결과 보기</string>
+    <string name="report_title">오늘의 학습 결과</string>
+    <string name="report_aq_label">AQ</string>
+    <string name="report_loading">결과를 만들고 있어요…</string>
+    <string name="btn_done">완료</string>
+
+    <!-- NAMING 힌트 -->
+    <string name="hint_request">힌트 요청</string>
+    <string name="hint_semantic_label">의미 단서</string>
+    <string name="hint_articulatory_label">조음 단서</string>
+    <string name="hint_exhausted">힌트를 모두 사용했어요</string>
+
+    <!-- 프로필 수정 (P3-27) -->
+    <string name="profile_edit_title">프로필 수정</string>
+    <string name="profile_nickname_hint">닉네임 (2~20자)</string>
+    <string name="profile_save">저장</string>
+    <string name="profile_nickname_error">닉네임은 2~20자, 공백만 넣을 수 없어요</string>
+    <string name="profile_saved">저장했어요</string>
+    <string name="session_expired">세션이 만료되었어요. 다시 로그인해 주세요</string>
 </resources>
