@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 홈 (구 학습): 오늘의 학습 + 실력 지표 -->
     <item
         android:id="@+id/learnFragment"
-        android:icon="@drawable/ic_school_24"
-        android:title="@string/tab_learn" />
+        android:icon="@drawable/ic_home_24"
+        android:title="@string/tab_home" />
+    <!-- 학습: 테마별 학습 (구 이력 자리) -->
     <item
-        android:id="@+id/historyFragment"
-        android:icon="@drawable/ic_history_24"
-        android:title="@string/tab_history" />
+        android:id="@+id/practiceFragment"
+        android:icon="@drawable/ic_theme_24"
+        android:title="@string/tab_practice" />
+    <!-- 대시보드: 점수 추이(방사형) + 이력 리스트 이동 -->
     <item
         android:id="@+id/dashboardFragment"
         android:icon="@drawable/ic_analytics_24"

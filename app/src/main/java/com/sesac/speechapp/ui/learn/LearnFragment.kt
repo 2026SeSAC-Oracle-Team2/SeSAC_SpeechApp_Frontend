@@ -8,15 +8,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.sesac.speechapp.databinding.FragmentLearnBinding
 import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
-import com.sesac.speechapp.ui.record.RecordingTestActivity
+import com.sesac.speechapp.ui.learning.RadarChartView
 
 /**
- * P3-21: Learn 탭 — 오늘의 학습 카드 + 3버튼(디버깅용)
- * content_type 임시 매핑:
- *   - 따라말하기 → SHADOWING
- *   - 스스로말하기 → SELF_TALK
- *   - 이야기하기 → STORYTELLING
- * TODO: UI 확정 시 Card 디자인 교체
+ * 홈 탭 (구 Learn) — 오늘의 학습 카드 + 실력 지표 방사형 그래프(stub).
+ * 디버깅용 3버튼(P3-21)은 제거됨 — 실제 세션 플로우(P3-26)로 대체.
  */
 class LearnFragment : Fragment() {
 
@@ -35,32 +31,23 @@ class LearnFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // P3-26: "오늘의 학습" 카드 탭 → 세션 로딩 화면 (스텁 2~3초 대기)
+        // 오늘의 학습 카드/버튼 탭 → 세션 로딩 화면 (스텁 2~3초 대기)
         binding.cardHero.setOnClickListener {
             startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
         }
-
-        // 기존 시작하기 버튼도 동일 동작 (카드 자체가 탭 대상이므로 버튼은 그대로 둠)
         binding.btnStart.setOnClickListener {
             startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
         }
 
-        // 3버튼 디버깅 UI
-        binding.btnShadowing.setOnClickListener {
-            startRecordingTest("SHADOWING")
-        }
-        binding.btnSelfTalk.setOnClickListener {
-            startRecordingTest("SELF_TALK")
-        }
-        binding.btnStorytelling.setOnClickListener {
-            startRecordingTest("STORYTELLING")
-        }
-    }
-
-    private fun startRecordingTest(contentType: String) {
-        val intent = Intent(requireContext(), RecordingTestActivity::class.java)
-        intent.putExtra(RecordingTestActivity.EXTRA_CONTENT_TYPE, contentType)
-        startActivity(intent)
+        // 실력 지표 stub — userAQ 최근20세션 상위10 평균 산정식은 P4에서 API 연동
+        binding.radarHome.setData(
+            listOf(
+                com.sesac.speechapp.ui.learning.RadarChartView.AxisData("알아듣기", 72f),
+                com.sesac.speechapp.ui.learning.RadarChartView.AxisData("이름대기", 58f),
+                com.sesac.speechapp.ui.learning.RadarChartView.AxisData("따라말하기", 81f),
+                com.sesac.speechapp.ui.learning.RadarChartView.AxisData("스스로말하기", 66f),
+            )
+        )
     }
 
     override fun onDestroyView() {

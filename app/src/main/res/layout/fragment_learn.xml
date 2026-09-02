@@ -1,103 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fillViewport="true">
 
-    <!-- Title -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:text="오늘의 학습"
-        android:textAppearance="@style/TextAppearance.SeSAC.H1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <!-- Hero Card -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardHero"
-        style="@style/Widget.SeSAC.Card.Hero"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle">
+        <!-- Title: 홈 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/tab_home"
+            android:textAppearance="@style/TextAppearance.SeSAC.H1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/bg_card_hero"
-            android:gravity="center_vertical"
-            android:orientation="vertical"
-            android:padding="28dp">
+        <!-- Hero Card: 오늘의 학습 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardHero"
+            style="@style/Widget.SeSAC.Card.Hero"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:text="AI와 대화하기"
-                android:textAppearance="@style/TextAppearance.SeSAC.H3"
-                android:textColor="@color/surface" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnStart"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="16dp"
-                android:backgroundTint="@color/surface"
-                android:text="시작하기"
-                android:textAppearance="@style/TextAppearance.SeSAC.H4"
-                android:textColor="@color/primary"
-                app:cornerRadius="14dp" />
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_card_hero"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:padding="28dp">
 
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/card_today_title"
+                    android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                    android:textColor="@color/surface" />
 
-    <!-- 디버깅 버튼 3개 (P3-21) -->
-    <LinearLayout
-        android:id="@+id/debugButtons"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
-        android:orientation="vertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardHero">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/card_today_sub"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
+                    android:textColor="#CCFFFFFF" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnShadowing"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginBottom="8dp"
-            android:text="따라말하기 (SHADOWING)"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            app:cornerRadius="14dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnStart"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="16dp"
+                    android:backgroundTint="@color/surface"
+                    android:text="@string/card_today_start"
+                    android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                    android:textColor="@color/primary"
+                    app:cornerRadius="14dp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSelfTalk"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginBottom="8dp"
-            android:text="스스로말하기 (SELF_TALK)"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            app:cornerRadius="14dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnStorytelling"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:text="이야기하기 (STORYTELLING)"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            app:cornerRadius="14dp" />
+        <!-- 실력 지표 방사형 그래프 (stub) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardRadar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardHero">
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="16dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/home_radar_title"
+                    android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                    android:textColor="@color/text_primary" />
+
+                <com.sesac.speechapp.ui.learning.RadarChartView
+                    android:id="@+id/radarHome"
+                    android:layout_width="match_parent"
+                    android:layout_height="260dp"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

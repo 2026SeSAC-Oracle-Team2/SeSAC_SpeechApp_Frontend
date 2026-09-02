@@ -120,7 +120,13 @@ class ProfileFragment : Fragment() {
             return
         }
 
-        val fullUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/api/v1/users/me/profile-image"
+        // cache buster: revision timestamp from SharedPreferences
+        // (before edit: constant -> cache hit; after edit: changed -> fresh load)
+        val cacheBuster = requireContext()
+            .getSharedPreferences("speechapp_prefs", MODE_PRIVATE)
+            .getLong("profile_image_updated_at", 0L)
+        val fullUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') +
+            "/api/v1/users/me/profile-image?v=$cacheBuster"
 
         // 스피너 ON → 이미지 로드 성공/실패 시 OFF
         binding.spinnerProfile.visibility = View.VISIBLE

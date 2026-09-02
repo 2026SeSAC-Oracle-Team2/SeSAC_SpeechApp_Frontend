@@ -8,27 +8,27 @@
     <fragment
         android:id="@+id/learnFragment"
         android:name="com.sesac.speechapp.ui.learn.LearnFragment"
-        android:label="학습"
+        android:label="@string/tab_home"
         tools:layout="@layout/fragment_learn" />
 
     <fragment
-        android:id="@+id/historyFragment"
-        android:name="com.sesac.speechapp.ui.history.HistoryFragment"
-        android:label="이력"
-        tools:layout="@layout/fragment_history" />
+        android:id="@+id/practiceFragment"
+        android:name="com.sesac.speechapp.ui.practice.PracticeFragment"
+        android:label="@string/tab_practice"
+        tools:layout="@layout/fragment_practice" />
 
     <fragment
         android:id="@+id/dashboardFragment"
         android:name="com.sesac.speechapp.ui.dashboard.DashboardFragment"
-        android:label="대시보드"
+        android:label="@string/tab_dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.sesac.speechapp.ui.profile.ProfileFragment"
-        android:label="프로필"
+        android:label="@string/tab_profile"
         tools:layout="@layout/fragment_profile" />
 
-    <!-- ChatActivity는 Activity이므로 Navigation Graph에서 직접 이동은 별도 Intent로 -->
+    <!-- HistoryFragment: 폐지 — 리스트는 대시보드 하단으로 이동 (사용자 확정) -->
 
 </navigation>

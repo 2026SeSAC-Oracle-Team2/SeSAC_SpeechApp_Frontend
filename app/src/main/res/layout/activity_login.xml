@@ -3,15 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/primary">
+    android:background="@drawable/bg_splash">
 
-    <!-- Logo -->
-    <ImageView
+    <!-- 덕담 마스코트 로고 (임시: 텍스트 🦆 — 에셋 확보 시 ImageView 교체) -->
+    <TextView
         android:id="@+id/logoArea"
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:background="@drawable/bg_icon_circle"
         android:contentDescription="로고"
+        android:gravity="center"
+        android:text="🦆"
+        android:textSize="64sp"
         app:layout_constraintBottom_toTopOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +27,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="SeSAC Speech"
+        android:text="@string/splash_title"
         android:textAppearance="@style/TextAppearance.SeSAC.H1"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toTopOf="@id/tvSubtitle"
@@ -38,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="AI와 함께하는 발화 연습"
+        android:text="@string/splash_subtitle"
         android:textAppearance="@style/TextAppearance.SeSAC.Body"
         android:textColor="@color/primary_light"
         app:layout_constraintBottom_toTopOf="@id/btnGoogleSignIn"
@@ -54,7 +57,7 @@
         android:layout_marginHorizontal="32dp"
         android:layout_marginBottom="32dp"
         android:backgroundTint="@android:color/white"
-        android:text="Google로 계속하기"
+        android:text="@string/login_google"
         android:textAppearance="@style/TextAppearance.SeSAC.H4"
         android:textColor="@color/text_primary"
         app:cornerRadius="14dp"

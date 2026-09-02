@@ -78,7 +78,7 @@ class ProfileEditActivity : AppCompatActivity() {
                 // 기존 사진 표시 (키가 있을 때만 전용 엔드포인트)
                 val key = user.profileImageUrl
                 if (!key.isNullOrBlank()) {
-                    val url = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/api/v1/users/me/profile-image"
+                    val url = BuildConfig.SERVER_BASE_URL.trimEnd('/') + "/api/v1/users/me/profile-image?v=" + System.currentTimeMillis()
                     binding.ivProfile.load(url, AuthImageLoader.get(this@ProfileEditActivity)) {
                         placeholder(R.drawable.ic_person_24)
                         error(R.drawable.ic_person_24)
@@ -140,6 +140,9 @@ class ProfileEditActivity : AppCompatActivity() {
             binding.btnSave.isEnabled = true
 
             if (ok) {
+                // ProfileFragment 캐시버스터용 — 수정 시점 기록
+                getSharedPreferences("speechapp_prefs", MODE_PRIVATE)
+                    .edit().putLong("profile_image_updated_at", System.currentTimeMillis()).apply()
                 toast(getString(R.string.profile_saved))
                 setResult(RESULT_OK)
                 finish()
