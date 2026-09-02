@@ -147,7 +147,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnTts" />
+        app:layout_constraintTop_toBottomOf="@id/containerRecord" />
 
     <!-- ─── 녹음/제출 (NAMING/SHADOWING/SELF_TALK) ─── -->
     <LinearLayout
@@ -160,7 +160,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvHint">
+        app:layout_constraintTop_toBottomOf="@id/cardImage">
 
         <TextView
             android:id="@+id/tvTimer"
