@@ -1,5 +1,6 @@
 package com.sesac.speechapp.ui.profile
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -123,7 +124,7 @@ class ProfileFragment : Fragment() {
         // cache buster: revision timestamp from SharedPreferences
         // (before edit: constant -> cache hit; after edit: changed -> fresh load)
         val cacheBuster = requireContext()
-            .getSharedPreferences("speechapp_prefs", MODE_PRIVATE)
+            .getSharedPreferences("speechapp_prefs", Context.MODE_PRIVATE)
             .getLong("profile_image_updated_at", 0L)
         val fullUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') +
             "/api/v1/users/me/profile-image?v=$cacheBuster"
