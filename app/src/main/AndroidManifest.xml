@@ -60,6 +60,23 @@
             android:name=".ui.record.RecordingTestActivity"
             android:exported="false" />
 
+        <!-- P3-26: 세션 플로우 (로딩 → 문제풀이 → 이야기 → 결과) -->
+        <activity
+            android:name=".ui.learning.LearningSessionLoadingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.learning.ProblemActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.learning.StorytellingActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.learning.SessionReportActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.onboarding.PermissionOnboardingActivity"
             android:exported="false" />

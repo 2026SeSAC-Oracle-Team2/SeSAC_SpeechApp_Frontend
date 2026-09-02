@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.sesac.speechapp.databinding.FragmentLearnBinding
+import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
 import com.sesac.speechapp.ui.record.RecordingTestActivity
 
 /**
@@ -34,8 +35,15 @@ class LearnFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 기존 시작하기 버튼은 숨김 (디버깅 UI 전환)
-        binding.btnStart.visibility = View.GONE
+        // P3-26: "오늘의 학습" 카드 탭 → 세션 로딩 화면 (스텁 2~3초 대기)
+        binding.cardHero.setOnClickListener {
+            startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
+        }
+
+        // 기존 시작하기 버튼도 동일 동작 (카드 자체가 탭 대상이므로 버튼은 그대로 둠)
+        binding.btnStart.setOnClickListener {
+            startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
+        }
 
         // 3버튼 디버깅 UI
         binding.btnShadowing.setOnClickListener {
