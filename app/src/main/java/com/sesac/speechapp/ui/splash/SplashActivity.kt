@@ -72,7 +72,7 @@ class SplashActivity : AppCompatActivity() {
                 true -> goToMain()
                 false -> {
                     // 인증 확정 실패 — Authenticator가 이미 토큰을 클리어했을 것
-                    Toast.makeText(this, "로그인이 만료되었어요. 다시 로그인해 주세요", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SplashActivity, "로그인이 만료되었어요. 다시 로그인해 주세요", Toast.LENGTH_SHORT).show()
                     goToLogin()
                 }
                 null -> goToMain() // 네트워크 오류 — 홈에서 재시도 가능하도록 진입 허용
