@@ -44,6 +44,14 @@ class ProfileFragment : Fragment() {
             startActivity(Intent(requireContext(), SettingActivity::class.java))
         }
 
+        // P3-27: 닉네임/프로필사진 영역 탭 → ProfileEditActivity
+        binding.frameProfileImage.setOnClickListener {
+            startActivity(Intent(requireContext(), ProfileEditActivity::class.java))
+        }
+        binding.tvNickname.setOnClickListener {
+            startActivity(Intent(requireContext(), ProfileEditActivity::class.java))
+        }
+
         // 로그아웃
         binding.btnLogout.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {

@@ -53,6 +53,10 @@
             android:exported="false" />
 
         <activity
+            android:name=".ui.profile.ProfileEditActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.record.RecordingTestActivity"
             android:exported="false" />
 
