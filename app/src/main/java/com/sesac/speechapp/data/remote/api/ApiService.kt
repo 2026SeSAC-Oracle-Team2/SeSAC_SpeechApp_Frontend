@@ -165,7 +165,9 @@ interface ApiService {
     ): Response<ApiResponse<HintData>>
 
     /**
-     * 4.5 이야기 턴 — 첫 호출 file=null (AI 첫 대사), 이후 음성 multipart
+     * 4.5 이야기 턴 — 음성 있는 제출 (2턴째부터)
+     * ⚠️ 첫 호출(file 없음)은 talkFirst 사용 — @Part nullable은 "빈 multipart body"로
+     * 전송돼 서버가 'Multipart body must have at least one part'로 거부한다 (실측).
      * 4번째 제출(3턴 하드캡 초과)은 E0401 에러 응답
      */
     @Multipart
@@ -173,7 +175,17 @@ interface ApiService {
     suspend fun talk(
         @Path("sessionId") sessionId: Long,
         @Query("userId") userId: Long,
-        @Part file: MultipartBody.Part?
+        @Part file: MultipartBody.Part
+    ): Response<ApiResponse<TalkData>>
+
+    /**
+     * 4.5 이야기 턴 — 첫 호출 (AI 첫 대사). file 파트 없이 일반 POST.
+     * 백엔드 file required=false라 multipart 없이도 정상 처리됨 (curl 실측 200).
+     */
+    @POST("api/v1/sessions/{sessionId}/turns/talk")
+    suspend fun talkFirst(
+        @Path("sessionId") sessionId: Long,
+        @Query("userId") userId: Long
     ): Response<ApiResponse<TalkData>>
 
     /**

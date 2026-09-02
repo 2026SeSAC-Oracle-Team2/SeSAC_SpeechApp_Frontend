@@ -61,6 +61,20 @@ class ProblemActivity : AppCompatActivity() {
     private val turnScores = mutableListOf<Int>()
     private val turnTypes = mutableListOf<String>()
 
+    /**
+     * 마이크 권한 런처 — onCreate 이전 등록 필수.
+     * (기존: toggleRecording 안에서 registerForActivityResult 호출 → 생명주기 예외로 크래시)
+     */
+    private val recordPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            toggleRecording() // 권한 승인 → 녹음 재시작
+        } else {
+            Toast.makeText(this, "마이크 권한이 필요해요", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProblemBinding.inflate(layoutInflater)
@@ -100,11 +114,21 @@ class ProblemActivity : AppCompatActivity() {
         currentIndex = index
         val turn = turns[index]
 
+        // 늦은 콜백 가드용: 턴 전환 시 진행 중인 녹음/미디어 정리
+        if (recordingHelper.recording) {
+            recordingHelper.stop()
+            recordedFile = null
+            binding.fabRecord.setColorFilter(ContextCompat.getColor(this, R.color.surface))
+        }
+        stopTts()
+
         // 프로그레스
         binding.tvProgress.text = getString(R.string.progress_turn_fmt, index + 1, turns.size)
         binding.progressBar.progress = ((index + 1) * 100 / turns.size)
         binding.tvTypeBadge.text = TYPE_LABELS[turn.type] ?: turn.type
-        binding.tvPassage.text = turn.passage ?: ""
+        // SELF_TALK: 지문 고정 문구 (사용자 확정) — 스텁 상황 설명은 이미지가 담당
+        binding.tvPassage.text = if (turn.type == "SELF_TALK") "다음 상황을 보고 묘사해보세요"
+        else turn.passage ?: ""
 
         // 기본 상태 초기화
         resetTurnViews()
@@ -119,6 +143,9 @@ class ProblemActivity : AppCompatActivity() {
 
         // TTS 버튼: ttsUrl 있을 때만
         binding.btnTts.visibility = if (turn.ttsUrl != null) View.VISIBLE else View.GONE
+
+        // 자동재생: 턴 진입 시 TTS 바로 재생 (사용자 피드백 — 재생버튼 안 눌러도 나와야 함)
+        if (turn.ttsUrl != null) playTts()
     }
 
     private fun resetTurnViews() {
@@ -205,8 +232,8 @@ class ProblemActivity : AppCompatActivity() {
             binding.btnSubmitRecording.isEnabled = recordedFile != null
         } else {
             if (!recordingHelper.hasPermission()) {
-                Toast.makeText(this, "마이크 권한이 필요해요", Toast.LENGTH_SHORT).show()
-                requestRecordPermission()
+                // 권한 요청 (런처는 프로퍼티로 등록됨 — 크래시 없음)
+                recordPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 return
             }
             if (recordingHelper.start()) {
@@ -268,11 +295,14 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     private fun requestHint() {
-        val turn = turns[currentIndex]
+        val turnIndex = currentIndex
+        val turn = turns[turnIndex]
         binding.btnHint.isEnabled = false
         lifecycleScope.launch {
             try {
                 val hint = repository.requestHint(sessionId, turn.turnId)
+                // 늦은 응답 가드: 턴이 이미 넘어갔으면 UI 갱신 무시 (새 턴의 버튼 상태 오염 방지)
+                if (turnIndex != currentIndex) return@launch
                 val label = if (hint.hintOrder == 1) getString(R.string.hint_semantic_label)
                 else getString(R.string.hint_articulatory_label)
                 val existing = binding.tvHint.text?.toString().orEmpty()
@@ -280,15 +310,17 @@ class ProblemActivity : AppCompatActivity() {
                 else "$existing\n$label: ${hint.text}"
                 binding.tvHint.visibility = View.VISIBLE
 
-                // 힌트 소진 (2개) → 버튼 숨김
+                // 힌트 소진 (2개) → 버튼 숨김 (다음 턴에서 showRecordingUI가 상태 리셋)
                 if (hint.hintOrder >= 2) {
                     binding.btnHint.visibility = View.GONE
                 } else {
                     binding.btnHint.isEnabled = true
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
-                binding.btnHint.isEnabled = true
+                if (turnIndex == currentIndex) {
+                    Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
+                    binding.btnHint.isEnabled = true
+                }
             }
         }
     }
@@ -343,13 +375,6 @@ class ProblemActivity : AppCompatActivity() {
             .putStringArrayListExtra(SessionReportActivity.EXTRA_TURN_TYPES, ArrayList(turnTypes))
         startActivity(intent)
         finish()
-    }
-
-    private fun requestRecordPermission() {
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-            if (granted) toggleRecording()
-            else Toast.makeText(this, "마이크 권한이 필요해요", Toast.LENGTH_SHORT).show()
-        }.launch(Manifest.permission.RECORD_AUDIO)
     }
 
     override fun onDestroy() {

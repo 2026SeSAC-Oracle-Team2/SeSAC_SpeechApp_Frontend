@@ -94,15 +94,19 @@ class SessionFlowRepository(context: Context) {
         unwrap(RetrofitClient.apiService.requestHint(sessionId, turnId))
     }
 
-    /** 4.5 이야기 턴 — first=true면 file=null (AI 첫 대사) */
+    /**
+     * 4.5 이야기 턴 — file=null이면 첫 호출(AI 첫 대사): 일반 POST로 전송.
+     * (Retrofit @Part nullable → 빈 multipart body → 서버 400 방지)
+     */
     suspend fun talk(sessionId: Long, file: File?): TalkData = withContext(Dispatchers.IO) {
-        val part = file?.takeIf { it.exists() }?.let {
-            MultipartBody.Part.createFormData(
+        val response = file?.takeIf { it.exists() }?.let {
+            val part = MultipartBody.Part.createFormData(
                 "file", it.name,
                 it.asRequestBody("audio/mp4".toMediaTypeOrNull())
             )
-        }
-        unwrap(RetrofitClient.apiService.talk(sessionId, userId(), part))
+            RetrofitClient.apiService.talk(sessionId, userId(), part)
+        } ?: RetrofitClient.apiService.talkFirst(sessionId, userId())
+        unwrap(response)
     }
 
     /** 4.6 세션 종료 + 리포트 (스텁 2~3초 동기 대기) */
