@@ -141,16 +141,28 @@ class ProblemActivity : AppCompatActivity() {
         val choices = turn.choices.orEmpty()
         choices.forEach { choice ->
             val isImage = choice.mediaType.equals("image", ignoreCase = true)
-            val view = layoutInflater.inflate(R.layout.item_listen_choice, binding.containerChoices, false) as TextView
+            val item = layoutInflater.inflate(
+                R.layout.item_listen_choice, binding.containerChoices, false
+            )
+            val tvText = item.findViewById<TextView>(R.id.tvChoiceText)
+            val ivImage = item.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.ivChoiceImage)
+
             if (isImage) {
-                val imgUrl = BuildConfig.SERVER_BASE_URL.trimEnd('/') + choice.context
-                // 이미지형 선택지: 텍스트뷰에 배경 이미지 로드 (레이아웃 확장 시 전용 아이템으로 교체)
-                view.load(imgUrl, AuthImageLoader.get(this))
+                // 이미지형: context = image_id → 콘텐츠 프록시 URL
+                tvText.visibility = View.GONE
+                ivImage.visibility = View.VISIBLE
+                val imgUrl = if (choice.context.startsWith("http")) choice.context
+                else resolveUrl("/api/v1/content/images/${choice.context}/file")
+                ivImage.load(imgUrl, AuthImageLoader.get(this)) {
+                    crossfade(true)
+                }
             } else {
-                view.text = choice.context
+                tvText.visibility = View.VISIBLE
+                ivImage.visibility = View.GONE
+                tvText.text = choice.context
             }
-            view.setOnClickListener { submitListen(choice.order) }
-            binding.containerChoices.addView(view)
+            item.setOnClickListener { submitListen(choice.order) }
+            binding.containerChoices.addView(item)
         }
     }
 
