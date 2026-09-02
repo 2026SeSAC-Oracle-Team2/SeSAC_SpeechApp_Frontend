@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- P3-26 문제 풀이 화면 — 유형별 레이아웃 전환(visibility) + 상단 프로그레스 -->
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- 상단: 프로그레스 "n / 8" -->
+    <TextView
+        android:id="@+id/tvProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.H3"
+        android:textColor="@color/text_primary"
+        tools:text="1 / 8"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvTypeBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/bg_badge"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.H5"
+        android:textColor="@color/primary"
+        tools:text="따라말하기"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvProgress"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="12dp"
+        app:indicatorColor="@color/primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvProgress"
+        app:trackColor="@color/border"
+        app:trackCornerRadius="4dp"
+        app:trackThickness="6dp" />
+
+    <!-- 공통: 문제 지문 -->
+    <TextView
+        android:id="@+id/tvPassage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="20dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textColor="@color/text_primary"
+        tools:text="여기서 금요일이 며칠인지 말해보세요"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
+    <!-- TTS 재생 (LISTEN/SHADOWING/SELF_TALK/NAMING 공통 — 있을 때만 표시) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTts"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginTop="12dp"
+        android:text="🔊 음성 재생"
+        app:cornerRadius="12dp"
+        app:layout_constraintStart_toStartOf="@id/tvPassage"
+        app:layout_constraintTop_toBottomOf="@id/tvPassage" />
+
+    <!-- 이미지 영역 (NAMING/SELF_TALK) -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardImage"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="2dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnTts">
+
+        <ImageView
+            android:id="@+id/ivProblem"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="문제 이미지"
+            android:scaleType="centerCrop" />
+    </androidx.cardview.widget.CardView>
+
+    <!-- ─── LISTEN: 선택지 리스트 ─── -->
+    <TextView
+        android:id="@+id/tvChoicesTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="정답을 골라주세요"
+        android:textAppearance="@style/TextAppearance.SeSAC.H5"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@id/tvPassage"
+        app:layout_constraintTop_toBottomOf="@id/cardImage" />
+
+    <LinearLayout
+        android:id="@+id/containerChoices"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvChoicesTitle" />
+
+    <!-- ─── 힌트 표시 (NAMING) ─── -->
+    <TextView
+        android:id="@+id/tvHint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_feedback_card"
+        android:padding="12dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/text_primary"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/containerChoices" />
+
+    <!-- ─── 녹음/제출 (NAMING/SHADOWING/SELF_TALK) ─── -->
+    <LinearLayout
+        android:id="@+id/containerRecord"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardImage">
+
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/recording_timer_default"
+            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+            android:textColor="@color/text_primary" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabRecord"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:contentDescription="@string/mic_desc"
+            android:src="@drawable/ic_mic_24"
+            app:backgroundTint="@color/primary"
+            app:tint="@color/surface" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHint"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginEnd="8dp"
+                android:text="@string/hint_request"
+                android:visibility="gone"
+                app:cornerRadius="12dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitRecording"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:backgroundTint="@color/primary"
+                android:text="제출"
+                android:textColor="@color/surface"
+                android:enabled="false"
+                app:cornerRadius="12dp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvRecordingHint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="버튼을 눌러 녹음을 시작하세요"
+            android:textAppearance="@style/TextAppearance.SeSAC.Body"
+            android:textColor="@color/text_muted" />
+    </LinearLayout>
+
+    <!-- ─── 채점 대기 오버레이 ─── -->
+    <FrameLayout
+        android:id="@+id/scoringOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_recording_overlay"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:indicatorColor="@color/primary"
+                app:indicatorSize="44dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="채점하고 있어요…"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textColor="@color/surface" />
+        </LinearLayout>
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

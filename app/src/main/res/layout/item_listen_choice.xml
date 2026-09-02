@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LISTEN 선택지 카드 (텍스트형) — 탭 → 즉시 제출 -->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tvChoice"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_question_card"
+    android:minHeight="56dp"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="14dp"
+    android:textAppearance="@style/TextAppearance.SeSAC.H4"
+    android:textColor="@color/text_primary" />
