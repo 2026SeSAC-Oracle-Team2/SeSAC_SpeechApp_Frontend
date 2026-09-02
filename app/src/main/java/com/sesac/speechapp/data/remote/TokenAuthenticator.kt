@@ -19,7 +19,7 @@ import okhttp3.Route
  * ⚠️ 백엔드 실계약 (2026-09-03): 만료/무효 토큰이 401이 아니라 **403**으로 온다
  * (SecurityConfig anyRequest authenticated → AccessDeniedHandler 기본 403).
  * → 401과 403을 모두 만료 신호로 취급한다. 단, 인증 없이 열린 경로
- *   (/api/v1/auth/**, /api/v1/sessions/**, /api/v1/voice/**, /api/v1/content/**)는
+ *   (auth, sessions, voice, content 전체 permitAll 경로)는
  *   토큰이 있어도 서버가 검증하지 않으므로 여기서 재시도하지 않는다(무한루프 방지).
  *
  * Authenticator는 OkHttp 스레드에서 동기 호출되므로 runBlocking 사용 (OkHttp 공식 패턴).
