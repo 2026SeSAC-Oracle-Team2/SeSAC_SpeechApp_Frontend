@@ -159,12 +159,14 @@ class StorytellingActivity : AppCompatActivity() {
     }
 
     private fun goToReport() {
-        if (finished && userTalkCount < DEMO_TALK_LIMIT) {
-            // 조기종료 — 정상 finish 진행
-        }
         recordingHelper.release()
+        // ProblemActivity가 누적한 턴별 점수를 결과 화면으로 전달
+        val scores = intent.getIntegerArrayListExtra(SessionReportActivity.EXTRA_TURN_SCORES) ?: ArrayList()
+        val types = intent.getStringArrayListExtra(SessionReportActivity.EXTRA_TURN_TYPES) ?: ArrayList()
         val intent = android.content.Intent(this, SessionReportActivity::class.java)
             .putExtra(SessionReportActivity.EXTRA_SESSION_ID, sessionId)
+            .putIntegerArrayListExtra(SessionReportActivity.EXTRA_TURN_SCORES, scores)
+            .putStringArrayListExtra(SessionReportActivity.EXTRA_TURN_TYPES, types)
         startActivity(intent)
         finish()
     }

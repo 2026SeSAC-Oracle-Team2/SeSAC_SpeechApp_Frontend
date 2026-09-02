@@ -57,6 +57,10 @@ class ProblemActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private var recordedFile: File? = null
 
+    /** 결과 화면 전달용: 턴별 (type, score) 누적 — 제출 응답의 score 사용 */
+    private val turnScores = mutableListOf<Int>()
+    private val turnTypes = mutableListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityProblemBinding.inflate(layoutInflater)
@@ -207,8 +211,11 @@ class ProblemActivity : AppCompatActivity() {
         val turn = turns[currentIndex]
         lifecycleScope.launch {
             try {
-                repository.submitListen(sessionId, turn.turnId, selected)
-                // 스펙 확정: LISTEN 즉시 다음 턴 (스코어 무시)
+                val data = repository.submitListen(sessionId, turn.turnId, selected)
+                // 결과 화면 집계용 누적
+                turnScores.add(data.score)
+                turnTypes.add(turn.type)
+                // 스펙 확정: LISTEN 즉시 다음 턴 (스코어 미표시)
                 nextTurn()
             } catch (e: Exception) {
                 Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
@@ -227,12 +234,15 @@ class ProblemActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                when (turn.type) {
+                val data = when (turn.type) {
                     "NAMING" -> repository.submitNaming(sessionId, turn.turnId, file)
                     "SHADOWING" -> repository.submitShadowing(sessionId, turn.turnId, file)
                     "SELF_TALK" -> repository.submitSelfTalk(sessionId, turn.turnId, file)
                     else -> throw IllegalStateException("녹음 제출이 없는 유형: ${turn.type}")
                 }
+                // 결과 화면 집계용 누적 (score는 0~100 Double — 반올림)
+                turnScores.add(data.score.toInt())
+                turnTypes.add(turn.type)
                 // 스펙 확정: 응답 수신하면 다음 턴 (점수는 결과 화면에서 일괄)
                 binding.scoringOverlay.visibility = View.GONE
                 nextTurn()
@@ -317,6 +327,8 @@ class ProblemActivity : AppCompatActivity() {
     private fun goToStorytelling() {
         val intent = Intent(this, StorytellingActivity::class.java)
             .putExtra(StorytellingActivity.EXTRA_SESSION_ID, sessionId)
+            .putIntegerArrayListExtra(SessionReportActivity.EXTRA_TURN_SCORES, ArrayList(turnScores))
+            .putStringArrayListExtra(SessionReportActivity.EXTRA_TURN_TYPES, ArrayList(turnTypes))
         startActivity(intent)
         finish()
     }
