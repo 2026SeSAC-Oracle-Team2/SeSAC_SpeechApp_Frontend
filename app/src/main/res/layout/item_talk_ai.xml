@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- AI 말풍선 (좌측) -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="6dp">
+
+    <TextView
+        android:id="@+id/tvAiMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:background="@drawable/bg_ai_bubble"
+        android:layout_marginEnd="64dp"
+        android:maxWidth="280dp"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/text_primary" />
+</FrameLayout>
