@@ -6,6 +6,9 @@ import com.sesac.speechapp.data.remote.dto.LoginResponse
 import com.sesac.speechapp.data.remote.dto.TokenRefreshRequest
 import com.sesac.speechapp.data.remote.dto.TokenRefreshResponse
 import com.sesac.speechapp.data.remote.dto.UpdateProfileRequest
+import com.sesac.speechapp.data.remote.dto.SurveyRequest
+import com.sesac.speechapp.data.remote.dto.SurveyResponse
+import com.sesac.speechapp.data.remote.dto.TagsResponse
 import com.sesac.speechapp.data.remote.dto.UserDto
 import com.sesac.speechapp.data.remote.dto.VoiceUploadResponse
 import com.sesac.speechapp.data.remote.dto.session.FinishData
@@ -82,6 +85,22 @@ interface ApiService {
      */
     @DELETE("api/v1/users/me")
     suspend fun withdraw(): Response<ApiResponse<Void?>>
+
+    /**
+     * GET /api/v1/users/me/tags — 태그 마스터 15종 (D-6 신설, 05a v1.6 §2)
+     */
+    @GET("api/v1/users/me/tags")
+    suspend fun getTags(): Response<ApiResponse<TagsResponse>>
+
+    /**
+     * POST /api/v1/users/me/survey — 가입 설문 접수 (D-6 신설, 05a v1.6 §2 + 06 v1.7 §5.2)
+     * 산출 주체 = 서버 — 클라는 answers 원문만 전송.
+     * (대표점수 조회 /me/scores는 대시보드 단위 D-7 영역 — 이번에 만들지 않는다)
+     */
+    @POST("api/v1/users/me/survey")
+    suspend fun submitSurvey(
+        @Body request: SurveyRequest
+    ): Response<ApiResponse<SurveyResponse>>
 
     /**
      * POST /api/v1/voice/upload
