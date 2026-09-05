@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-6 가입 설문 문항 + 가입 Step2 화면 문구 (신규 파일 — strings.xml 커밋 금지 상태 회피용)
+  문항 5종 전문 = 06_Session_Flow_Spec.md v1.7 §5.2 그대로 (앱 고정 — 서버 저장 없음)
+-->
+<resources>
+    <!-- 공통 -->
+    <string name="common_back">뒤로</string>
+
+    <!-- 가입 Step2 (성별·생년월일·취미·태그) -->
+    <string name="signup_profile_title">추가 정보 입력</string>
+    <string name="signup_profile_sex_label">성별</string>
+    <string name="signup_profile_sex_male">남성</string>
+    <string name="signup_profile_sex_female">여성</string>
+    <string name="signup_profile_birth_label">생년월일</string>
+    <string name="signup_profile_birth_hint">눌러서 날짜를 선택하세요</string>
+    <string name="signup_profile_birth_required">생년월일을 선택해 주세요</string>
+    <string name="signup_profile_birth_future_error">미래 날짜는 선택할 수 없어요</string>
+    <string name="signup_profile_hobby_label">취미</string>
+    <string name="signup_profile_hobby_hint">취미를 입력해 주세요 (선택)</string>
+    <string name="signup_profile_tag_label">관심사</string>
+    <string name="signup_profile_tag_hint">관심사를 최대 5개까지 선택하세요 (선택)</string>
+    <string name="signup_profile_tag_limit_error">최대 5개까지 선택할 수 있어요</string>
+    <string name="signup_profile_tags_load_error">관심사 목록을 불러오지 못했어요</string>
+    <string name="signup_profile_sex_required">성별을 선택해 주세요</string>
+    <string name="signup_profile_next">다음으로</string>
+    <string name="signup_profile_saving">저장 중...</string>
+    <string name="signup_profile_save_error">프로필 저장에 실패했어요</string>
+
+    <!-- 가입 설문 (06 v1.7 §5.2 — 문항 전문) -->
+    <string name="survey_title">학습 준비 설문</string>
+    <string name="survey_intro">평소 상황을 기준으로 편하게 답해 주세요.\n각 문항을 눌러 1~5 중 하나를 선택해 주세요.</string>
+    <string name="survey_scale_min">1 = 전혀 못해요</string>
+    <string name="survey_scale_max">5 = 아주 잘해요</string>
+    <string name="survey_question_1">일상에서 하고 싶은 말을 원하는 만큼 표현하시나요?</string>
+    <string name="survey_question_2">상대방의 말을 끝까지 이해하는 편이신가요?</string>
+    <string name="survey_question_3">물건이나 사람의 이름이 잘 떠오르시나요?</string>
+    <string name="survey_question_4">들은 문장을 그대로 따라 말하기가 편하신가요?</string>
+    <string name="survey_question_5">대화를 이어가는데 부담이 적으신가요?</string>
+    <string name="survey_submit">제출</string>
+    <string name="survey_submitting">제출 중...</string>
+    <string name="survey_submit_error">설문 제출에 실패했어요. 다시 시도해 주세요</string>
+    <string name="survey_incomplete_error">모든 문항에 응답해 주세요</string>
+    <string name="survey_result_missing">설문 결과를 확인하지 못했어요. 잠시 후 다시 시도해 주세요</string>
+    <string name="survey_done_title">학습 준비 완료!</string>
+    <string name="survey_done_message">설문이 저장되었어요.\n이제 학습을 시작할 수 있어요. (결과 확인: AQ %1$d점 기준으로 시작합니다)</string>
+    <string name="survey_done_confirm">시작하기</string>
+    <string name="survey_exit_title">설문을 그만두시겠어요?</string>
+    <string name="survey_exit_message">설문을 완료해야 학습을 시작할 수 있어요.</string>
+    <string name="survey_exit_stay">계속 설문하기</string>
+    <string name="survey_exit_quit">종료</string>
+</resources>

@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.sesac.speechapp.MainActivity
 import com.sesac.speechapp.databinding.ActivitySignUpBinding
 
 class SignUpActivity : AppCompatActivity() {
@@ -84,11 +83,11 @@ class SignUpActivity : AppCompatActivity() {
                     Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
                 }
                 is SignUpState.PartialSuccess -> {
-                    // 닉네임은 저장됨, 사진 업로드만 실패 → 안내 후 진행
+                    // 닉네임은 저장됨, 사진 업로드만 실패 → 안내 후 다음 단계 진행
                     Toast.makeText(this, state.message, Toast.LENGTH_LONG).show()
-                    navigateToMain()
+                    navigateToProfileStep()
                 }
-                is SignUpState.Success -> navigateToMain()
+                is SignUpState.Success -> navigateToProfileStep()
             }
         }
     }
@@ -99,9 +98,14 @@ class SignUpActivity : AppCompatActivity() {
         binding.ivProfilePreview.isEnabled = enabled
     }
 
-    private fun navigateToMain() {
-        val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    /**
+     * D-6 가입 다단계화: Step1(닉네임+사진) 완료 → Step2(성별·생년월일·취미·태그)로 이동.
+     * 닉네임은 Step2 PATCH에서 전체 필드 일괄 전송에 사용 — extra로 전달.
+     */
+    private fun navigateToProfileStep() {
+        val nickname = binding.etNickname.text?.toString()?.trim().orEmpty()
+        val intent = Intent(this, SignUpProfileStepActivity::class.java).apply {
+            putExtra(SignUpProfileStepActivity.EXTRA_NICKNAME, nickname)
         }
         startActivity(intent)
         finish()

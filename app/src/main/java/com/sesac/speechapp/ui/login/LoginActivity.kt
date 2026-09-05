@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.sesac.speechapp.MainActivity
 import com.sesac.speechapp.databinding.ActivityLoginBinding
 import com.sesac.speechapp.ui.signup.SignUpActivity
+import com.sesac.speechapp.ui.survey.SurveyActivity
 
 class LoginActivity : AppCompatActivity() {
 
@@ -52,9 +53,15 @@ class LoginActivity : AppCompatActivity() {
                     // 신규 유저이거나 닉네임이 아직 없으면 회원가입 화면으로
                     if (state.isNewUser || state.nickname == null) {
                         navigateToSignUp()
-                    } else {
-                        navigateToMain()
+                        return@observe
                     }
+                    // D-6 가입 설문 재노출 (06 v1.7 §5.2): userAq null = 설문 미응답 —
+                    // isNewUser 판별과 독립 (가입 직후 앱 종료 방어). 기존 isNewUser 로직은 유지.
+                    if (state.userAq == null) {
+                        navigateToSurvey()
+                        return@observe
+                    }
+                    navigateToMain()
                 }
                 is LoginState.Error -> {
                     binding.btnGoogleSignIn.isEnabled = true
@@ -76,6 +83,14 @@ class LoginActivity : AppCompatActivity() {
 
     private fun navigateToSignUp() {
         startActivity(Intent(this, SignUpActivity::class.java))
+        finish()
+    }
+
+    /**
+     * D-6 가입 설문 재노출 — 설문 미응답 유저(userAq null)는 메인 진입 전 설문 강제.
+     */
+    private fun navigateToSurvey() {
+        startActivity(Intent(this, SurveyActivity::class.java))
         finish()
     }
 }

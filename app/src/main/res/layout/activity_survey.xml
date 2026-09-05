@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:background="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/common_back"
+            android:src="@android:drawable/ic_menu_close_clear_cancel" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/survey_title"
+            android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintBottom_toTopOf="@id/btnSubmit"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <!-- 안내 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:text="@string/survey_intro"
+                android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+            <!-- 1~5 라벨 (문항 그룹 위 공통 안내) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="start"
+                    android:text="@string/survey_scale_min"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="@string/survey_scale_max"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- 문항 1 -->
+            <TextView
+                android:id="@+id/tvQuestion1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/survey_question_1"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgQuestion1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbQ1_S1"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="1"
+                    android:text="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ1_S2"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="2"
+                    android:text="2"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ1_S3"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="3"
+                    android:text="3"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ1_S4"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="4"
+                    android:text="4"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ1_S5"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="5"
+                    android:text="5"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+            </RadioGroup>
+
+            <!-- 문항 2 -->
+            <TextView
+                android:id="@+id/tvQuestion2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/survey_question_2"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgQuestion2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbQ2_S1"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="1"
+                    android:text="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ2_S2"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="2"
+                    android:text="2"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ2_S3"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="3"
+                    android:text="3"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ2_S4"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="4"
+                    android:text="4"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ2_S5"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="5"
+                    android:text="5"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+            </RadioGroup>
+
+            <!-- 문항 3 -->
+            <TextView
+                android:id="@+id/tvQuestion3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/survey_question_3"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgQuestion3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbQ3_S1"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="1"
+                    android:text="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ3_S2"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="2"
+                    android:text="2"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ3_S3"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="3"
+                    android:text="3"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ3_S4"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="4"
+                    android:text="4"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ3_S5"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="5"
+                    android:text="5"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+            </RadioGroup>
+
+            <!-- 문항 4 -->
+            <TextView
+                android:id="@+id/tvQuestion4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/survey_question_4"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgQuestion4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbQ4_S1"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="1"
+                    android:text="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ4_S2"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="2"
+                    android:text="2"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ4_S3"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="3"
+                    android:text="3"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ4_S4"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="4"
+                    android:text="4"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ4_S5"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="5"
+                    android:text="5"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+            </RadioGroup>
+
+            <!-- 문항 5 -->
+            <TextView
+                android:id="@+id/tvQuestion5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/survey_question_5"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textStyle="bold" />
+
+            <RadioGroup
+                android:id="@+id/rgQuestion5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/rbQ5_S1"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="1"
+                    android:text="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ5_S2"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="2"
+                    android:text="2"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ5_S3"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="3"
+                    android:text="3"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ5_S4"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="4"
+                    android:text="4"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+
+                <RadioButton
+                    android:id="@+id/rbQ5_S5"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:tag="5"
+                    android:text="5"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body" />
+            </RadioGroup>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 제출 (고정 하단 — 전 문항 응답 시에만 활성화) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnSubmit"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_margin="24dp"
+        android:backgroundTint="@color/primary"
+        android:enabled="false"
+        android:text="@string/survey_submit"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textColor="@android:color/white"
+        app:cornerRadius="14dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:enabled="true" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

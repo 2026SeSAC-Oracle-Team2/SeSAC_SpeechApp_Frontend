@@ -106,7 +106,8 @@ class AuthRepository(private val context: Context) {
 
         return LoginResult(
             isNewUser = loginData.isNewUser,
-            nickname = user?.nickname
+            nickname = user?.nickname,
+            userAq = user?.userAq
         )
     }
 
@@ -200,4 +201,9 @@ class AuthRepository(private val context: Context) {
 data class LoginResult(
     val isNewUser: Boolean,
     val nickname: String?,
+    /**
+     * D-6 가입 설문 재노출 판별 (06 v1.7 §5.2): USER_AQ null = 설문 미응답 → 로그인 시 설문 리노출.
+     * isNewUser와 독립 동작 (기존 isNewUser 판별 로직은 건드리지 않음 — 후속 과제).
+     */
+    val userAq: Int?,
 )

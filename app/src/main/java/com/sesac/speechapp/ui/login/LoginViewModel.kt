@@ -31,7 +31,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             _loginState.value = when {
                 loginResult != null -> LoginState.Success(
                     isNewUser = loginResult.isNewUser,
-                    nickname = loginResult.nickname
+                    nickname = loginResult.nickname,
+                    userAq = loginResult.userAq
                 )
                 else -> LoginState.Error(result.exceptionOrNull()?.message ?: "로그인 실패")
             }
@@ -47,6 +48,10 @@ sealed class LoginState {
     data class Success(
         val isNewUser: Boolean = false,
         val nickname: String? = null,
+        /**
+         * D-6 가입 설문 재노출 판별용 (06 v1.7 §5.2) — null = 설문 미응답.
+         */
+        val userAq: Int? = null,
     ) : LoginState()
     data class Error(val message: String) : LoginState()
 }

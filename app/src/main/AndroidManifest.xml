@@ -41,6 +41,18 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- D-6: 가입 다단계 Step2 (성별·생년월일·취미·태그) -->
+        <activity
+            android:name=".ui.signup.SignUpProfileStepActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <!-- D-6: 가입 설문 (스킵 불가 — 뒤로가기 경고 다이얼로그) -->
+        <activity
+            android:name=".ui.survey.SurveyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
         <activity
             android:name=".MainActivity"
             android:exported="false"
