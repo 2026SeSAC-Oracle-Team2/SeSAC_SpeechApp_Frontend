@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- P3-27 프로필 수정 화면: 원형 사진(탭→갤러리) + 닉네임 입력 + 저장 -->
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/background"
+    android:fillViewport="true">
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="16dp">
 
     <TextView
         android:id="@+id/tvTitle"
@@ -89,6 +95,142 @@
             android:maxLength="20" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <!-- D-7b: 성별 토글 (선택 안 함 허용 — null 유지) -->
+    <TextView
+        android:id="@+id/tvSexLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="@string/profile_edit_sex_label"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tilNickname" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupSex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSexLabel">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSexM"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/profile_edit_sex_male" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipSexF"
+            style="@style/Widget.Material3.Chip.Filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minHeight="48dp"
+            android:text="@string/profile_edit_sex_female" />
+    </com.google.android.material.chip.ChipGroup>
+
+    <!-- D-7b: 생년월일 (읽기 표시 + 탭 → DatePicker, maxDate=현재) -->
+    <TextView
+        android:id="@+id/tvBirthLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/profile_edit_birth_label"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupSex" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilBirthDate"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/profile_edit_birth_hint"
+        app:boxCornerRadiusBottomEnd="14dp"
+        app:boxCornerRadiusBottomStart="14dp"
+        app:boxCornerRadiusTopEnd="14dp"
+        app:boxCornerRadiusTopStart="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvBirthLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etBirthDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:cursorVisible="false"
+            android:focusable="false"
+            android:inputType="none"
+            android:minHeight="48dp"
+            android:longClickable="false" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- D-7b: 취미 (자유 입력) -->
+    <TextView
+        android:id="@+id/tvHobbyLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/profile_edit_hobby_label"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tilBirthDate" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilHobby"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        android:hint="@string/profile_edit_hobby_hint"
+        app:boxCornerRadiusBottomEnd="14dp"
+        app:boxCornerRadiusBottomStart="14dp"
+        app:boxCornerRadiusTopEnd="14dp"
+        app:boxCornerRadiusTopStart="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvHobbyLabel">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etHobby"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:maxLength="50"
+            android:minHeight="48dp" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- D-7b: 관심사 태그 (GET /me/tags 15종 — 최대 5개, 전량교체 PATCH) -->
+    <TextView
+        android:id="@+id/tvTagsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="20dp"
+        android:text="@string/profile_edit_tags_label"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tilHobby" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chipGroupTags"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTagsLabel" />
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSave"
         android:layout_width="0dp"
@@ -112,6 +254,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnSave"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tilNickname" />
+        app:layout_constraintTop_toBottomOf="@id/chipGroupTags" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
