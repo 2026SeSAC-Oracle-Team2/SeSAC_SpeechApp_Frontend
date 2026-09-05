@@ -1,6 +1,8 @@
 package com.sesac.speechapp.ui.learning
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,20 +19,31 @@ import com.sesac.speechapp.data.repository.SessionFlowRepository
 import com.sesac.speechapp.databinding.ActivityStorytellingBinding
 import com.sesac.speechapp.ui.record.RecordingHelper
 import kotlinx.coroutines.launch
+import java.io.File
 
 /**
- * P3-26 이야기 턴 — 채팅 UI.
+ * P3-26 이야기 턴 — 채팅 UI + D-7 AI 대화 UX (06 §3 STORYTELLING 규약).
  *
  * - 첫 진입: /turns/talk (file=null) → AI 첫 대사 표시
- * - 유저: 녹음 FAB → 제출 → aiText(AI 말풍선) + userText(내 말풍선) 표시
- * - 데모 3턴 하드캡: 백엔드가 4번째 제출을 E0401 차단 → 종료 안내 표시
- * - 우측 상단 "대화 종료" 확인 다이얼로그 → finish → SessionReportActivity
+ * - [학습 중단하기] 버튼(우상단): 1~3턴 동안 표시 — 우는 덕분이 팝업 → [네, 나갈게요]=finish 호출(중단 판정)
+ *   / [아니요, 계속할게요]=계속
+ * - 유저 4턴째 답변 제출 완료 시 버튼 [학습 마치기] 전환 — 팝업 → 학습 완료 판정 (total 호출)
+ * - 8턴 하드캡: talk-turn-limit=8 — 9번째 제출 E0401 수신 시 종료 안내
+ *   + 8턴째 답변 후 AI 마무리 응답 표시 → "이번 학습 수고하셨어요!" [학습 결과 보기]
+ * - LLM 로딩: "덕분이가 답변을 생각중이에요" 버블 표시
+ * - 녹음 UX: [음성으로 답변하기] 직접 클릭 시작 + 30초 제한 표시 + [녹음 완료]/30초 도달 → 자동 제출
  */
 class StorytellingActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_SESSION_ID = "session_id"
-        private const val DEMO_TALK_LIMIT = 3 // 백엔드 demo.talk-turn-limit과 동기
+
+        /** 백엔드 talk-turn-limit=8 (application.yml — D-5 상향, 05a v1.6 §3.5) */
+        private const val TALK_HARD_CAP = 8
+        /** 학습 완료 판정: 유저 4턴째 답변 (06 v1.7 §3 — 최소 완료 판정) */
+        private const val MIN_COMPLETE_TURNS = 4
+        /** 녹음 30초 제한 (06 §3 — AI 대화 답변도 30초 통일) */
+        private const val RECORD_LIMIT_SECONDS = 30
     }
 
     private lateinit var binding: ActivityStorytellingBinding
@@ -40,8 +53,12 @@ class StorytellingActivity : AppCompatActivity() {
 
     private var sessionId: Long = -1
     private var userTalkCount = 0
-    private var lastRecordedFile: java.io.File? = null
+    private var lastRecordedFile: File? = null
     private var finished = false
+
+    /** 녹음 30초 제한 타이머 — 도달 시 자동 제출 (06 §3) */
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var recordLimitRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,7 +67,7 @@ class StorytellingActivity : AppCompatActivity() {
 
         repository = SessionFlowRepository(this)
         recordingHelper = RecordingHelper(this) { seconds ->
-            binding.tvTimer.text = String.format("%02d:%02d", seconds / 60, seconds % 60)
+            binding.tvTimer.text = getString(R.string.talk_record_limit_fmt, seconds)
         }
 
         sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
@@ -64,101 +81,194 @@ class StorytellingActivity : AppCompatActivity() {
         binding.rvChat.layoutManager = LinearLayoutManager(this)
         binding.rvChat.adapter = chatAdapter
 
-        binding.fabRecord.setOnClickListener { toggleRecording() }
-        binding.btnExit.setOnClickListener { confirmExit() }
+        binding.btnRecord.setOnClickListener { toggleRecording() }
+        binding.btnStopOrFinish.setOnClickListener { onStopOrFinishClicked() }
 
         startFirstTurn()
     }
 
     private fun startFirstTurn() {
-        binding.waitingOverlay.visibility = View.VISIBLE
+        showThinking()
         lifecycleScope.launch {
             try {
                 val talk = repository.talk(sessionId, file = null)
-                binding.waitingOverlay.visibility = View.GONE
+                hideThinking()
                 chatAdapter.add(TalkChatAdapter.Item(aiText = talk.aiText))
                 scrollToBottom()
             } catch (e: Exception) {
-                binding.waitingOverlay.visibility = View.GONE
+                hideThinking()
                 Toast.makeText(this@StorytellingActivity, e.message, Toast.LENGTH_LONG).show()
                 finish()
             }
         }
     }
 
-    private fun toggleRecording() {
-        // 하드캡 도달 시 제출 금지 — 종료 안내만
-        if (userTalkCount >= DEMO_TALK_LIMIT) {
-            showCapReached()
-            return
+    // ─── 중단/마치기 버튼 (06 §3 — 4턴 전환) ─────────────────────
+
+    /**
+     * 우상단 버튼 — 1~3턴 동안 [학습 중단하기], 4턴째 답변 완료 후 [학습 마치기].
+     * 클릭 시 팝업: 중단=우는 덕분이 팝업 / 마치기=완료 확인 팝업.
+     */
+    private fun onStopOrFinishClicked() {
+        if (finished) return
+        if (userTalkCount >= MIN_COMPLETE_TURNS) {
+            confirmFinish()
+        } else {
+            confirmStop()
         }
+    }
+
+    /** [학습 중단하기] 팝업 — 1~3턴: 우는 덕분이 + 경고 (06 §3 기획 문구) */
+    private fun confirmStop() {
+        val remaining = TALK_HARD_CAP - userTalkCount
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.talk_stop_btn))
+            .setMessage(getString(R.string.talk_stop_confirm_fmt, remaining))
+            .setPositiveButton(getString(R.string.talk_stop_yes)) { _, _ ->
+                // [네, 나갈게요]=finish 호출(중단 판정) → 간이 보고서 표시
+                goToReport()
+            }
+            .setNegativeButton(getString(R.string.talk_stop_no), null)
+            .show()
+    }
+
+    /** [학습 마치기] 팝업 — 4턴째 답변 후: 학습 완료 판정 (06 §3) */
+    private fun confirmFinish() {
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.talk_finish_btn))
+            .setMessage(getString(R.string.talk_finish_confirm))
+            .setPositiveButton(getString(R.string.talk_finish_yes)) { _, _ ->
+                goToReport()
+            }
+            .setNegativeButton(getString(R.string.talk_stop_no), null)
+            .show()
+    }
+
+    // ─── 녹음 UX (06 §3 — 직접 클릭 시작, 30초 제한, 자동 제출) ─────
+
+    private fun toggleRecording() {
+        if (finished) return
 
         if (recordingHelper.recording) {
+            cancelRecordLimit()
             lastRecordedFile = recordingHelper.stop()
-            binding.tvRecordingHint.text = "탭하여 말하기"
+            resetRecordUi()
             if (lastRecordedFile != null) submitTalk()
+            else Toast.makeText(this, "녹음 파일이 없어요", Toast.LENGTH_SHORT).show()
         } else {
             if (!recordingHelper.hasPermission()) {
                 Toast.makeText(this, "마이크 권한이 필요해요", Toast.LENGTH_SHORT).show()
                 return
             }
             if (recordingHelper.start()) {
-                binding.tvRecordingHint.text = "녹음 중… 다시 탭하여 전송"
+                binding.btnRecord.text = getString(R.string.btn_recording_stop)
+                binding.tvRecordingHint.text = getString(R.string.recording_now)
+                startRecordLimit()
             }
         }
     }
 
+    /** 녹음 30초 제한 표시 + 도달 시 녹음 컷 → 자동 제출 (06 §3) */
+    private fun startRecordLimit() {
+        recordLimitRunnable = Runnable {
+            if (recordingHelper.recording) {
+                lastRecordedFile = recordingHelper.stop()
+                resetRecordUi()
+                if (lastRecordedFile != null) submitTalk()
+            }
+        }
+        mainHandler.postDelayed(recordLimitRunnable!!, RECORD_LIMIT_SECONDS * 1000L)
+    }
+
+    private fun cancelRecordLimit() {
+        recordLimitRunnable?.let { mainHandler.removeCallbacks(it) }
+        recordLimitRunnable = null
+    }
+
+    private fun resetRecordUi() {
+        binding.btnRecord.text = getString(R.string.btn_voice_answer)
+        binding.tvRecordingHint.text = getString(R.string.btn_voice_answer)
+        binding.tvTimer.text = getString(R.string.recording_timer_default)
+    }
+
     private fun submitTalk() {
         val file = lastRecordedFile ?: return
-        binding.waitingOverlay.visibility = View.VISIBLE
+        showThinking()
 
         lifecycleScope.launch {
             try {
                 val talk = repository.talk(sessionId, file = file)
-                binding.waitingOverlay.visibility = View.GONE
+                hideThinking()
                 userTalkCount++
 
                 chatAdapter.add(TalkChatAdapter.Item(userText = talk.userText ?: "(인식된 말 없음)"))
                 chatAdapter.add(TalkChatAdapter.Item(aiText = talk.aiText))
                 scrollToBottom()
 
-                // 데모 3턴 도달 → 종료 안내
-                if (userTalkCount >= DEMO_TALK_LIMIT) {
-                    showCapReached()
-                }
+                onUserTalkCompleted()
             } catch (e: SessionFlowException) {
-                binding.waitingOverlay.visibility = View.GONE
-                // 백엔드 하드캡 차단 (E0401) → 종료 안내
+                hideThinking()
+                // 백엔드 하드캡 차단 (E0401) → 종료 안내 (8턴 상향 후에도 동일 코드 대응)
                 if (e.code == "E0401") showCapReached()
                 else Toast.makeText(this@StorytellingActivity, e.message, Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
-                binding.waitingOverlay.visibility = View.GONE
+                hideThinking()
                 Toast.makeText(this@StorytellingActivity, e.message, Toast.LENGTH_LONG).show()
             }
         }
     }
 
+    /**
+     * 유저 답변 완료 후 처리 (06 §3):
+     * - 4턴째 답변 제출 완료 시점부터 버튼 [학습 마치기] 전환 (1~3턴 = [학습 중단하기])
+     * - 8턴째 답변 후 AI 마무리 응답(=이번 aiText) 수신 → "이번 학습 수고하셨어요!" [학습 결과 보기]
+     */
+    private fun onUserTalkCompleted() {
+        if (userTalkCount >= TALK_HARD_CAP) {
+            // 8턴 하드캡 도달 — AI 마무리 응답까지 표시됨 → 종료 안내
+            showCapReached()
+            return
+        }
+        // 4턴 경계 전환 — 버튼 라벨 갱신 (중단하기 → 마치기)
+        refreshExitButton()
+    }
+
+    /** 버튼 라벨 갱신 — 4턴 전 [학습 중단하기] / 4턴째 답변 후 [학습 마치기] */
+    private fun refreshExitButton() {
+        binding.btnStopOrFinish.text =
+            if (userTalkCount >= MIN_COMPLETE_TURNS) getString(R.string.talk_finish_btn)
+            else getString(R.string.talk_stop_btn)
+    }
+
+    /** 8턴 하드캡 — "이번 학습 수고하셨어요!" [학습 결과 보기] (06 §3) */
     private fun showCapReached() {
         if (finished) return
         finished = true
+        cancelRecordLimit()
         AlertDialog.Builder(this)
-            .setTitle("오늘의 대화 종료")
+            .setTitle(getString(R.string.talk_cap_done))
             .setMessage(getString(R.string.talk_cap_notice))
-            .setPositiveButton(getString(R.string.btn_finish)) { _, _ -> goToReport() }
-            .setNegativeButton("계속 대화") { d, _ -> d.dismiss() }
+            .setPositiveButton(getString(R.string.btn_view_result)) { _, _ -> goToReport() }
+            .setCancelable(false)
             .show()
     }
 
-    private fun confirmExit() {
-        AlertDialog.Builder(this)
-            .setTitle(getString(R.string.talk_exit))
-            .setMessage(getString(R.string.talk_exit_confirm))
-            .setPositiveButton(getString(R.string.btn_finish)) { _, _ -> goToReport() }
-            .setNegativeButton("계속 대화", null)
-            .show()
+    // ─── LLM 로딩 표시 (06 §3 — "덕분이가 답변을 생각중이에요") ──────
+
+    private fun showThinking() {
+        binding.thinkingBubble.visibility = View.VISIBLE
+        binding.btnRecord.isEnabled = false
+    }
+
+    private fun hideThinking() {
+        binding.thinkingBubble.visibility = View.GONE
+        binding.btnRecord.isEnabled = true
+        resetRecordUi()
     }
 
     private fun goToReport() {
+        finished = true
+        cancelRecordLimit()
         recordingHelper.release()
         // ProblemActivity가 누적한 턴별 점수를 결과 화면으로 전달
         val scores = intent.getIntegerArrayListExtra(SessionReportActivity.EXTRA_TURN_SCORES) ?: ArrayList()
@@ -179,11 +289,12 @@ class StorytellingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelRecordLimit()
         recordingHelper.release()
     }
 }
 
-/** 채팅 어댑터 — AI/유저 말풍선 2-ViewHolder */
+/** 채팅 어댑터 — AI/유저 말풍선 2-ViewHolder + D-7 생각중 버블(ThinkingBubble 별도 뷰) */
 class TalkChatAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     data class Item(val aiText: String? = null, val userText: String? = null)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 이야기 턴 — 채팅 UI (AI 대사/유저 녹음) + 조기종료 -->
+<!-- P3-26 이야기 턴 — 채팅 UI + D-7 AI 대화 UX (중단/마치기 전환·덕분이 생각중 버블·음성 답변 버튼) -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -18,14 +18,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 우측 상단 조기종료 -->
+    <!-- D-7 2.1/2.2: 우상단 [학습 중단하기] — 4턴째 답변 후 [학습 마치기]로 전환 (코드에서 라벨 갱신) -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnExit"
+        android:id="@+id/btnStopOrFinish"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:text="@string/talk_exit"
+        android:text="@string/talk_stop_btn"
         android:textColor="@color/error"
         app:layout_constraintBaseline_toBaselineOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -38,12 +38,44 @@
         android:layout_marginTop="8dp"
         android:clipToPadding="false"
         android:paddingBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@id/containerInput"
+        app:layout_constraintBottom_toTopOf="@id/thinkingBubble"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- 하단 입력 영역: 녹음 FAB + 타이머 -->
+    <!-- D-7 2.4: LLM 로딩 버블 — "덕분이가 답변을 생각중이에요" -->
+    <LinearLayout
+        android:id="@+id/thinkingBubble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/bg_feedback_card"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="10dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@id/containerInput"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:indeterminate="true"
+            app:indicatorColor="@color/primary"
+            app:indicatorSize="20dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:text="@string/talk_thinking"
+            android:textAppearance="@style/TextAppearance.SeSAC.Body"
+            android:textColor="@color/text_secondary" />
+    </LinearLayout>
+
+    <!-- 하단 입력 영역: [음성으로 답변하기] + 30초 제한 표시 (D-7 2.5) -->
     <LinearLayout
         android:id="@+id/containerInput"
         android:layout_width="0dp"
@@ -51,79 +83,51 @@
         android:background="@color/surface"
         android:elevation="8dp"
         android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:paddingHorizontal="20dp"
         android:paddingVertical="12dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/tvTimer"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/recording_timer_default"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/text_secondary" />
-
-        <TextView
-            android:id="@+id/tvRecordingHint"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:gravity="center"
-            android:text="탭하여 말하기"
-            android:textAppearance="@style/TextAppearance.SeSAC.Body"
-            android:textColor="@color/text_muted" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/fabRecord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:contentDescription="@string/mic_desc"
-            android:src="@drawable/ic_mic_24"
-            app:backgroundTint="@color/primary"
-            app:fabSize="mini"
-            app:tint="@color/surface" />
-    </LinearLayout>
-
-    <!-- AI 응답 대기 오버레이 -->
-    <FrameLayout
-        android:id="@+id/waitingOverlay"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/bg_recording_overlay"
-        android:clickable="true"
-        android:focusable="true"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
-
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                app:indicatorColor="@color/primary"
-                app:indicatorSize="44dp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/tvTimer"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="듣고 있어요…"
+                android:layout_weight="1"
+                android:text="@string/recording_timer_default"
                 android:textAppearance="@style/TextAppearance.SeSAC.H4"
-                android:textColor="@color/surface" />
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvRecordingHint"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:gravity="center"
+                android:text="@string/btn_voice_answer"
+                android:textAppearance="@style/TextAppearance.SeSAC.Body"
+                android:textColor="@color/text_muted" />
         </LinearLayout>
-    </FrameLayout>
+
+        <!-- D-7 시니어 UI: 마이크 아이콘 대신 굵은 텍스트 버튼 — [음성으로 답변하기]/[녹음 완료] 전환 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRecord"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/primary"
+            android:text="@string/btn_voice_answer"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/surface"
+            android:textStyle="bold"
+            app:cornerRadius="14dp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
