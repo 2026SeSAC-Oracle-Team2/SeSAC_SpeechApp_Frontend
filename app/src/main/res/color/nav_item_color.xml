@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- D-8③ 하단 네비 아이콘 색: 선택=시안 accent(갈색) + semibold, 비선택=muted-foreground -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/primary" android:state_checked="true" />
+    <item android:color="@color/accent" android:state_checked="true" />
     <item android:color="@color/text_secondary" />
 </selector>

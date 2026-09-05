@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- D-8③: 시안 gradient-brand로 통일 (기존 키 유지 — 참조 파손 방지) -->
+<!-- D-8③ 시안 gradient-brand(135deg) — 주요 버튼·유저 버블·진행바 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
+    <!-- CSS 135deg(좌상→우하) ≈ Android angle 315 -->
     <gradient
         android:angle="315"
         android:startColor="@color/brand_grad_brand_start"

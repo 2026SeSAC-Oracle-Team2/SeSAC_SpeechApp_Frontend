@@ -4,15 +4,15 @@
     <style name="Theme.SeSAC_Speech" parent="Theme.Material3.Light.NoActionBar">
         <!-- Primary -->
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorPrimaryContainer">@color/primary_light</item>
-        <item name="colorOnPrimaryContainer">@color/primary_dark</item>
+        <item name="colorOnPrimary">@color/brand_on_primary</item>
+        <item name="colorPrimaryContainer">@color/brand_secondary</item>
+        <item name="colorOnPrimaryContainer">@color/brand_secondary_fg</item>
 
         <!-- Secondary (same as Primary for unified look) -->
-        <item name="colorSecondary">@color/primary</item>
-        <item name="colorOnSecondary">@android:color/white</item>
-        <item name="colorSecondaryContainer">@color/primary_light</item>
-        <item name="colorOnSecondaryContainer">@color/primary_dark</item>
+        <item name="colorSecondary">@color/brand_secondary</item>
+        <item name="colorOnSecondary">@color/brand_secondary_fg</item>
+        <item name="colorSecondaryContainer">@color/brand_secondary</item>
+        <item name="colorOnSecondaryContainer">@color/brand_secondary_fg</item>
 
         <!-- Surface / Background -->
         <item name="android:colorBackground">@color/background</item>
@@ -29,12 +29,12 @@
 
         <!-- Status Bar -->
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:navigationBarColor">@color/background</item>
     </style>
 
     <!-- Splash Theme (before login) -->
     <style name="Theme.SeSAC_Speech.Splash" parent="Theme.SeSAC_Speech">
         <item name="android:windowBackground">@drawable/bg_splash</item>
-        <item name="android:statusBarColor">@color/primary</item>
+        <item name="android:statusBarColor">@color/brand_grad_warm_end</item>
     </style>
 </resources>

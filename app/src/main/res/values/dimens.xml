@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8③ 디자인 토큰 — ~/design 시안 styles.css 기준 치수.
+  radius 체계: 시안 radius 기본값 1.125rem(18dp) 기준 계산
+    radius-md = 16dp (minus 2) / radius-lg = 18dp / radius-xl = 22dp (plus 4)
+    radius-2xl = 26dp (plus 8, card-soft) / radius-3xl = 30dp (plus 12)
+  폰트: 시안 px ≈ sp 1:1 근사 (지시문 §6 — 17px → 17sp 등)
+-->
+<resources>
+    <!-- ══ Radius (시안 radius 체계) ══ -->
+    <dimen name="radius_md">16dp</dimen>
+    <dimen name="radius_lg">18dp</dimen>
+    <dimen name="radius_xl">22dp</dimen>
+    <dimen name="radius_2xl">26dp</dimen>
+    <dimen name="radius_3xl">30dp</dimen>
+    <!-- pill(완전 둥근): rounded-full — 배지·칩·진행바 -->
+    <dimen name="radius_pill">100dp</dimen>
+
+    <!-- ══ 버튼 (시안 Btn: min-h 52px, px-5, rounded-2xl) ══ -->
+    <dimen name="btn_height">52dp</dimen>
+    <dimen name="btn_height_secondary">48dp</dimen>
+    <dimen name="btn_padding_h">20dp</dimen>
+
+    <!-- ══ 화면 여백 (시안 Screen px-5 / pt-6 / pb-28) ══ -->
+    <dimen name="screen_padding_h">20dp</dimen>
+    <dimen name="screen_padding_top">24dp</dimen>
+    <dimen name="screen_padding_bottom">112dp</dimen>
+    <!-- 카드 내 여백 (card-soft p-5 / p-4) -->
+    <dimen name="card_padding">20dp</dimen>
+    <dimen name="card_padding_sm">16dp</dimen>
+    <!-- 카드 간격 (space-y-3/4, mt-5) -->
+    <dimen name="gap_card">12dp</dimen>
+    <dimen name="gap_card_lg">16dp</dimen>
+    <dimen name="gap_section">28dp</dimen>
+
+    <!-- ══ 마스코트 (시안 duck 표시 크기) ══ -->
+    <dimen name="duck_banner">72dp</dimen>
+    <dimen name="duck_loading">96dp</dimen>
+    <dimen name="duck_login">200dp</dimen>
+    <dimen name="duck_chat_bubble">48dp</dimen>
+
+    <!-- ══ 하단 네비 (시안 min-h 60px, 아이콘 24) ══ -->
+    <dimen name="bottom_nav_height">64dp</dimen>
+</resources>

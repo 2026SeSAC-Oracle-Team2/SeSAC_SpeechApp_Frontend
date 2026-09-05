@@ -1,36 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8③ 디자인 토큰 — ~/design 시안 styles.css oklch → sRGB hex 변환분.
+  변환: CSS Color 4 공식 수식(Oklab → LMS → linear sRGB → gamma) + 명세 앵커 검증
+  (oklch(0.627955 0.257683 29.2338) → #FF0000 원값 일치).
+  원칙: 기존 키 유지(값만 교체) + 신규 키는 추가만 (참조 파손 방지 — 지시문 §6).
+  참고: 아래 주석의 "oklch(...)" 는 시안 토큰 원값.
+-->
 <resources>
-    <!-- Primary Palette -->
-    <color name="primary">#4A90D9</color>
-    <color name="primary_dark">#3A7BC8</color>
-    <color name="primary_light">#E8F1FA</color>
-    <color name="primary_ghost">#0D4A90D9</color>
+    <!-- ══ Primary (시안 primary: 노랑계열, oklch(0.83 0.16 84)) ══ -->
+    <color name="primary">#F8BD2C</color>
+    <color name="primary_dark">#F1B200</color>
+    <color name="primary_light">#F6EEDB</color>
+    <color name="primary_ghost">#0DF8BD2C</color>
 
-    <!-- Neutral Palette -->
-    <color name="text_primary">#1A1A2E</color>
-    <color name="text_secondary">#8B92A8</color>
-    <color name="text_muted">#B0B8CC</color>
-    <color name="background">#F7F9FC</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="border">#E8ECF2</color>
+    <!-- ══ Neutral (시안 foreground / muted / card / background) ══ -->
+    <!-- text_primary = 시안 foreground oklch(0.31 0.045 62) — 갈색 톤 다크브라운 -->
+    <color name="text_primary">#412B17</color>
+    <color name="text_secondary">#806E5C</color>
+    <color name="text_muted">#B3A698</color>
+    <!-- background = 시안 background oklch(0.985 0.012 92) — 크림 아이보리 -->
+    <color name="background">#FDFAF1</color>
+    <color name="surface">#FFFFFC</color>
+    <!-- border = 시안 border oklch(0.9 0.024 86) -->
+    <color name="border">#E5DDCD</color>
 
-    <!-- Accent -->
-    <color name="accent">#FFD166</color>
-    <color name="accent_bg">#FFF8E8</color>
+    <!-- ══ Accent (시안 accent oklch(0.6 0.09 55) — 갈색. 강조 텍스트/아이콘에 사용) ══ -->
+    <color name="accent">#AA714A</color>
+    <color name="accent_bg">#F6EEDB</color>
 
-    <!-- Semantic -->
-    <color name="success">#5CB85C</color>
-    <color name="warning">#F5A623</color>
-    <color name="error">#E8715A</color>
-    <color name="error_border">#F5D0C8</color>
+    <!-- ══ Semantic ══ -->
+    <color name="success">#38A065</color>
+    <color name="warning">#F1B200</color>
+    <!-- error = 시안 destructive oklch(0.58 0.19 27) -->
+    <color name="error">#D33B36</color>
+    <color name="error_border">#FBD5C9</color>
 
-    <!-- Chat Specific -->
-    <color name="ai_bubble_bg">#FFFFFF</color>
-    <color name="user_bubble_bg_start">#4A90D9</color>
-    <color name="user_bubble_bg_end">#3A7BC8</color>
-    <color name="feedback_card_bg">#E8F1FA</color>
-    <color name="feedback_card_border">#264A90D9</color>
+    <!-- ══ Chat Specific (키 유지 — 값만 시안 톤으로 교체) ══ -->
+    <color name="ai_bubble_bg">#FFFFFC</color>
+    <!-- 유저 버블 = 시안 gradient-brand(135deg, oklch(0.88 0.15 92) → oklch(0.8 0.16 76)) -->
+    <color name="user_bubble_bg_start">#FBD452</color>
+    <color name="user_bubble_bg_end">#F8AD24</color>
+    <color name="feedback_card_bg">#F6EEDB</color>
+    <color name="feedback_card_border">#26AA714A</color>
 
-    <!-- Divider -->
-    <color name="divider">#E8ECF2</color>
+    <!-- ══ Divider (키 유지 — border와 동일 톤) ══ -->
+    <color name="divider">#E5DDCD</color>
+
+    <!-- ══ D-8③ 신규 키 (시안 토큰 — 기존 참조 없음, 추가만) ══ -->
+    <!-- 시안 secondary: 카드 내 서브 배경/진행바 트랙 -->
+    <color name="brand_secondary">#F6EEDB</color>
+    <!-- 시안 secondary-foreground -->
+    <color name="brand_secondary_fg">#563C26</color>
+    <!-- 시안 muted: 설명 텍스트 배경 -->
+    <color name="brand_muted">#F5F0E3</color>
+    <!-- 시안 primary-foreground: 노랑 위 텍스트(다크브라운) -->
+    <color name="brand_on_primary">#46290B</color>
+    <!-- 시안 success/destructive foreground: 밝은 크림 -->
+    <color name="brand_on_success">#FDFAF1</color>
+    <!-- 시안 brand 팔레트 (DuckSays 배너·FAB·카드 헤더 등) -->
+    <color name="brand_ivory">#F8F3E5</color>
+    <color name="brand_yellow">#FFC921</color>
+    <color name="brand_yellow_light">#FFD74B</color>
+    <color name="brand_yellow_dark">#F1B200</color>
+    <color name="brand_brown">#7D5231</color>
+    <!-- 시안 gradient-warm(160deg): 화면 배경 그라데이션 (Screen 공통 배경) -->
+    <color name="brand_grad_warm_start">#FFF9E2</color>
+    <color name="brand_grad_warm_end">#FCEABE</color>
+    <!-- 시안 gradient-brand(135deg): 주요 버튼·유저 버블·진행바 -->
+    <color name="brand_grad_brand_start">#FBD452</color>
+    <color name="brand_grad_brand_end">#F8AD24</color>
+    <!-- 시안 그림자 색 base (shadow 토큰의 oklch(0.48 0.075 58)) -->
+    <color name="brand_shadow">#7D5231</color>
 </resources>
