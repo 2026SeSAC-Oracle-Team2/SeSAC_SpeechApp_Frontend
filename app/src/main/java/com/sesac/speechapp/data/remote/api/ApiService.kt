@@ -18,6 +18,7 @@ import com.sesac.speechapp.data.remote.dto.session.ListenSubmitRequest
 import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
 import com.sesac.speechapp.data.remote.dto.session.SessionReportData
 import com.sesac.speechapp.data.remote.dto.session.SessionScoresData
+import com.sesac.speechapp.data.remote.dto.session.StatsData
 import com.sesac.speechapp.data.remote.dto.session.SessionHistoryData
 import com.sesac.speechapp.data.remote.dto.session.TalkData
 import com.sesac.speechapp.data.remote.dto.session.VoiceSubmitData
@@ -110,6 +111,13 @@ interface ApiService {
      */
     @GET("api/v1/users/me/scores")
     suspend fun getMyScores(): Response<ApiResponse<SessionScoresData>>
+
+    /**
+     * GET /api/v1/users/me/stats — 홈 통계 (D-8②b, 05a §8.4 — JWT 필수)
+     * streak/avgScore/deltaScore — delta null이면 증감 표시 숨김
+     */
+    @GET("api/v1/users/me/stats")
+    suspend fun getMyStats(): Response<ApiResponse<StatsData>>
 
     /**
      * GET /api/v1/users/me/sessions/history — 지난 학습 카드 리스트 (D-7 3.1, 05a v1.6 §8.2 — JWT 필수)

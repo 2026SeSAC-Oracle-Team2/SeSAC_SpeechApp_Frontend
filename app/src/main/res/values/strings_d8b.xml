@@ -1,0 +1,13 @@
+<resources>
+    <!-- D-8②b 홈 카드 문구 (strings.xml 커밋 금지 상태 회피용 — strings_survey 계열 별도 파일) -->
+    <string name="card_today_sub_d8b">문제 8개 + 덕분이 대화, 약 8분</string>
+
+    <!-- D-8②b 홈 통계 카드 -->
+    <string name="home_stat_streak_label">연속 학습</string>
+    <string name="home_stat_streak_value">%d일</string>
+    <string name="home_stat_avg_label">평균 점수</string>
+    <string name="home_stat_placeholder">-</string>
+
+    <!-- D-8②b DuckSays 배너 (테마별 학습 — 마스코트 톤, 기획 문구와 충돌 없음) -->
+    <string name="duck_says_theme_banner">같이 오늘의 학습을 해볼까요? 꽥꽥꽥</string>
+</resources>

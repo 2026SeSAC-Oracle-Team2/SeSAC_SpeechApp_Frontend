@@ -5,21 +5,30 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.sesac.speechapp.R
+import com.sesac.speechapp.data.repository.SessionFlowRepository
 import com.sesac.speechapp.databinding.FragmentLearnBinding
 import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
 import com.sesac.speechapp.ui.learning.RadarChartView
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 /**
- * 홈 탭 (구 Learn) — 오늘의 학습 카드 + 실력 지표 방사형 그래프.
+ * 홈 탭 (구 Learn) — 오늘의 학습 카드 + 홈 통계 2카드 + 실력 지표 방사형 그래프.
  * D-7 1.4: 오늘의 학습 → POST /sessions/today (EXTRA_THEMA 미전달 = today 분기)
+ * D-8②b: 홈 통계 2카드(연속 학습/평균 점수) 실데이터 — GET /users/me/stats (05a §8.4).
+ *         조회 실패 시 카드 유지 + 값 자리 "-" (로딩 실패가 화면을 깨지 않게).
+ *         onResume 재조회 — 학습 완료 후 복귀 시 즉시 반영.
  * 실력 지표 stub — 대시보드 D-7 3.2에서 실데이터화 (홈 카드는 D-7 범위 아님 — stub 유지)
  */
 class LearnFragment : Fragment() {
 
     private var _binding: FragmentLearnBinding? = null
     private val binding get() = _binding!!
+    private lateinit var repository: SessionFlowRepository
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,6 +41,7 @@ class LearnFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        repository = SessionFlowRepository(requireContext())
 
         // 오늘의 학습 카드/버튼 탭 → 세션 로딩 화면 (스텁 2~3초 대기, D-7 1.4: /today 분기)
         binding.cardHero.setOnClickListener {
@@ -50,6 +60,42 @@ class LearnFragment : Fragment() {
                 RadarChartView.AxisData(getString(R.string.metric_selftalk), 0f),
             )
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadStats()
+    }
+
+    /**
+     * D-8②b 홈 통계 2카드 — GET /users/me/stats.
+     * 실패 시 카드는 유지하고 값 자리만 "-" (null 케이스와 동일 폴백).
+     * deltaScore null이면 증감 TextView 숨김. 부호 포맷(+3.4/−2.1)은 클라 담당.
+     */
+    private fun loadStats() {
+        lifecycleScope.launch {
+            try {
+                val stats = repository.getMyStats()
+                binding.containerStats.tvStreakValue.text =
+                    getString(R.string.home_stat_streak_value).format(Locale.US, stats.streakDays)
+                binding.containerStats.tvAvgValue.text = stats.avgScore?.let {
+                    String.format(Locale.US, "%.1f", it)
+                } ?: getString(R.string.home_stat_placeholder)
+                if (stats.deltaScore != null) {
+                    val delta = stats.deltaScore
+                    val sign = if (delta >= 0) "+" else "\u2212" // −(U+2212) 음수 기호
+                    binding.containerStats.tvDeltaValue.text = sign + String.format(Locale.US, "%.1f", kotlin.math.abs(delta))
+                    binding.containerStats.tvDeltaValue.visibility = View.VISIBLE
+                } else {
+                    binding.containerStats.tvDeltaValue.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                binding.containerStats.tvStreakValue.text = getString(R.string.home_stat_placeholder)
+                binding.containerStats.tvAvgValue.text = getString(R.string.home_stat_placeholder)
+                binding.containerStats.tvDeltaValue.visibility = View.GONE
+                Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onDestroyView() {

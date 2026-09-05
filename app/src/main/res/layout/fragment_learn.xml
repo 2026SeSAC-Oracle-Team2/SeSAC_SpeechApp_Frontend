@@ -23,6 +23,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- D-8②b 홈 통계 2카드 (연속 학습 / 평균 점수) — 시안 home.tsx 기준 -->
+        <include
+            android:id="@+id/containerStats"
+            layout="@layout/view_home_stats_cards"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
         <!-- Hero Card: 오늘의 학습 -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHero"
@@ -33,7 +43,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle">
+            app:layout_constraintTop_toBottomOf="@id/containerStats">
 
             <LinearLayout
                 android:layout_width="match_parent"

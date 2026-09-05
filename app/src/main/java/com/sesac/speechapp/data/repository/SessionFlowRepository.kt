@@ -11,6 +11,7 @@ import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
 import com.sesac.speechapp.data.remote.dto.session.SessionHistoryData
 import com.sesac.speechapp.data.remote.dto.session.SessionReportData
 import com.sesac.speechapp.data.remote.dto.session.SessionScoresData
+import com.sesac.speechapp.data.remote.dto.session.StatsData
 import com.sesac.speechapp.data.remote.dto.session.TalkData
 import com.sesac.speechapp.data.remote.dto.session.VoiceSubmitData
 import kotlinx.coroutines.Dispatchers
@@ -138,6 +139,14 @@ class SessionFlowRepository(context: Context) {
      */
     suspend fun getMyScores(): SessionScoresData = withContext(Dispatchers.IO) {
         unwrap(RetrofitClient.apiService.getMyScores())
+    }
+
+    /**
+     * 홈 통계 (05a §8.4) — JWT 필수 (403 시 TokenAuthenticator 무음 refresh 경로).
+     * 조회 실패 시 호출부에서 카드 "-" 폴백 (화면 깨짐 방지).
+     */
+    suspend fun getMyStats(): StatsData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.getMyStats())
     }
 
     /**

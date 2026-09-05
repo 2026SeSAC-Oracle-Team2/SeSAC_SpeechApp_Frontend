@@ -29,6 +29,31 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
+    <!-- D-8②b DuckSays 배너 (덕분이 말풍선 — 텍스트만, 마스코트 에셋은 D-8③) -->
+    <LinearLayout
+        android:id="@+id/containerDuckSays"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_duck_banner"
+        android:padding="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvThemeTitle">
+
+        <TextView
+            android:id="@+id/tvDuckSays"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/duck_says_theme_banner"
+            android:textAppearance="@style/TextAppearance.SeSAC.Body"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/containerThemes"
         android:layout_width="0dp"
@@ -38,7 +63,7 @@
         android:orientation="vertical"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvThemeTitle">
+        app:layout_constraintTop_toBottomOf="@id/containerDuckSays">
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardThemeCafe"

@@ -116,6 +116,21 @@ data class SessionScoresData(
  * 조회 조건(서버): STATUS != COMPLETED_NO_TALK AND AQ IS NOT NULL
  * createdAt은 ISO 타임스탬프 문자열 — 표현(YYYY.mm.dd)은 클라 포맷 책임 (§8.2 규약)
  */
+/*
+ * GET /api/v1/users/me/stats 응답 (05a §8.4 — 홈 통계, D-8②b)
+ * streakDays: 완료 세션 일자 연속 (중단 세션 COMPLETED_NO_TALK 제외 — §8.2와 동일 원칙).
+ *             오늘 완료 없어도 어제까지 연속이면 유지 (오늘 미학습 = 0 아님).
+ * avgScore:   최근 10개 완료 세션 AQ 평균 (소수 1자리) — 0개면 null (홈 카드 "-" 표시).
+ *             ⚠️ ADR-009 대표점수(최근 20 상위 10)와 다른 식 — "최근 10개 전부 평균".
+ * deltaScore: 최근 10개 평균 − 직전 10개(11~20번째) 평균 (소수 1자리).
+ *             세션 10개 이하면 null — 증감 표시 숨김. 부호 포맷(+3.4/−2.1)은 클라 책임.
+ */
+data class StatsData(
+    val streakDays: Int = 0,
+    val avgScore: Double? = null,
+    val deltaScore: Double? = null,
+)
+
 data class SessionHistoryData(
     val sessions: List<SessionHistoryItem> = emptyList(),
 )
