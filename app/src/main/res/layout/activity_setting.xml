@@ -155,7 +155,7 @@
                         android:layout_height="wrap_content"
                         android:text="09:00"
                         android:textAppearance="@style/TextAppearance.SeSAC.Body"
-                        android:textColor="@color/primary" />
+                        android:textColor="@color/accent" /> />
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 

@@ -16,5 +16,5 @@
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp"
         android:textAppearance="@style/TextAppearance.SeSAC.Body"
-        android:textColor="@color/surface" />
+        android:textColor="@color/brand_on_primary" />
 </FrameLayout>

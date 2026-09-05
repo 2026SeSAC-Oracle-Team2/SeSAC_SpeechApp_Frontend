@@ -5,21 +5,28 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_splash">
 
-    <!-- 덕담 마스코트 로고 (임시: 텍스트 🦆 — 에셋 확보 시 ImageView 교체) -->
-    <TextView
-        android:id="@+id/logoArea"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:background="@drawable/bg_icon_circle"
-        android:contentDescription="로고"
-        android:gravity="center"
-        android:text="🦆"
-        android:textSize="64sp"
+    <!-- D-8③ 시안 index: duck 마스코트 200dp (덕담 앱명 유지 — 사용자 확정) -->
+    <ImageView
+        android:id="@+id/imgDuckLogin"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:contentDescription="덕담 마스코트"
+        android:src="@drawable/img_duck"
         app:layout_constraintBottom_toTopOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
+
+    <!-- 기존 로고 TextView — ID 보존, gone (Binding 파손 방지) -->
+    <TextView
+        android:id="@+id/logoArea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🦆"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- Title -->
     <TextView
@@ -28,8 +35,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="@string/splash_title"
-        android:textAppearance="@style/TextAppearance.SeSAC.H1"
-        android:textColor="@android:color/white"
+        android:textAppearance="@style/TextAppearance.SeSAC.Display"
+        android:textSize="30sp"
+        android:textColor="@color/text_primary"
         app:layout_constraintBottom_toTopOf="@id/tvSubtitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,7 +51,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/splash_subtitle"
         android:textAppearance="@style/TextAppearance.SeSAC.Body"
-        android:textColor="@color/primary_light"
+        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toTopOf="@id/btnGoogleSignIn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,11 +64,14 @@
         android:layout_height="52dp"
         android:layout_marginHorizontal="32dp"
         android:layout_marginBottom="32dp"
-        android:backgroundTint="@android:color/white"
+        android:backgroundTint="@color/surface"
         android:text="@string/login_google"
         android:textAppearance="@style/TextAppearance.SeSAC.H4"
         android:textColor="@color/text_primary"
-        app:cornerRadius="14dp"
+        android:textStyle="bold"
+        app:cornerRadius="16dp"
+        app:strokeColor="@color/border"
+        app:strokeWidth="2dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

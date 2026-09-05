@@ -136,7 +136,7 @@
                     android:layout_height="wrap_content"
                     android:text="12"
                     android:textAppearance="@style/TextAppearance.SeSAC.H2"
-                    android:textColor="@color/primary" />
+                    android:textColor="@color/accent" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -164,7 +164,7 @@
                     android:layout_height="wrap_content"
                     android:text="78"
                     android:textAppearance="@style/TextAppearance.SeSAC.H2"
-                    android:textColor="@color/primary" />
+                    android:textColor="@color/accent" />
 
                 <TextView
                     android:layout_width="wrap_content"

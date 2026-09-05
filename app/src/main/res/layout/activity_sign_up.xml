@@ -132,12 +132,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:layout_marginTop="32dp"
-                android:backgroundTint="@color/primary"
+                android:background="@drawable/bg_grad_brand"
+                android:backgroundTint="@null"
                 android:enabled="false"
                 android:text="완료"
                 android:textAppearance="@style/TextAppearance.SeSAC.H4"
-                android:textColor="@android:color/white"
-                app:cornerRadius="14dp"
+                android:textColor="@color/brand_on_primary"
+                android:textStyle="bold"
+                app:cornerRadius="16dp"
                 tools:enabled="true" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
