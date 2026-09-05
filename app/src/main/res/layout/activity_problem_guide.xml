@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-7 1.1 문제 가이드 화면 — 턴별 안내 텍스트 + [준비됐어요!] (06 §3, 안내 TTS 없음) -->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="32dp">
+
+        <!-- 상단: n / 8 + 유형 배지 (문제 화면과 동일 체계) -->
+        <TextView
+            android:id="@+id/tvProgress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+            android:textColor="@color/text_primary"
+            tools:text="1 / 8"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tvTypeBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/primary"
+            tools:text="알아듣기"
+            app:layout_constraintBaseline_toBaselineOf="@id/tvProgress"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:indicatorColor="@color/primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvProgress"
+            app:trackColor="@color/border"
+            app:trackCornerRadius="4dp"
+            app:trackThickness="6dp" />
+
+        <!-- 마스코트 + 안내 -->
+        <TextView
+            android:id="@+id/tvMascot"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="@string/splash_title"
+            android:textColor="@color/primary"
+            android:textSize="56sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
+        <!-- 타입별 안내 본문 (strings_d7: guide_*_body + 부가 문구 병합) -->
+        <TextView
+            android:id="@+id/tvGuideBody"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@drawable/bg_feedback_card"
+            android:padding="20dp"
+            android:lineSpacingExtra="6dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/text_primary"
+            tools:text="이번 문제는 '알아듣기' 입니다."
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvMascot" />
+
+        <TextView
+            android:id="@+id/tvGuideExtra"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:lineSpacingExtra="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.Body"
+            android:textColor="@color/text_secondary"
+            tools:text="질문을 듣고 30초 안에 선택지를 골라야해요."
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvGuideBody" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReady"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="32dp"
+            android:backgroundTint="@color/primary"
+            android:text="@string/guide_btn_ready"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/surface"
+            app:cornerRadius="14dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvGuideExtra" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

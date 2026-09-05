@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.TextView
@@ -16,6 +18,7 @@ import coil.load
 import com.sesac.speechapp.BuildConfig
 import com.sesac.speechapp.R
 import com.sesac.speechapp.data.remote.AuthImageLoader
+import com.sesac.speechapp.data.remote.dto.session.ChoiceDto
 import com.sesac.speechapp.data.remote.dto.session.TurnDto
 import com.sesac.speechapp.data.repository.SessionFlowRepository
 import com.sesac.speechapp.databinding.ActivityProblemBinding
@@ -24,26 +27,41 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 /**
- * P3-26 문제 풀이 화면 — 유형별 레이아웃 전환.
+ * P3-26 문제 풀이 화면 — 유형별 레이아웃 전환 + D-7 시간 통제 체계 (06 §3).
  *
- * - LISTEN: TTS + 선택지 카드(텍스트/이미지) 탭 → 즉시 제출 (응답 스코어 무시, 다음 턴)
- * - NAMING: 이미지 + TTS + 녹음 제출 + 힌트 버튼(의미→조음, 최대 2개, 하단 텍스트)
- * - SHADOWING: TTS 문장 재생 + 녹음 제출
- * - SELF_TALK: 상황 이미지 + 녹음 제출
- * - 공통: 채점 대기 오버레이(스텁 0.8~1.5초) → 다음 턴 (점수 미표시 — 결과에서 일괄)
- * - 상단 "n / 8" 프로그레스
+ * - LISTEN: 대기 카운트다운 3초 → TTS → 선택지 탭 → [제출] (30초 제한)
+ *   30초 도달: 선택 누름=최근 선택지 제출 / 미선택=오답 처리 제출
+ * - NAMING/SELF_TALK: 대기 카운트다운 5초(사진 관찰) → 녹음 시작 → 30초
+ * - SHADOWING: 대기 3초 → TTS → 재생 종료 후 3초 → 녹음 시작 → 30초. [다시 듣기] 없음
+ * - 음성형: [녹음 완료] or 30초 도달 → 녹음 컷 → multipart 강제 제출
+ * - 제출 완료 흐름: 제출 중 → 제출 완료 → [다음으로] (제출/이동 버튼 분리)
+ * - 힌트(NAMING): 30초 카운트다운 진행 중에도 요청 가능 (시간 정지 없음)
+ * - 타이머: Handler postDelayed — 턴 이동/제출 시 cancel, onDestroy 해제 (누수 방지)
  */
 class ProblemActivity : AppCompatActivity() {
 
     companion object {
         const val EXTRA_SESSION_ID = "session_id"
-        const val EXTRA_THEME = "theme"
+        const val EXTRA_TURN_INDEX = "turn_index"
+
+        /** 06 §3: 제출 제한 30초 통일 (모든 타입) */
+        private const val SUBMIT_LIMIT_SECONDS = 30
+        /** 대기 카운트다운: LISTEN·SHADOWING 3초 (TTS 전) / NAMING·SELF_TALK 5초 (사진 관찰) */
+        private const val WAIT_LISTEN_SECONDS = 3
+        private const val WAIT_RECORD_SECONDS = 5
+        /** SHADOWING: TTS 재생 종료 후 3초 후 녹음 시작 */
+        private const val SHADOWING_PRE_RECORD_SECONDS = 3
+
         private val TYPE_LABELS = mapOf(
             "LISTEN" to "알아듣기",
+            "LISTEN_TEXT" to "알아듣기",
+            "LISTEN_PICTURE" to "알아듣기",
             "NAMING" to "이름대기",
             "SHADOWING" to "따라말하기",
             "SELF_TALK" to "스스로말하기",
         )
+
+        fun typeLabel(type: String): String = TYPE_LABELS[type] ?: type
     }
 
     private lateinit var binding: ActivityProblemBinding
@@ -56,6 +74,19 @@ class ProblemActivity : AppCompatActivity() {
 
     private var mediaPlayer: MediaPlayer? = null
     private var recordedFile: File? = null
+
+    /** 현재 턴 제출 진행 상태 — 카운트다운/제출 흐름 제어 */
+    private var submittedThisTurn = false
+    /** LISTEN: 이번 턴에 유저가 선택한 최근 order (미선택=null) */
+    private var selectedChoice: ChoiceDto? = null
+    /** LISTEN 미선택 오답 제출용 — choices 최대 order + 1 (서버 정답 ref와 절대 일치하지 않는 값) */
+    private var noChoiceSentinel = 0
+
+    // ─── 타이머 (D-7 1.2 — Handler 기반, 턴 이동/종료 시 cancel) ───
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var waitRunnable: Runnable? = null
+    private var submitCountdownRunnable: Runnable? = null
+    private var shadowingPreRecordRunnable: Runnable? = null
 
     /** 결과 화면 전달용: 턴별 (type, score) 누적 — 제출 응답의 score 사용 */
     private val turnScores = mutableListOf<Int>()
@@ -71,7 +102,7 @@ class ProblemActivity : AppCompatActivity() {
         if (granted) {
             toggleRecording() // 권한 승인 → 녹음 재시작
         } else {
-            Toast.makeText(this, "마이크 권한이 필요해요", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.mic_denied_fallback), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -97,11 +128,18 @@ class ProblemActivity : AppCompatActivity() {
         }
 
         binding.fabRecord.setOnClickListener { toggleRecording() }
-        binding.btnSubmitRecording.setOnClickListener { submitRecording() }
+        binding.btnSubmitRecording.setOnClickListener { onRecordingSubmitClicked() }
         binding.btnTts.setOnClickListener { playTts() }
         binding.btnHint.setOnClickListener { requestHint() }
+        binding.btnNext.setOnClickListener { onNextClicked() }
 
-        showTurn(0)
+        // D-7 1.2: 제출 카운트다운 표시 + 제출 완료 상태 영역
+        binding.tvSubmitCountdown.visibility = View.GONE
+        binding.containerSubmitted.visibility = View.GONE
+
+        val startIndex = intent.getIntExtra(EXTRA_TURN_INDEX, 0)
+            .coerceIn(0, (turns.size - 1).coerceAtLeast(0))
+        showTurn(startIndex)
     }
 
     // ─── 턴 렌더 ────────────────────────────────────────────────
@@ -114,38 +152,35 @@ class ProblemActivity : AppCompatActivity() {
         currentIndex = index
         val turn = turns[index]
 
-        // 늦은 콜백 가드용: 턴 전환 시 진행 중인 녹음/미디어 정리
+        // 늦은 콜백 가드용: 턴 전환 시 진행 중인 녹음/미디어/타이머 정리 (지시문 4.5)
+        cancelAllTimers()
         if (recordingHelper.recording) {
             recordingHelper.stop()
             recordedFile = null
-            binding.fabRecord.setColorFilter(ContextCompat.getColor(this, R.color.surface))
         }
         stopTts()
 
         // 프로그레스
         binding.tvProgress.text = getString(R.string.progress_turn_fmt, index + 1, turns.size)
         binding.progressBar.progress = ((index + 1) * 100 / turns.size)
-        binding.tvTypeBadge.text = TYPE_LABELS[turn.type] ?: turn.type
+        binding.tvTypeBadge.text = typeLabel(turn.type)
         // SELF_TALK: 지문 고정 문구 (사용자 확정) — 스텁 상황 설명은 이미지가 담당
         binding.tvPassage.text = if (turn.type == "SELF_TALK") "다음 상황을 보고 묘사해보세요"
         else turn.passage ?: ""
 
-        // 기본 상태 초기화
+        // 기본 상태 초기화 (D-7: 선택/제출 상태·카운트다운 포함)
+        submittedThisTurn = false
+        selectedChoice = null
+        noChoiceSentinel = (turn.choices.orEmpty().maxOfOrNull { it.order } ?: 0) + 1
         resetTurnViews()
 
         when (turn.type) {
-            "LISTEN" -> renderListen(turn)
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> renderListen(turn)
             "NAMING" -> renderNaming(turn)
             "SHADOWING" -> renderRecordingTurn(turn, showImage = false)
             "SELF_TALK" -> renderRecordingTurn(turn, showImage = true)
             else -> renderRecordingTurn(turn, showImage = false)
         }
-
-        // TTS 버튼: ttsUrl 있을 때만
-        binding.btnTts.visibility = if (turn.ttsUrl != null) View.VISIBLE else View.GONE
-
-        // 자동재생: 턴 진입 시 TTS 바로 재생 (사용자 피드백 — 재생버튼 안 눌러도 나와야 함)
-        if (turn.ttsUrl != null) playTts()
     }
 
     private fun resetTurnViews() {
@@ -157,10 +192,15 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvHint.visibility = View.GONE
         binding.btnHint.visibility = View.GONE
         binding.tvHint.text = ""
+        binding.tvSubmitCountdown.visibility = View.GONE
+        binding.containerSubmitted.visibility = View.GONE
+        binding.btnTts.visibility = View.GONE
+        binding.tvWait.visibility = View.GONE
         recordedFile = null
         stopTts()
     }
 
+    /** LISTEN — 대기 카운트다운 3초 후 TTS, 선택지 탭 → 제출 상태 진입 */
     private fun renderListen(turn: TurnDto) {
         binding.tvChoicesTitle.visibility = View.VISIBLE
         binding.containerChoices.visibility = View.VISIBLE
@@ -188,19 +228,37 @@ class ProblemActivity : AppCompatActivity() {
                 ivImage.visibility = View.GONE
                 tvText.text = choice.context
             }
-            item.setOnClickListener { submitListen(choice.order) }
+            item.setOnClickListener { onChoiceSelected(choice) }
             binding.containerChoices.addView(item)
         }
+
+        // D-7 1.2: 대기 카운트다운 3초 → 종료 직후 TTS 재생
+        binding.tvWait.visibility = View.VISIBLE
+        startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true)
     }
 
+    /** NAMING — 5초 사진 관찰 → 녹음 시작. 힌트는 카운트다운 중에도 가능 */
     private fun renderNaming(turn: TurnDto) {
         showImage(turn)
         showRecordingUI(showHintButton = true)
+        binding.tvWait.visibility = View.VISIBLE
+        startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
     }
 
     private fun renderRecordingTurn(turn: TurnDto, showImage: Boolean) {
         if (showImage) showImage(turn)
         showRecordingUI(showHintButton = false)
+        if (turn.type == "SHADOWING") {
+            // SHADOWING: 3초 → TTS 재생 → 재생 종료 후 3초 → 녹음 시작. [다시 듣기] 없음 (마이크 오염 방지)
+            binding.btnTts.visibility = View.GONE
+            binding.tvWait.visibility = View.VISIBLE
+            startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true)
+        } else {
+            // SELF_TALK: 5초 사진 관찰 → 녹음 시작
+            binding.tvWait.visibility = View.VISIBLE
+            startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
+            if (turn.ttsUrl != null) binding.btnTts.visibility = View.VISIBLE
+        }
     }
 
     private fun showImage(turn: TurnDto) {
@@ -218,28 +276,214 @@ class ProblemActivity : AppCompatActivity() {
         binding.containerRecord.visibility = View.VISIBLE
         binding.btnHint.visibility = if (showHintButton) View.VISIBLE else View.GONE
         binding.btnSubmitRecording.isEnabled = false
-        binding.tvRecordingHint.text = "버튼을 눌러 녹음을 시작하세요"
+        binding.btnSubmitRecording.text = getString(R.string.btn_recording_start)
+        binding.tvRecordingHint.text = getString(R.string.recording_now)
         binding.tvTimer.text = getString(R.string.recording_timer_default)
+    }
+
+    // ─── 대기 카운트다운 (3초/5초) ────────────────────────────────
+
+    /**
+     * 대기 카운트다운 — 종료 직후 TTS 재생(LISTEN·SHADOWING) 또는 녹음 시작(음성형).
+     * 시니어 UI: 큰 숫자 카운트 + 안내 문구 (06 §3).
+     */
+    private fun startWaitCountdown(seconds: Int, isListen: Boolean) {
+        var remaining = seconds
+        val fmt = if (isListen) R.string.wait_listen_fmt else R.string.wait_record_fmt
+        binding.tvWait.text = getString(fmt, remaining)
+
+        waitRunnable = object : Runnable {
+            override fun run() {
+                remaining--
+                if (remaining > 0) {
+                    binding.tvWait.text = getString(fmt, remaining)
+                    mainHandler.postDelayed(this, 1000)
+                } else {
+                    binding.tvWait.visibility = View.GONE
+                    onWaitFinished()
+                }
+            }
+        }
+        mainHandler.postDelayed(waitRunnable!!, 1000)
+    }
+
+    private fun onWaitFinished() {
+        val turn = turns.getOrNull(currentIndex) ?: return
+        when (turn.type) {
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
+                playTts()
+                startSubmitCountdown()
+            }
+            "SHADOWING" -> {
+                playTtsWithCompletion { startShadowingPreRecord() }
+            }
+            "NAMING", "SELF_TALK" -> {
+                startRecordingAuto()
+            }
+        }
+    }
+
+    /** SHADOWING 전용: TTS 재생 종료 → 3초 후 녹음 시작 (06 §3) */
+    private fun playTtsWithCompletion(onComplete: () -> Unit) {
+        val turn = turns.getOrNull(currentIndex) ?: return
+        val ttsUrl = turn.ttsUrl ?: run {
+            onComplete()
+            return
+        }
+        stopTts()
+        mediaPlayer = MediaPlayer().apply {
+            try {
+                setDataSource(resolveUrl(ttsUrl))
+                setOnPreparedListener { it.start() }
+                setOnCompletionListener {
+                    releasePlayer()
+                    shadowingPreRecordRunnable = Runnable { onComplete() }.also {
+                        mainHandler.postDelayed(it, SHADOWING_PRE_RECORD_SECONDS * 1000L)
+                    }
+                }
+                prepareAsync()
+            } catch (e: Exception) {
+                Toast.makeText(this@ProblemActivity, "음성 재생 실패", Toast.LENGTH_SHORT).show()
+                releasePlayer()
+                onComplete()
+            }
+        }
+    }
+
+    private fun startShadowingPreRecord() {
+        if (submittedThisTurn) return
+        startRecordingAuto()
+    }
+
+    /** 녹음 자동 시작 (대기 카운트다운 종료 후) — 권한 있으면 바로 */
+    private fun startRecordingAuto() {
+        if (!recordingHelper.hasPermission()) {
+            recordPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            return
+        }
+        if (recordingHelper.start()) {
+            // 녹음 중 확실한 표시 — 버튼을 [녹음 완료]로 전환 (시니어 UI: 색상 대신 텍스트)
+            binding.fabRecord.text = getString(R.string.btn_recording_stop)
+            binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.error)
+            )
+            binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
+            binding.btnSubmitRecording.isEnabled = true
+            binding.tvRecordingHint.text = getString(R.string.recording_now)
+            startSubmitCountdown()
+        } else {
+            Toast.makeText(this, "녹음 시작 실패", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // ─── 제출 카운트다운 30초 (모든 타입 공통) ──────────────────────
+
+    /**
+     * 제출 카운트다운 30초 — 시각적 표시.
+     * 도달 시: LISTEN=CASE 2/3 강제 제출 / 음성형=녹음 컷 → multipart 강제 제출.
+     */
+    private fun startSubmitCountdown() {
+        if (submittedThisTurn) return
+        binding.tvSubmitCountdown.visibility = View.VISIBLE
+        var remaining = SUBMIT_LIMIT_SECONDS
+        binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+
+        submitCountdownRunnable = object : Runnable {
+            override fun run() {
+                if (submittedThisTurn) return
+                remaining--
+                if (remaining > 0) {
+                    binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+                    mainHandler.postDelayed(this, 1000)
+                } else {
+                    onSubmitTimeUp()
+                }
+            }
+        }
+        mainHandler.postDelayed(submitCountdownRunnable!!, 1000)
+    }
+
+    /** 30초 도달 — 타입별 강제 제출 (06 §3) */
+    private fun onSubmitTimeUp() {
+        if (submittedThisTurn) return
+        val turn = turns.getOrNull(currentIndex) ?: return
+        when (turn.type) {
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
+                // CASE 2: 선택 누름=마지막 선택지로 제출 / CASE 3: 미선택=오답(0) 제출
+                val choice = selectedChoice
+                if (choice != null) {
+                    submitListen(choice.order)
+                } else {
+                    submitListen(noChoiceSentinel) // 오답 처리 — 서버가 0점 자체 채점
+                }
+            }
+            "NAMING", "SHADOWING", "SELF_TALK" -> forceSubmitRecording()
+        }
+    }
+
+    /** 음성형 30초 도달 — 녹음 컷 → multipart 강제 제출 (RecordingHelper.stop+파일 확보) */
+    private fun forceSubmitRecording() {
+        if (recordingHelper.recording) {
+            recordedFile = recordingHelper.stop()
+        }
+        val file = recordedFile
+        if (file == null || !file.exists()) {
+            // 녹음 파일 없음 — 오답 방어: 빈 파일 제출 불가, 다음 턴으로는 진행 불가(계약 유지)
+            // 서버 계약상 multipart 필수 — 파일 없으면 제출 스킵 후 안내 (재시도 불가 케이스 — 보고서 기록)
+            Toast.makeText(this, "녹음 파일이 준비되지 않았어요", Toast.LENGTH_SHORT).show()
+            return
+        }
+        submitRecording()
     }
 
     // ─── 상호작용 ────────────────────────────────────────────────
 
+    /** LISTEN 선택지 탭 — 선택만 하고 제출은 [제출] (06 §3 버튼 분리) */
+    private fun onChoiceSelected(choice: ChoiceDto) {
+        if (submittedThisTurn) return
+        selectedChoice = choice
+        // 선택 완료 → [제출] 버튼 (06 §3: 제출(제한)과 다음으로(자유) 분리)
+        binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
+        binding.btnSubmitRecording.isEnabled = true
+        binding.btnSubmitRecording.visibility = View.VISIBLE
+    }
+
+    /** 음성형: [녹음 시작]→[녹음 완료] 토글 / LISTEN: [제출] */
+    private fun onRecordingSubmitClicked() {
+        val turn = turns.getOrNull(currentIndex) ?: return
+        if (turn.type == "LISTEN" || turn.type == "LISTEN_TEXT" || turn.type == "LISTEN_PICTURE") {
+            val choice = selectedChoice
+            if (choice != null) submitListen(choice.order)
+            return
+        }
+        toggleRecording()
+    }
+
     private fun toggleRecording() {
         if (recordingHelper.recording) {
             recordedFile = recordingHelper.stop()
-            binding.fabRecord.setColorFilter(ContextCompat.getColor(this, R.color.surface))
-            binding.tvRecordingHint.text = "녹음 완료 — 제출하세요"
-            binding.btnSubmitRecording.isEnabled = recordedFile != null
+            // 녹음 종료 — 버튼 원복
+            binding.fabRecord.text = getString(R.string.btn_recording_start)
+            binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                ContextCompat.getColor(this, R.color.primary)
+            )
+            binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
+            submitRecording()
         } else {
             if (!recordingHelper.hasPermission()) {
-                // 권한 요청 (런처는 프로퍼티로 등록됨 — 크래시 없음)
                 recordPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                 return
             }
             if (recordingHelper.start()) {
-                binding.fabRecord.setColorFilter(ContextCompat.getColor(this, R.color.error))
-                binding.tvRecordingHint.text = "녹음 중… 다시 눌러 중지"
-                binding.btnSubmitRecording.isEnabled = false
+                // 녹음 중 확실한 표시 — 버튼을 [녹음 완료]로 전환 (시니어 UI)
+                binding.fabRecord.text = getString(R.string.btn_recording_stop)
+                binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
+                    ContextCompat.getColor(this, R.color.error)
+                )
+                binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
+                binding.btnSubmitRecording.isEnabled = true
+                binding.tvRecordingHint.text = getString(R.string.recording_now)
+                startSubmitCountdown()
             } else {
                 Toast.makeText(this, "녹음 시작 실패", Toast.LENGTH_SHORT).show()
             }
@@ -247,16 +491,21 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     private fun submitListen(selected: Int) {
+        if (submittedThisTurn) return
+        submittedThisTurn = true
         val turn = turns[currentIndex]
+        cancelSubmitCountdown()
+        showSubmitProgress()
+
         lifecycleScope.launch {
             try {
                 val data = repository.submitListen(sessionId, turn.turnId, selected)
-                // 결과 화면 집계용 누적
                 turnScores.add(data.score)
                 turnTypes.add(turn.type)
-                // 스펙 확정: LISTEN 즉시 다음 턴 (스코어 미표시)
-                nextTurn()
+                showSubmittedState()
             } catch (e: Exception) {
+                submittedThisTurn = false
+                hideSubmitProgress()
                 Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
             }
         }
@@ -269,7 +518,8 @@ class ProblemActivity : AppCompatActivity() {
             return
         }
         val turn = turns[currentIndex]
-        binding.scoringOverlay.visibility = View.VISIBLE // 채점 대기 (스텁 0.8~1.5초)
+        cancelSubmitCountdown()
+        showSubmitProgress()
 
         lifecycleScope.launch {
             try {
@@ -279,19 +529,46 @@ class ProblemActivity : AppCompatActivity() {
                     "SELF_TALK" -> repository.submitSelfTalk(sessionId, turn.turnId, file)
                     else -> throw IllegalStateException("녹음 제출이 없는 유형: ${turn.type}")
                 }
-                // 결과 화면 집계용 누적 (score는 0~100 Double — 반올림)
                 turnScores.add(data.score.toInt())
                 turnTypes.add(turn.type)
-                // 스펙 확정: 응답 수신하면 다음 턴 (점수는 결과 화면에서 일괄)
-                binding.scoringOverlay.visibility = View.GONE
-                nextTurn()
+                showSubmittedState()
             } catch (e: Exception) {
-                binding.scoringOverlay.visibility = View.GONE
+                hideSubmitProgress()
                 Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
-                // 재제출 가능 상태 유지
-                binding.btnSubmitRecording.isEnabled = true
+                // 재제출 가능 상태 유지 (녹음 파일은 이미 확보됨 — 다시 [녹음 완료] 가능)
+                submittedThisTurn = false
             }
         }
+    }
+
+    /** 제출 중 상태: "답안을 제출 중이에요" (06 §3 제출 완료 흐름 1단계) */
+    private fun showSubmitProgress() {
+        binding.scoringOverlay.visibility = View.VISIBLE
+    }
+
+    /** 제출 완료 상태: "답안이 제출되었어요" + [다음으로] 등장 (2단계 — 버튼 분리) */
+    private fun showSubmittedState() {
+        binding.scoringOverlay.visibility = View.GONE
+        binding.tvSubmitCountdown.visibility = View.GONE
+        binding.containerSubmitted.visibility = View.VISIBLE
+        binding.containerRecord.visibility = View.GONE
+        binding.containerChoices.visibility = View.GONE
+    }
+
+    private fun hideSubmitProgress() {
+        binding.scoringOverlay.visibility = View.GONE
+    }
+
+    /** [다음으로] — 이동 자유 (제한 없음) → 다음 턴 문제 가이드 화면 */
+    private fun onNextClicked() {
+        goToNextTurn()
+    }
+
+    private fun goToNextTurn() {
+        val intent = Intent(this, ProblemGuideActivity::class.java)
+            .putExtra(ProblemGuideActivity.EXTRA_TURN_INDEX, currentIndex + 1)
+        startActivity(intent)
+        finish()
     }
 
     private fun requestHint() {
@@ -362,11 +639,30 @@ class ProblemActivity : AppCompatActivity() {
         return base + relative
     }
 
-    // ─── 전환 ────────────────────────────────────────────────
+    // ─── 타이머 해제 (지시문 4.5 — onDestroy + 턴 이동 시 cancel) ──────
 
-    private fun nextTurn() {
-        showTurn(currentIndex + 1)
+    private fun cancelWaitTimer() {
+        waitRunnable?.let { mainHandler.removeCallbacks(it) }
+        waitRunnable = null
     }
+
+    private fun cancelSubmitCountdown() {
+        submitCountdownRunnable?.let { mainHandler.removeCallbacks(it) }
+        submitCountdownRunnable = null
+    }
+
+    private fun cancelShadowingPreRecord() {
+        shadowingPreRecordRunnable?.let { mainHandler.removeCallbacks(it) }
+        shadowingPreRecordRunnable = null
+    }
+
+    private fun cancelAllTimers() {
+        cancelWaitTimer()
+        cancelSubmitCountdown()
+        cancelShadowingPreRecord()
+    }
+
+    // ─── 전환 ────────────────────────────────────────────────
 
     private fun goToStorytelling() {
         val intent = Intent(this, StorytellingActivity::class.java)
@@ -379,6 +675,7 @@ class ProblemActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        cancelAllTimers()
         recordingHelper.release()
         releasePlayer()
     }

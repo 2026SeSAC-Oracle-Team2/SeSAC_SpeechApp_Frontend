@@ -16,6 +16,9 @@ import com.sesac.speechapp.data.remote.dto.session.HintData
 import com.sesac.speechapp.data.remote.dto.session.ListenSubmitData
 import com.sesac.speechapp.data.remote.dto.session.ListenSubmitRequest
 import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
+import com.sesac.speechapp.data.remote.dto.session.SessionReportData
+import com.sesac.speechapp.data.remote.dto.session.SessionScoresData
+import com.sesac.speechapp.data.remote.dto.session.SessionHistoryData
 import com.sesac.speechapp.data.remote.dto.session.TalkData
 import com.sesac.speechapp.data.remote.dto.session.VoiceSubmitData
 import okhttp3.MultipartBody
@@ -95,12 +98,36 @@ interface ApiService {
     /**
      * POST /api/v1/users/me/survey — 가입 설문 접수 (D-6 신설, 05a v1.6 §2 + 06 v1.7 §5.2)
      * 산출 주체 = 서버 — 클라는 answers 원문만 전송.
-     * (대표점수 조회 /me/scores는 대시보드 단위 D-7 영역 — 이번에 만들지 않는다)
      */
     @POST("api/v1/users/me/survey")
     suspend fun submitSurvey(
         @Body request: SurveyRequest
     ): Response<ApiResponse<SurveyResponse>>
+
+    /**
+     * GET /api/v1/users/me/scores — 대표점수 (D-7 3.1, 05a v1.6 §8.1 — JWT 필수)
+     * null = 캐시 미산출 — 클라 폴백: 방사형 0 표시 + 안내문
+     */
+    @GET("api/v1/users/me/scores")
+    suspend fun getMyScores(): Response<ApiResponse<SessionScoresData>>
+
+    /**
+     * GET /api/v1/users/me/sessions/history — 지난 학습 카드 리스트 (D-7 3.1, 05a v1.6 §8.2 — JWT 필수)
+     * 조회 조건: STATUS != COMPLETED_NO_TALK AND AQ IS NOT NULL — createdAt ISO 수신 (클라 포맷 책임)
+     */
+    @GET("api/v1/users/me/sessions/history")
+    suspend fun getSessionHistory(): Response<ApiResponse<SessionHistoryData>>
+
+    /**
+     * GET /api/v1/sessions/{sessionId}/report — 세부 보고서 (D-7 3.1, 05a v1.6 §8.3)
+     * permitAll 경로 — userId 쿼리파라미터 소유 검증 (타 유저 E0400, 중단 세션 E0404).
+     * 응답 수신 시 백엔드가 REPORT_VIEWED_AT 기록 (null일 때만 — 최초 1회)
+     */
+    @GET("api/v1/sessions/{sessionId}/report")
+    suspend fun getSessionReport(
+        @Path("sessionId") sessionId: Long,
+        @Query("userId") userId: Long
+    ): Response<ApiResponse<SessionReportData>>
 
     /**
      * POST /api/v1/voice/upload
@@ -119,8 +146,26 @@ interface ApiService {
     // ═══════════════════════════════════════════════════════════
 
     /**
-     * 4.1 세션 생성 — "오늘의 학습" (실경로 /sessions/v2, 데모 2026-09-03)
+     * 4.1 세션 생성 — 오늘의 학습 (D-7 1.4: /today 신설 — 테마 서버 랜덤, 05a v1.6 §3.1)
      * 스텁 응답 2~3초 — 로딩 화면 필수
+     */
+    @POST("api/v1/sessions/today")
+    suspend fun createSessionToday(
+        @Query("userId") userId: Long
+    ): Response<ApiResponse<SessionCreateData>>
+
+    /**
+     * 4.1 세션 생성 — 테마별 학습 (D-7 1.4: /theme 신설 — thema 고정, 05a v1.6 §3.1)
+     * thema: TEST|HOSPITAL|CAFE (대소문자 무관 — 소문자 허용). 이외 E0400
+     */
+    @POST("api/v1/sessions/theme")
+    suspend fun createSessionTheme(
+        @Query("userId") userId: Long,
+        @Query("thema") thema: String
+    ): Response<ApiResponse<SessionCreateData>>
+
+    /**
+     * 4.1 세션 생성 — 구 /v2 (하위호환 유지·미사용 — D-5 이전 데모 계약, 05a v1.6 §3.1)
      */
     @POST("api/v1/sessions/v2")
     suspend fun createSession(
@@ -187,7 +232,7 @@ interface ApiService {
      * 4.5 이야기 턴 — 음성 있는 제출 (2턴째부터)
      * ⚠️ 첫 호출(file 없음)은 talkFirst 사용 — @Part nullable은 "빈 multipart body"로
      * 전송돼 서버가 'Multipart body must have at least one part'로 거부한다 (실측).
-     * 4번째 제출(3턴 하드캡 초과)은 E0401 에러 응답
+     * 9번째 제출(talk-turn-limit=8 초과)은 E0401 에러 응답
      */
     @Multipart
     @POST("api/v1/sessions/{sessionId}/turns/talk")
@@ -208,7 +253,8 @@ interface ApiService {
     ): Response<ApiResponse<TalkData>>
 
     /**
-     * 4.6 세션 종료 + 리포트 — 동기 응답 (스텁 2~3초, 로딩 대기)
+     * 4.6 세션 종료 + 간이 보고서 — 동기 응답 (스텁 즉시)
+     * v1.6 2단계 계약: talk/total은 항상 null — 세부 보고서는 GET /sessions/{id}/report (§8.3)
      */
     @POST("api/v1/sessions/{sessionId}/finish")
     suspend fun finishSession(

@@ -80,6 +80,11 @@
             android:name=".ui.learning.LearningSessionLoadingActivity"
             android:exported="false" />
 
+        <!-- D-7: 문제 가이드 화면 (턴마다 — 안내 텍스트만, 06 §3) -->
+        <activity
+            android:name=".ui.learning.ProblemGuideActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.learning.ProblemActivity"
             android:exported="false" />

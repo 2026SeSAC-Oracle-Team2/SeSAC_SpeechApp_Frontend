@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 로딩 화면: 마스코트 + 스피너 + 재시도 (세션 생성 스텁 2~3초 대기) -->
+<!-- P3-26 로딩 화면: 마스코트 + 스피너 + 재시도 + D-7 [시작] 게이트 (로딩 완료 후 권한 선제 확인) -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -70,5 +70,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvError" />
+
+    <!-- D-7 1.3: 로딩 완료 후 [시작] — 마이크 권한 선제 확인 게이트 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="56dp"
+        android:layout_marginTop="16dp"
+        android:minWidth="200dp"
+        android:backgroundTint="@color/primary"
+        android:text="@string/btn_start"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textColor="@color/surface"
+        android:visibility="gone"
+        app:cornerRadius="14dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnRetry" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

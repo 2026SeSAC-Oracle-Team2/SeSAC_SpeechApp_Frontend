@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-7 학습 화면 시간 통제 + AI 대화 UX + 대시보드/세부 보고서 (신규 파일 — strings.xml 커밋 금지 상태 회피용)
+  문구 원천: 06_Session_Flow_Spec.md v1.7 §3 (기획 확정 문구 그대로)
+-->
+<resources>
+    <!-- ══════════ 지표 라벨 (RadarChartView 공용 — 하드코딩 제거) ══════════ -->
+    <string name="metric_listen">알아듣기</string>
+    <string name="metric_naming">이름대기</string>
+    <string name="metric_shadowing">따라말하기</string>
+    <string name="metric_selftalk">스스로말하기</string>
+
+    <!-- ══════════ 문제 가이드 화면 (06 §3 — 턴별 안내, D-7 1.1) ══════════ -->
+    <string name="guide_title">문제 안내</string>
+    <string name="guide_btn_ready">준비됐어요!</string>
+
+    <!-- LISTEN_TEXT / LISTEN_PICTURE 공통 안내 -->
+    <string name="guide_listen_body">이번 문제는 \'알아듣기\' 입니다.\n질문을 듣고 올바른 선택지를 고른 후 [제출] 버튼을 눌러주세요.</string>
+    <string name="guide_listen_time">질문을 듣고 30초 안에 선택지를 골라야해요.</string>
+    <string name="guide_listen_replay">문제를 다시 들으려면 [다시듣기] 버튼을 눌러주세요.</string>
+    <!-- LISTEN_PICTURE 병기 -->
+    <string name="guide_listen_picture_extra">이번 문제는 AI 음성을 들어야해요.\n사용 중인 스마트폰의 음량을 확인해주세요.</string>
+
+    <!-- NAMING 안내 -->
+    <string name="guide_naming_body">사진 안의 물건은 무엇인가요?\n마이크 버튼을 눌러 답을 말해주세요.</string>
+    <string name="guide_naming_hint">모르면 [힌트 요청]을 눌러보세요. 힌트는 최대 2회 사용할 수 있어요.</string>
+    <string name="guide_naming_time">30초 안에 답을 말해야해요. 30초가 지나면 녹음이 자동으로 끝나요.</string>
+
+    <!-- SHADOWING 안내 -->
+    <string name="guide_shadowing_body">AI가 말하는 문장을 끝까지 들은 후 3초 후에 녹음이 시작돼요.\n시작되면 AI가 말한 문장을 그대로 따라 말해주세요.</string>
+    <string name="guide_shadowing_replay">문장을 다시 들으려면 [다시듣기] 버튼을 눌러주세요.</string>
+    <string name="guide_shadowing_time">30초 안에 따라 말해야해요. 30초가 지나면 녹음이 자동으로 끝나요.</string>
+
+    <!-- SELF_TALK 안내 -->
+    <string name="guide_selftalk_body">사진을 보고 30초 안에 상황을 자유롭게 표현해주세요.</string>
+    <string name="guide_selftalk_time">30초를 다 채우지 않아도 괜찮아요. 다 말하면 [녹음 완료]를 눌러주세요.</string>
+
+    <!-- ══════════ 문제 화면 시간 통제 (06 §3 — D-7 1.2) ══════════ -->
+    <string name="wait_listen_fmt">3초 후 질문 음성이 나와요.\n집중하세요! %1$d</string>
+    <string name="wait_record_fmt">5초 후 녹음이 시작돼요.\n사진을 잘 보세요! %1$d</string>
+    <string name="submit_countdown_fmt">남은 시간 %1$d초</string>
+    <string name="submitting_answer">답안을 제출 중이에요</string>
+    <string name="submitted_answer">답안이 제출되었어요</string>
+    <string name="btn_listen_submit">제출</string>
+    <string name="btn_next">다음으로</string>
+    <string name="btn_recording_start">녹음 시작</string>
+    <string name="btn_recording_stop">녹음 완료</string>
+    <string name="recording_now">녹음 중이에요</string>
+    <string name="mic_denied_fallback">마이크 권한이 없어 음성 문제를 풀 수 없어요.\n설정에서 권한을 허용해 주세요.</string>
+
+    <!-- ══════════ 로딩 화면 [시작] 버튼 (D-7 1.3) ══════════ -->
+    <string name="loading_done">로딩 완료!</string>
+    <string name="btn_start">시작</string>
+
+    <!-- ══════════ AI 대화 UX (06 §3 STORYTELLING 규약 — D-7 2.x) ══════════ -->
+    <string name="talk_stop_btn">학습 중단하기</string>
+    <string name="talk_finish_btn">학습 마치기</string>
+    <string name="talk_stop_confirm_fmt">🦆😭\n덕분이와 %1$d번만 더 대화해주세요.\n잠깐만! 지금 나가면 학습 결과를 확인할 수 없어요!\n정말로 나가시겠어요?</string>
+    <string name="talk_stop_yes">네, 나갈게요</string>
+    <string name="talk_stop_no">아니요, 계속할게요</string>
+    <string name="talk_finish_confirm">수고하셨어요!\n이번 학습은 여기까지 할까요?</string>
+    <string name="talk_finish_yes">네, 마칠게요</string>
+    <string name="talk_thinking">덕분이가 답변을 생각중이에요</string>
+    <string name="talk_cap_done">이번 학습 수고하셨어요!</string>
+    <string name="btn_view_result">학습 결과 보기</string>
+    <string name="btn_voice_answer">음성으로 답변하기</string>
+    <string name="talk_record_limit_fmt">녹음 %1$d초 (최대 30초)</string>
+
+    <!-- ══════════ 대시보드 / 세부 보고서 (05a §8 — D-7 3.x) ══════════ -->
+    <string name="dash_fallback_empty">학습을 시작해보세요</string>
+    <string name="dash_history_empty">아직 학습 기록이 없어요</string>
+    <string name="dash_aq_fmt">AQ %1$d점</string>
+    <string name="detail_title">세부 보고서</string>
+    <string name="detail_aq_label">AQ 지수</string>
+    <string name="detail_metric_title">지표별 결과</string>
+    <string name="detail_talk_title">AI 대화 피드백</string>
+    <string name="detail_talk_history_title">대화 내역</string>
+    <string name="detail_turns_title">문제 기록</string>
+    <string name="detail_loading_fail">상세 보고서를 불러오지 못했어요</string>
+    <string name="detail_preparing">상세 보고서를 만들고 있어요.\n잠시 후 다시 시도해 주세요.</string>
+    <string name="detail_listen_correct">정답</string>
+    <string name="detail_listen_wrong">오답</string>
+    <string name="detail_my_answer">내 답변</string>
+    <string name="report_detail_btn">상세 보고서 보기</string>
+    <string name="report_detail_placeholder">상세 보고서가 준비되면 알림으로 알려드릴게요</string>
+</resources>

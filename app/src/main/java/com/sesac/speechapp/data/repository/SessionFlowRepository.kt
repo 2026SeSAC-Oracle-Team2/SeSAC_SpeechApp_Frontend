@@ -8,6 +8,9 @@ import com.sesac.speechapp.data.remote.dto.session.FinishData
 import com.sesac.speechapp.data.remote.dto.session.HintData
 import com.sesac.speechapp.data.remote.dto.session.ListenSubmitRequest
 import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
+import com.sesac.speechapp.data.remote.dto.session.SessionHistoryData
+import com.sesac.speechapp.data.remote.dto.session.SessionReportData
+import com.sesac.speechapp.data.remote.dto.session.SessionScoresData
 import com.sesac.speechapp.data.remote.dto.session.TalkData
 import com.sesac.speechapp.data.remote.dto.session.VoiceSubmitData
 import kotlinx.coroutines.Dispatchers
@@ -19,12 +22,15 @@ import okhttp3.RequestBody.Companion.asRequestBody
 import java.io.File
 
 /**
- * P3-26 세션 플로우 Repository — "오늘의 학습" 전체 API.
+ * P3-26 세션 플로우 Repository — 세션 플로우 전체 API + D-7 대시보드/세부 보고서 3종.
  *
- * 실계약 (2026-09-03, ~/app SessionFlowController):
+ * 실계약 (2026-09-03, ~/app SessionFlowController; D-7 2026-09-06 갱신):
  *  - userId는 모든 엔드포인트에 쿼리파라미터로 전달 (TokenManager에서 조회)
+ *  - 세션 생성 2종 분기: POST /sessions/today(테마 랜덤)·/theme?thema=(고정) — /v2는 하위호환 유지·미사용
  *  - LISTEN selected: Int 1-based
  *  - 음성 제출: multipart "file" part (m4a, audio/mp4)
+ *  - 대시보드: /users/me/scores·/users/me/sessions/history — JWT 필수 (TokenAuthenticator 경로)
+ *  - 세부 보고서: GET /sessions/{id}/report?userId= — permitAll+userId 쿼리 (JWT 불필요, 붙여도 무해)
  */
 class SessionFlowRepository(context: Context) {
 
@@ -46,7 +52,17 @@ class SessionFlowRepository(context: Context) {
         return body.data
     }
 
-    /** 4.1 세션 생성 (스텁 2~3초) */
+    /** 4.1 세션 생성 — 오늘의 학습 (D-7 1.4: /today — 테마 서버 랜덤) */
+    suspend fun createSessionToday(): SessionCreateData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.createSessionToday(userId()))
+    }
+
+    /** 4.1 세션 생성 — 테마별 학습 (D-7 1.4: /theme?thema= — 대소문자 무관) */
+    suspend fun createSessionTheme(thema: String): SessionCreateData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.createSessionTheme(userId(), thema))
+    }
+
+    /** 4.1 세션 생성 — 구 /v2 (하위호환 유지·미사용 — 기존 메서드 시그니처 파손 금지) */
     suspend fun createSession(): SessionCreateData = withContext(Dispatchers.IO) {
         unwrap(RetrofitClient.apiService.createSession(userId()))
     }
@@ -109,13 +125,40 @@ class SessionFlowRepository(context: Context) {
         unwrap(response)
     }
 
-    /** 4.6 세션 종료 + 리포트 (스텁 2~3초 동기 대기) */
+    /** 4.6 세션 종료 + 간이 보고서 (v1.6: talk/total 항상 null — 2단계 계약) */
     suspend fun finishSession(sessionId: Long): FinishData = withContext(Dispatchers.IO) {
         unwrap(RetrofitClient.apiService.finishSession(sessionId, userId()))
+    }
+
+    // ─── D-7 3.1 대시보드 / 세부 보고서 3종 ───────────────────────
+
+    /**
+     * 대표점수 (05a §8.1) — JWT 필수 (403 시 TokenAuthenticator 무음 refresh 경로)
+     * null = 캐시 미산출 — 클라 폴백 처리
+     */
+    suspend fun getMyScores(): SessionScoresData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.getMyScores())
+    }
+
+    /**
+     * 지난 학습 카드 리스트 (05a §8.2) — JWT 필수.
+     * 서버 조건: STATUS != COMPLETED_NO_TALK AND AQ IS NOT NULL
+     */
+    suspend fun getSessionHistory(): SessionHistoryData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.getSessionHistory())
+    }
+
+    /**
+     * 세부 보고서 (05a §8.3) — permitAll+userId 쿼리 (JWT 헤더 불필요, 붙여도 무해).
+     * 중단 세션 E0404 / 타 유저 E0400 — 응답 수신 시 서버가 REPORT_VIEWED_AT 기록.
+     * 상세 보고서 생성 지연 시(스텁 10초) E0404 수신 가능 — 클라는 "준비 중" 안내 후 재시도.
+     */
+    suspend fun getSessionReport(sessionId: Long): SessionReportData = withContext(Dispatchers.IO) {
+        unwrap(RetrofitClient.apiService.getSessionReport(sessionId, userId()))
     }
 
     private enum class VoiceKind { NAMING, SHADOWING, SELF_TALK }
 }
 
-/** 백엔드 error.code를 보존하는 예외 — 하드캡(E0401) 판별 등에 사용 */
+/** 백엔드 error.code를 보존하는 예외 — 하드캡(E0401)·중단 세션(E0404) 판별 등에 사용 */
 class SessionFlowException(val code: String, message: String) : Exception(message)
