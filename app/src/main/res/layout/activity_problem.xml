@@ -95,16 +95,17 @@
         app:layout_constraintTop_toBottomOf="@id/tvPassage" />
 
     <!-- D-7: 제출 카운트다운 30초 (시각적 표시) -->
+    <!-- D-8③ 시안 SubmitCountdown: 보더 카드형 — 남은시간 강조 -->
     <TextView
         android:id="@+id/tvSubmitCountdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:background="@drawable/bg_badge"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_countdown_pill"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="6dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H3"
-        android:textColor="@color/error"
+        android:paddingVertical="10dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:visibility="gone"
         tools:text="남은 시간 30초"
@@ -127,11 +128,12 @@
     <!-- 이미지 영역 (NAMING/SELF_TALK) -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardImage"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="200dp"
+        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:cardCornerRadius="20dp"
+        app:cardCornerRadius="30dp"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -208,6 +210,7 @@
             android:textColor="@color/text_primary" />
 
         <!-- D-7 시니어 UI: 마이크 아이콘 대신 굵은 텍스트 버튼 (녹음 시작/녹음 완료) -->
+        <!-- D-8③ 시안 RecordPanel: [녹음 시작/완료] — gradient-brand 버튼 (녹음 중 코드 tint로 error 전환) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/fabRecord"
             android:layout_width="wrap_content"
@@ -217,7 +220,7 @@
             android:backgroundTint="@color/primary"
             android:text="@string/btn_recording_start"
             android:textAppearance="@style/TextAppearance.SeSAC.H3"
-            android:textColor="@color/surface"
+            android:textColor="@color/brand_on_primary"
             android:textStyle="bold"
             app:cornerRadius="16dp" />
 
@@ -282,13 +285,15 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNext"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/primary"
+            android:background="@drawable/bg_grad_brand"
+            android:backgroundTint="@null"
             android:text="@string/btn_next"
             android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/surface"
-            app:cornerRadius="14dp" />
+            android:textColor="@color/brand_on_primary"
+            android:textStyle="bold"
+            app:cornerRadius="16dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

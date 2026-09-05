@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm">
 
     <TextView
         android:id="@+id/tvTitle"
@@ -19,14 +19,19 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- D-7 2.1/2.2: 우상단 [학습 중단하기] — 4턴째 답변 후 [학습 마치기]로 전환 (코드에서 라벨 갱신) -->
+    <!-- D-8③ 시안 chat: X 버튼 카드형 — 라벨 유지(시니어 텍스트 버튼 규약), 카드 배경만 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStopOrFinish"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="44dp"
         android:layout_marginEnd="8dp"
+        android:backgroundTint="@color/surface"
         android:text="@string/talk_stop_btn"
         android:textColor="@color/error"
+        app:cornerRadius="16dp"
+        app:strokeColor="@color/border"
+        app:strokeWidth="1dp"
         app:layout_constraintBaseline_toBaselineOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -43,14 +48,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- D-7 2.4: LLM 로딩 버블 — "덕분이가 답변을 생각중이에요" -->
+    <!-- D-7 2.4 + D-8③ 시안 Loading: 덕분이 마스코트 + 생각중 말풍선 -->
     <LinearLayout
         android:id="@+id/thinkingBubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_feedback_card"
+        android:background="@drawable/bg_duck_banner"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
@@ -58,6 +63,12 @@
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/containerInput"
         app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="덕분이"
+            android:src="@drawable/img_duck" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:layout_width="20dp"

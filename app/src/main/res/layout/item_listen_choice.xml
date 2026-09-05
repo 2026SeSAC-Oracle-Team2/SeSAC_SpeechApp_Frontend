@@ -6,8 +6,8 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     android:background="@drawable/bg_question_card"
-    android:minHeight="56dp"
-    android:padding="6dp">
+    android:minHeight="64dp"
+    android:padding="8dp">
 
     <!-- 텍스트형 (mediaType=text) -->
     <TextView
@@ -18,9 +18,10 @@
         android:layout_marginEnd="4dp"
         android:gravity="center_vertical"
         android:minHeight="56dp"
-        android:paddingHorizontal="14dp"
-        android:paddingVertical="8dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:textSize="17sp"
+        android:textStyle="bold"
         android:textColor="@color/text_primary" />
 
     <!-- 이미지형 (mediaType=image) — 기본 숨김 -->

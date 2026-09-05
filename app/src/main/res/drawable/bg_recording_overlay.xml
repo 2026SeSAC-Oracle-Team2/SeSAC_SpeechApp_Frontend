@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Recording overlay background (blur effect) -->
+<!-- D-8③ 시안 녹음 오버레이: foreground(다크브라운) 50% -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#EBF7F9FC" />
-<!-- #F7F9FC with 92% opacity -->
+    <solid android:color="#80412B17" />
 </shape>

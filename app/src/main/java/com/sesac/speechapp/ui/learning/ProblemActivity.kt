@@ -228,7 +228,18 @@ class ProblemActivity : AppCompatActivity() {
                 ivImage.visibility = View.GONE
                 tvText.text = choice.context
             }
-            item.setOnClickListener { onChoiceSelected(choice) }
+            item.setOnClickListener {
+                // D-8③ 시안 선택 상태: secondary 배경 강조 (선택지 카드들 원복 후 적용)
+                for (i in 0 until binding.containerChoices.childCount) {
+                    binding.containerChoices.getChildAt(i).setBackgroundColor(
+                        androidx.core.content.ContextCompat.getColor(this@ProblemActivity, android.R.color.transparent)
+                    )
+                }
+                item.setBackgroundColor(
+                    androidx.core.content.ContextCompat.getColor(this@ProblemActivity, R.color.brand_secondary)
+                )
+                onChoiceSelected(choice)
+            }
             binding.containerChoices.addView(item)
         }
 

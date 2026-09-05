@@ -53,16 +53,24 @@
             app:trackCornerRadius="4dp"
             app:trackThickness="6dp" />
 
-        <!-- 마스코트 + 안내 -->
+        <!-- D-8③ 시안 GuideView: duck 마스코트 + 말풍선 안내 (DuckSays 패턴) -->
+        <ImageView
+            android:id="@+id/imgDuckGuide"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginTop="24dp"
+            android:contentDescription="덕분이"
+            android:src="@drawable/img_duck"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
+        <!-- 기존 텍스트 마스코트 — ID 보존, gone -->
         <TextView
             android:id="@+id/tvMascot"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
             android:text="@string/splash_title"
-            android:textColor="@color/primary"
-            android:textSize="56sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/progressBar" />
 
@@ -93,18 +101,20 @@
             tools:text="질문을 듣고 30초 안에 선택지를 골라야해요."
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGuideBody" />
+            app:layout_constraintTop_toBottomOf="@id/imgDuckGuide" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReady"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="52dp"
             android:layout_marginTop="32dp"
-            android:backgroundTint="@color/primary"
+            android:background="@drawable/bg_grad_brand"
+            android:backgroundTint="@null"
             android:text="@string/guide_btn_ready"
             android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/surface"
-            app:cornerRadius="14dp"
+            android:textColor="@color/brand_on_primary"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvGuideExtra" />

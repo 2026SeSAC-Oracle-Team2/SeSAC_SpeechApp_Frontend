@@ -7,19 +7,28 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <TextView
-        android:id="@+id/tvMascot"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/splash_title"
-        android:textColor="@color/primary"
-        android:textSize="48sp"
-        android:textStyle="bold"
+    <!-- D-8③ 시안 Loading 컴포넌트: duck 마스코트 96dp (애니메이션 없음 — 시니어 가독성) -->
+    <ImageView
+        android:id="@+id/imgMascotDuck"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:contentDescription="덕분이"
+        android:src="@drawable/img_duck"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.40" />
+
+    <!-- 기존 텍스트 마스코트 — D-8③에서 이미지로 대체 (ID 보존, gone) -->
+    <TextView
+        android:id="@+id/tvMascot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/splash_title"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvMessage"

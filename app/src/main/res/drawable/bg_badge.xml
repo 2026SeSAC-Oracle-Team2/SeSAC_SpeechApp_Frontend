@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Level / Streak badge background -->
+<!-- D-8③ 시안 pill 배지 — secondary 배경, 완전 둥근 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="@color/primary_light" />
-    <corners android:radius="20dp" />
+    <solid android:color="@color/brand_secondary" />
+    <corners android:radius="@dimen/radius_pill" />
     <padding
-        android:left="14dp"
-        android:right="14dp"
+        android:left="12dp"
+        android:right="12dp"
         android:top="6dp"
         android:bottom="6dp" />
 </shape>
