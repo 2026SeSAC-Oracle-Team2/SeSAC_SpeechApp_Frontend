@@ -91,12 +91,16 @@ class PracticeFragment : Fragment() {
  */
 object ThemeImagePrefs {
     private const val PREFS = "theme_image_prefs"
+    // D-8④ 기본값: 운영 DB 각 테마 최초 등록 이미지 (LIVE 실측 2026-09-06 — CAFE 68~139, HOSPITAL 110~149)
+    // 기획자 소스 확정 시 prefs 덮어쓰기로 대체 — 코드 수정 불필요
+    private const val DEFAULT_CAFE_IMAGE_ID = 68L
+    private const val DEFAULT_HOSPITAL_IMAGE_ID = 110L
 
     fun cafeImageId(ctx: android.content.Context): Long? =
         ctx.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
-            .getLong("cafe_image_id", -1L).takeIf { it > 0 }
+            .getLong("cafe_image_id", DEFAULT_CAFE_IMAGE_ID).takeIf { it > 0 }
 
     fun hospitalImageId(ctx: android.content.Context): Long? =
         ctx.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
-            .getLong("hospital_image_id", -1L).takeIf { it > 0 }
+            .getLong("hospital_image_id", DEFAULT_HOSPITAL_IMAGE_ID).takeIf { it > 0 }
 }
