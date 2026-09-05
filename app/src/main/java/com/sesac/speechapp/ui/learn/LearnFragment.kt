@@ -11,8 +11,10 @@ import androidx.lifecycle.lifecycleScope
 import com.sesac.speechapp.R
 import com.sesac.speechapp.data.repository.SessionFlowRepository
 import com.sesac.speechapp.databinding.FragmentLearnBinding
+import com.sesac.speechapp.ui.detail.DateFormats
 import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
-import com.sesac.speechapp.ui.learning.RadarChartView
+import android.widget.LinearLayout
+import android.widget.TextView
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -22,7 +24,8 @@ import java.util.Locale
  * D-8②b: 홈 통계 2카드(연속 학습/평균 점수) 실데이터 — GET /users/me/stats (05a §8.4).
  *         조회 실패 시 카드 유지 + 값 자리 "-" (로딩 실패가 화면을 깨지 않게).
  *         onResume 재조회 — 학습 완료 후 복귀 시 즉시 반영.
- * 실력 지표 stub — 대시보드 D-7 3.2에서 실데이터화 (홈 카드는 D-7 범위 아님 — stub 유지)
+ * D-8③: 실력 지표 레이더는 홈에서 제거 (사용자 확정 — 최근 학습 결과 리스트로 대체).
+ *         최근 학습 결과 = GET /users/me/sessions/history 최근 3개 (터치 → 세부 보고서).
  */
 class LearnFragment : Fragment() {
 
@@ -51,20 +54,53 @@ class LearnFragment : Fragment() {
             startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
         }
 
-        // 실력 지표 stub — 대시보드 탭이 D-7 3.2에서 실데이터화 (홈은 P4 이월)
-        binding.radarHome.setData(
-            listOf(
-                RadarChartView.AxisData(getString(R.string.metric_listen), 0f),
-                RadarChartView.AxisData(getString(R.string.metric_naming), 0f),
-                RadarChartView.AxisData(getString(R.string.metric_shadowing), 0f),
-                RadarChartView.AxisData(getString(R.string.metric_selftalk), 0f),
-            )
-        )
+        // 최근 학습 결과 3개 — onResume에서 조회 (탭 재진입 반영)
+        binding.containerRecent.removeAllViews()
     }
 
     override fun onResume() {
         super.onResume()
         loadStats()
+        loadRecent()
+    }
+
+    /**
+     * D-8③ 홈 최근 학습 결과 — history 상위 3개 카드 (시안 home.tsx).
+     * 터치 → 세부 보고서. 실패/빈 목록 시 빈 상태 문구 (카드 유지 — ②b 폴백 방침 동일).
+     */
+    private fun loadRecent() {
+        lifecycleScope.launch {
+            try {
+                val data = repository.getSessionHistory()
+                val items = data.sessions.take(3)
+                binding.containerRecent.removeAllViews()
+                binding.tvRecentEmpty.visibility =
+                    if (items.isEmpty()) View.VISIBLE else View.GONE
+                binding.tvMoreHint.visibility =
+                    if (data.sessions.size > 3) View.VISIBLE else View.GONE
+                items.forEach { it_ ->
+                    val row = layoutInflater.inflate(
+                        R.layout.item_home_recent, binding.containerRecent, false
+                    ) as LinearLayout
+                    row.findViewById<TextView>(R.id.tvRecentTopic).text = it_.sessionName
+                    row.findViewById<TextView>(R.id.tvRecentDate).text = DateFormats.toDashDate(it_.createdAt)
+                    row.findViewById<TextView>(R.id.tvRecentAq).text = it_.aq.toString()
+                    row.setOnClickListener {
+                        startActivity(
+                            Intent(requireContext(), com.sesac.speechapp.ui.detail.SessionDetailActivity::class.java)
+                                .putExtra(com.sesac.speechapp.ui.detail.SessionDetailActivity.EXTRA_SESSION_ID, it_.sessionId)
+                                .putExtra(com.sesac.speechapp.ui.detail.SessionDetailActivity.EXTRA_SESSION_NAME, it_.sessionName)
+                                .putExtra(com.sesac.speechapp.ui.detail.SessionDetailActivity.EXTRA_CREATED_AT, it_.createdAt)
+                        )
+                    }
+                    binding.containerRecent.addView(row)
+                }
+            } catch (e: Exception) {
+                binding.containerRecent.removeAllViews()
+                binding.tvRecentEmpty.visibility = View.VISIBLE
+                binding.tvMoreHint.visibility = View.GONE
+            }
+        }
     }
 
     /**

@@ -19,14 +19,16 @@
 
     <TextView
         android:id="@+id/tvThemeTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
         android:text="@string/practice_theme_title"
-        android:textAppearance="@style/TextAppearance.SeSAC.H3"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
         android:textColor="@color/text_secondary"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
     <!-- D-8②b DuckSays 배너 (덕분이 말풍선 — 텍스트만, 마스코트 에셋은 D-8③) -->
@@ -44,11 +46,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvThemeTitle">
 
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:contentDescription="덕분이"
+            android:src="@drawable/img_duck" />
+
         <TextView
             android:id="@+id/tvDuckSays"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:layout_weight="1"
+            android:background="@drawable/bg_duck_banner"
+            android:padding="16dp"
             android:text="@string/duck_says_theme_banner"
             android:textAppearance="@style/TextAppearance.SeSAC.Body"
             android:textColor="@color/text_primary" />
@@ -74,26 +85,52 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_card_hero"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="☕ 카페"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H3"
-                    android:textColor="@color/surface" />
+                <ImageView
+                    android:id="@+id/ivThemeCafe"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:contentDescription="카페 테마 이미지"
+                    android:scaleType="centerCrop" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="주문하기, 메뉴 고르기 등 카페 상황 어휘"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
-                    android:textColor="#CCFFFFFF" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/theme_cafe_title"
+                            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                            android:textColor="@color/text_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/theme_cafe_sub"
+                            android:textAppearance="@style/TextAppearance.SeSAC.Caption"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                        android:textColor="@color/text_secondary" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -102,30 +139,56 @@
             style="@style/Widget.SeSAC.Card.Hero"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/primary_dark">
+            app:cardBackgroundColor="@color/surface">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_card_hero"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="🏥 병원"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H3"
-                    android:textColor="@color/surface" />
+                <ImageView
+                    android:id="@+id/ivThemeHospital"
+                    android:layout_width="match_parent"
+                    android:layout_height="160dp"
+                    android:contentDescription="병원 테마 이미지"
+                    android:scaleType="centerCrop" />
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="예약하기, 증상 말하기 등 병원 상황 어휘"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
-                    android:textColor="#CCFFFFFF" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/theme_hospital_title"
+                            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                            android:textColor="@color/text_primary" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/theme_hospital_sub"
+                            android:textAppearance="@style/TextAppearance.SeSAC.Caption"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                        android:textColor="@color/text_secondary" />
+                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>

@@ -6,6 +6,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import coil.load
+import com.sesac.speechapp.BuildConfig
+import com.sesac.speechapp.R
+import com.sesac.speechapp.data.remote.AuthImageLoader
 import com.sesac.speechapp.databinding.FragmentPracticeBinding
 import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
 
@@ -30,6 +34,7 @@ class PracticeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        loadThemeImages()
 
         // 테마 카드 → 로딩 화면에 thema 코드 전달 (theme 분기 — D-7 1.4)
         binding.cardThemeCafe.setOnClickListener {
@@ -46,8 +51,52 @@ class PracticeFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        loadThemeImages()
+    }
+
+    /**
+     * D-8③ 테마 카드 대표 이미지 — DB OCI 콘텐츠 이미지 (시안 더미 아님).
+     * 문제 세부와 동일 프록시 경로(/api/v1/content/images/{id}/file) — 표시만, 로직 무관.
+     * 이미지 ID는 서버 운영 데이터 의존 — 실패 시 카드만 표시(깨지지 않게).
+     */
+    private fun loadThemeImages() {
+        val base = BuildConfig.SERVER_BASE_URL.trimEnd('/')
+        val loader = AuthImageLoader.get(requireContext())
+        val cafeId = ThemeImagePrefs.cafeImageId(requireContext())
+        val hospitalId = ThemeImagePrefs.hospitalImageId(requireContext())
+        if (cafeId != null) {
+            binding.ivThemeCafe.load(base + "/api/v1/content/images/" + cafeId + "/file", loader) {
+                crossfade(true)
+            }
+        }
+        if (hospitalId != null) {
+            binding.ivThemeHospital.load(base + "/api/v1/content/images/" + hospitalId + "/file", loader) {
+                crossfade(true)
+            }
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+}
+
+/**
+ * D-8③ 테마 대표 이미지 ID 저장소 — 서버에 테마 이미지 엔드포인트가 없어
+ * 클라 설정값으로 관리 (BuildConfig 아님 — SharedPreferences). 미설정 시 카드만 표시.
+ * 기본값: 운영 DB에 등록된 카페/병원 대표 이미지 ID (서버 데이터에 맞춰 수정 가능).
+ */
+object ThemeImagePrefs {
+    private const val PREFS = "theme_image_prefs"
+
+    fun cafeImageId(ctx: android.content.Context): Long? =
+        ctx.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
+            .getLong("cafe_image_id", -1L).takeIf { it > 0 }
+
+    fun hospitalImageId(ctx: android.content.Context): Long? =
+        ctx.getSharedPreferences(PREFS, android.content.Context.MODE_PRIVATE)
+            .getLong("hospital_image_id", -1L).takeIf { it > 0 }
 }
