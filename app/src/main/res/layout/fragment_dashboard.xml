@@ -22,9 +22,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Streak Card -->
+        <!-- D-7 3.2: AQ 큰 숫자 카드 (대표 AQ — §8.1 userAq) -->
         <androidx.cardview.widget.CardView
-            android:id="@+id/cardStreak"
+            android:id="@+id/cardAq"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="24dp"
@@ -42,107 +42,42 @@
                 android:padding="24dp">
 
                 <TextView
-                    android:id="@+id/tvStreakLabel"
+                    android:id="@+id/tvAqLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dash_streak_label"
+                    android:text="@string/detail_aq_label"
                     android:textAppearance="@style/TextAppearance.SeSAC.Label"
                     android:textColor="@android:color/white"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
-                    android:id="@+id/tvStreak"
+                    android:id="@+id/tvAqBig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="@string/dash_streak_value"
+                    android:text="0"
                     android:textAppearance="@style/TextAppearance.SeSAC.Display"
                     android:textColor="@android:color/white"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvStreakLabel" />
+                    app:layout_constraintTop_toBottomOf="@id/tvAqLabel" />
 
+                <!-- 폴백 문구: 점수 전부 null → "학습을 시작해보세요" -->
                 <TextView
-                    android:id="@+id/tvStreakUnit"
+                    android:id="@+id/tvAqFallback"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/dash_streak_unit"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                    android:layout_marginTop="4dp"
+                    android:text="@string/dash_fallback_empty"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
                     android:textColor="#CCFFFFFF"
-                    app:layout_constraintBaseline_toBaselineOf="@id/tvStreak"
-                    app:layout_constraintStart_toEndOf="@id/tvStreak" />
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAqBig" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Stats Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardStats"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardStreak">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="20dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvTotalSessions"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dash_total_sessions"
-                        android:textAppearance="@style/TextAppearance.SeSAC.Display"
-                        android:textColor="@color/primary" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dash_total_label"
-                        android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
-                        android:textColor="@color/text_secondary" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/tvBestScore"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dash_best_score"
-                        android:textAppearance="@style/TextAppearance.SeSAC.Display"
-                        android:textColor="@color/success" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/dash_best_label"
-                        android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
-                        android:textColor="@color/text_secondary" />
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <!-- 점수 추이 그래프 → 지표별 방사형 그래프 (stub) -->
+        <!-- 대표점수 방사형 그래프 (§8.1 대표점수 4축) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardChart"
             android:layout_width="0dp"
@@ -154,7 +89,7 @@
             app:cardElevation="2dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardStats">
+            app:layout_constraintTop_toBottomOf="@id/cardAq">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -190,6 +125,23 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardChart" />
 
+        <!-- D-7 3.2: 빈 목록 상태 문구 -->
+        <TextView
+            android:id="@+id/tvHistoryEmpty"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/dash_history_empty"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/text_muted"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvHistory"
             android:layout_width="0dp"
@@ -201,7 +153,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvHistoryTitle" />
+            app:layout_constraintTop_toBottomOf="@id/tvHistoryEmpty" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

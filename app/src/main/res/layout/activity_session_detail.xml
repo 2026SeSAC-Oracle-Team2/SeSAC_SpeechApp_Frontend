@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-7 3.3 세부 보고서 화면 — 종합 피드백 + AQ + radar(세션 집계) + 지표 카드 + AI 대화 피드백/내역 -->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="24dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="32dp">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/detail_title"
+            android:textAppearance="@style/TextAppearance.SeSAC.H1" />
+
+        <!-- 상단: 세션명 + 날짜 -->
+        <TextView
+            android:id="@+id/tvSessionName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/text_secondary"
+            tools:text="오늘의 학습 - TEST" />
+
+        <TextView
+            android:id="@+id/tvSessionDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
+            android:textColor="@color/text_muted"
+            tools:text="2026.09.06" />
+
+        <!-- 로딩 상태 -->
+        <LinearLayout
+            android:id="@+id/containerLoading"
+            android:layout_width="match_parent"
+            android:layout_height="280dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:indicatorColor="@color/primary"
+                app:indicatorSize="44dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/report_loading"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textColor="@color/text_secondary" />
+        </LinearLayout>
+
+        <!-- 결과 본문 -->
+        <LinearLayout
+            android:id="@+id/containerResult"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- AQ 지수 큰 숫자 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/detail_aq_label"
+                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:id="@+id/tvAQ"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/primary"
+                android:textSize="64sp"
+                android:textStyle="bold" />
+
+            <!-- 방사형 그래프 (세션 TURN 집계 — §8.3 radar 그대로) -->
+            <com.sesac.speechapp.ui.learning.RadarChartView
+                android:id="@+id/radarDetail"
+                android:layout_width="match_parent"
+                android:layout_height="280dp"
+                android:layout_marginTop="8dp" />
+
+            <!-- 종합 피드백 -->
+            <TextView
+                android:id="@+id/tvTotalFeedback"
+                style="@style/FeedbackCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_card_hero"
+                tools:text="전반적으로 안정적인 발화를 보였습니다..." />
+
+            <!-- 지표별 카드 4종 (점수·피드백 — 클릭 확장 시 turns) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/detail_metric_title"
+                android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvMetricCards"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false" />
+
+            <!-- AI 대화 피드백 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/detail_talk_title"
+                android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+
+            <TextView
+                android:id="@+id/tvTalkFeedback"
+                style="@style/FeedbackCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                tools:text="자유 대화에 적극적으로 참여하셨습니다..." />
+
+            <!-- 대화 내역 (AI text + 내 답변 다시 듣기) -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/detail_talk_history_title"
+                android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvTalkHistory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:nestedScrollingEnabled="false" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvError"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/error"
+            android:visibility="gone" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="center_horizontal"
+            android:backgroundTint="@color/primary"
+            android:text="@string/btn_retry"
+            android:textColor="@color/surface"
+            android:visibility="gone"
+            app:cornerRadius="14dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnDone"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="@color/primary"
+            android:text="@string/btn_done"
+            android:textAppearance="@style/TextAppearance.SeSAC.H4"
+            android:textColor="@color/surface"
+            app:cornerRadius="14dp" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

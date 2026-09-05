@@ -83,4 +83,8 @@
     <string name="detail_my_answer">내 답변</string>
     <string name="report_detail_btn">상세 보고서 보기</string>
     <string name="report_detail_placeholder">상세 보고서가 준비되면 알림으로 알려드릴게요</string>
+    <string name="detail_tts_btn">▶ AI 음성 듣기</string>
+    <string name="detail_voice_btn">▶ 내 답변 듣기</string>
+    <string name="detail_replay_btn">▶ 다시 듣기</string>
+    <string name="detail_pick_image">(그림 선택지)</string>
 </resources>

@@ -97,6 +97,11 @@
             android:name=".ui.learning.SessionReportActivity"
             android:exported="false" />
 
+        <!-- D-7 3.3: 세부 보고서 화면 (대시보드 카드/간이 보고서에서 진입) -->
+        <activity
+            android:name=".ui.detail.SessionDetailActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.onboarding.PermissionOnboardingActivity"
             android:exported="false" />

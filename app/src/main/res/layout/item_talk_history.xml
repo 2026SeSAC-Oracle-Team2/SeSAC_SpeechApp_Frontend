@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-7 3.3 대화 내역 행 — AI text(±TTS) / USER text(±voiceUrl 다시 듣기) -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp"
+    android:orientation="horizontal">
+
+    <!-- AI 말풍선 (speaker=AI) -->
+    <TextView
+        android:id="@+id/tvAiText"
+        style="@style/FeedbackCard"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:layout_gravity="start"
+        android:visibility="gone"
+        tools:text="수고하셨습니다. 마지막으로 오늘 기분이..." />
+
+    <LinearLayout
+        android:id="@+id/containerUser"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:gravity="end"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvUserText"
+            style="@style/FeedbackCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_card_hero"
+            android:textColor="@color/surface"
+            tools:text="오늘은 카페에 갔어요" />
+
+        <!-- 내 답변 다시 듣기 (voiceUrl 있을 때만) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnUserVoice"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:layout_marginTop="4dp"
+            android:text="▶ 다시 듣기"
+            android:visibility="gone"
+            app:cornerRadius="10dp" />
+    </LinearLayout>
+</LinearLayout>

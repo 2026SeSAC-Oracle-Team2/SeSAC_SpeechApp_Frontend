@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-7 3.3 문제 기록 행 (지표 카드 확장) — promptText + TTS 재생 + 내 답변(텍스트/이미지/음성) -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="6dp"
+    android:background="@drawable/bg_feedback_card"
+    android:orientation="vertical"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/tvTurnPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/text_primary"
+        tools:text="포도을(를) 고르세요" />
+
+    <!-- AI TTS 재생 버튼 (ttsUrl 있을 때만) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTurnTts"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="6dp"
+        android:text="▶ AI 음성 듣기"
+        android:visibility="gone"
+        app:cornerRadius="10dp" />
+
+    <TextView
+        android:id="@+id/tvTurnAnswerLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:text="@string/detail_my_answer"
+        android:textAppearance="@style/TextAppearance.SeSAC.Tiny"
+        android:textColor="@color/text_muted" />
+
+    <TextView
+        android:id="@+id/tvTurnAnswer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/text_primary"
+        tools:text="8월 12일 (정답)" />
+
+    <!-- LISTEN_PICTURE: 내가 고른 이미지 선택지 (context=image_id) -->
+    <ImageView
+        android:id="@+id/ivTurnAnswerImage"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:layout_marginTop="4dp"
+        android:contentDescription="내가 고른 그림"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+    <!-- 음성형: 내 답변 다시 듣기 -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTurnVoice"
+        style="@style/Widget.Material3.Button.TonalButton"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="4dp"
+        android:text="▶ 내 답변 듣기"
+        android:visibility="gone"
+        app:cornerRadius="10dp" />
+
+    <TextView
+        android:id="@+id/tvTurnImage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        tools:text="문제 이미지" />
+</LinearLayout>
