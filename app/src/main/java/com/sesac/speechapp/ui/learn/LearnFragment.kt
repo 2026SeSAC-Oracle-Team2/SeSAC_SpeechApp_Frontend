@@ -131,12 +131,16 @@ class LearnFragment : Fragment() {
 
     /**
      * D-8③ 홈 최근 학습 결과 — history 상위 3개 카드 (시안 home.tsx).
+     * D-8-C2 C-1 원인 확정: onViewCreated의 removeAllViews와 onResume loadRecent가
+     * 경쟁하지는 않지만, API 실패 시 재시도 없이 empty로 남는 케이스가 있었다.
+     * → 로그 추가 + 실패 시 1회 재시도 (네트워크 일시 실패 대비 — 지시문 C-1).
      */
-    private fun loadRecent() {
+    private fun loadRecent(retried: Boolean = false) {
         lifecycleScope.launch {
             try {
                 val data = repository.getSessionHistory()
                 val items = data.sessions.take(3)
+                android.util.Log.d("LearnFragment", "loadRecent ok — ${data.sessions.size} sessions")
                 binding.containerRecent.removeAllViews()
                 binding.tvRecentEmpty.visibility =
                     if (items.isEmpty()) View.VISIBLE else View.GONE
@@ -160,6 +164,13 @@ class LearnFragment : Fragment() {
                     binding.containerRecent.addView(row)
                 }
             } catch (e: Exception) {
+                android.util.Log.w("LearnFragment", "loadRecent 실패 — ${e.message}")
+                // D-8-C2 C-1: 실패 시 1회 재시도 (일시적 네트워크 실패 대비)
+                if (!retried) {
+                    kotlinx.coroutines.delay(1500)
+                    loadRecent(retried = true)
+                    return@launch
+                }
                 binding.containerRecent.removeAllViews()
                 binding.tvRecentEmpty.visibility = View.VISIBLE
                 binding.tvMoreHint.visibility = View.GONE
