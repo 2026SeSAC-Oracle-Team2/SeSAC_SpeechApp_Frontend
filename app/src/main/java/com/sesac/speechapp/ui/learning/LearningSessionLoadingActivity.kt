@@ -132,9 +132,14 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * D-8-C2 A-6: ProblemActivity가 가이드 단계를 흡수 — 로딩 → ProblemActivity 직행.
+     * (기존: 로딩 → ProblemGuideActivity → ProblemActivity 3단 activity 이동 = 끊김 원인)
+     */
     private fun goToGuide() {
-        val intent = Intent(this, ProblemGuideActivity::class.java)
-            .putExtra(ProblemGuideActivity.EXTRA_TURN_INDEX, 0)
+        val intent = Intent(this, ProblemActivity::class.java)
+            .putExtra(ProblemActivity.EXTRA_SESSION_ID, sessionId)
+            .putExtra(ProblemActivity.EXTRA_TURN_INDEX, 0)
         startActivity(intent)
         finish()
     }

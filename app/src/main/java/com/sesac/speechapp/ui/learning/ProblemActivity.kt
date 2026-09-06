@@ -29,7 +29,13 @@ import java.io.File
 /**
  * P3-26 문제 풀이 화면 — 유형별 레이아웃 전환 + D-7 시간 통제 체계 (06 §3).
  *
- * - LISTEN: 대기 카운트다운 3초 → TTS → 선택지 탭 → [제출] (30초 제한)
+ * D-8-C2 A-6 (사용자 확정 A안): 단일 Activity 유지 + 내부 상태 기반 뷰 전환.
+ *  - GUIDE (가이드 컨테이너) → QUESTION (문항) → SUBMITTED (제출완료) → [다음으로] → GUIDE ...
+ *  - ProblemGuideActivity는 앱 흐름에서 제외 (파일·매니페스트는 호환 유지)
+ *  - 상단 헤더(X + 진행바 + n/total)는 화면 고정 — 턴이 바뀌어도 리셋 없음 (끊김 해소)
+ *  - 단계 전환 시 200ms alpha fade (과한 애니 금지 — 시안에도 없음)
+ *
+ * - LISTEN: 대기 카운트다운 3초 → TTS → TTS 완료 후 제출 카운트다운 → 선택지 탭 → [제출] (30초)
  *   30초 도달: 선택 누름=최근 선택지 제출 / 미선택=오답 처리 제출
  * - NAMING/SELF_TALK: 대기 카운트다운 5초(사진 관찰) → 녹음 시작 → 30초
  * - SHADOWING: 대기 3초 → TTS → 재생 종료 후 3초 → 녹음 시작 → 30초. [다시 듣기] 없음
@@ -43,6 +49,11 @@ class ProblemActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_SESSION_ID = "session_id"
         const val EXTRA_TURN_INDEX = "turn_index"
+
+        /** A-6 내부 단계 — GUIDE(가이드 표시) / QUESTION(문항) / SUBMITTED(제출완료) */
+        private const val PHASE_GUIDE = 0
+        private const val PHASE_QUESTION = 1
+        private const val PHASE_SUBMITTED = 2
 
         /** 06 §3: 제출 제한 30초 통일 (모든 타입) */
         private const val SUBMIT_LIMIT_SECONDS = 30
@@ -77,6 +88,9 @@ class ProblemActivity : AppCompatActivity() {
 
     /** D-8-C2 A-2: 마이크 pulse 애니메이터 — 녹음 중에만 활성 */
     private var micPulseAnimator: android.animation.ObjectAnimator? = null
+
+    /** D-8-C2 A-6: 현재 내부 단계 — showTurn(GUIDE) → enterQuestionPhase(QUESTION) → showSubmittedState(SUBMITTED) */
+    private var currentPhase = PHASE_GUIDE
 
     /** 현재 턴 제출 진행 상태 — 카운트다운/제출 흐름 제어 */
     private var submittedThisTurn = false
@@ -137,6 +151,8 @@ class ProblemActivity : AppCompatActivity() {
         binding.btnTts.setOnClickListener { playTts() }
         binding.btnHint.setOnClickListener { requestHint() }
         binding.btnNext.setOnClickListener { onNextClicked() }
+        // D-8-C2 A-6: 가이드 [준비됐어요!] → 문항 단계 전환 (같은 Activity)
+        binding.btnReady.setOnClickListener { enterQuestionPhase() }
 
         // D-8-C2 A-1: SubmitCountdown 텍스트 중복 제거 — pill 배지 숫자만 갱신 (문항 단계 상시 표시 유지)
         binding.tvSubmitCountdown.visibility = View.GONE
@@ -145,6 +161,101 @@ class ProblemActivity : AppCompatActivity() {
         val startIndex = intent.getIntExtra(EXTRA_TURN_INDEX, 0)
             .coerceIn(0, (turns.size - 1).coerceAtLeast(0))
         showTurn(startIndex)
+    }
+
+    // ─── D-8-C2 A-6: 내부 단계 전환 (GUIDE → QUESTION → SUBMITTED) ───
+
+    /** 단계 전환 + 200ms alpha fade (시안 수준의 절제된 애니 — 과한 애니 금지) */
+    private fun setPhase(phase: Int) {
+        val questionViews = if (phase == PHASE_GUIDE) View.GONE else View.VISIBLE
+        binding.containerGuidePhase.visibility =
+            if (phase == PHASE_GUIDE) View.VISIBLE else View.GONE
+        binding.tvTypeBadge.visibility = questionViews
+        binding.tvPassage.visibility = questionViews
+        currentPhase = phase
+        // fade: 루트 콘텐츠에 가벼운 alpha 트랜지션
+        binding.root.animate().alpha(0.35f).setDuration(80).withEndAction {
+            binding.root.animate().alpha(1f).setDuration(120).start()
+        }.start()
+    }
+
+    /** GUIDE 단계 렌더 — ProblemGuideActivity 로직 이관 (06 §3 문구 그대로) */
+    private fun renderGuidePhase(turn: TurnDto, index: Int) {
+        binding.tvGuideTypeBadge.text = ProblemActivity.typeLabel(turn.type)
+
+        val (body, extra) = when (turn.type) {
+            "LISTEN", "LISTEN_TEXT" -> {
+                val bodyText = getString(R.string.guide_listen_body) + "\n\n" +
+                    getString(R.string.guide_listen_replay)
+                bodyText to getString(R.string.guide_listen_time)
+            }
+            "LISTEN_PICTURE" -> {
+                val bodyText = getString(R.string.guide_listen_body) + "\n\n" +
+                    getString(R.string.guide_listen_replay)
+                val extraText = getString(R.string.guide_listen_picture_extra) + "\n" +
+                    getString(R.string.guide_listen_time)
+                bodyText to extraText
+            }
+            "NAMING" -> getString(R.string.guide_naming_body) to
+                getString(R.string.guide_naming_hint) + "\n" + getString(R.string.guide_naming_time)
+            "SHADOWING" -> getString(R.string.guide_shadowing_body) to
+                getString(R.string.guide_shadowing_replay) + "\n" +
+                getString(R.string.guide_shadowing_time)
+            "SELF_TALK" -> getString(R.string.guide_selftalk_body) to
+                getString(R.string.guide_selftalk_time)
+            else -> getString(R.string.guide_selftalk_body) to ""
+        }
+        binding.tvGuideBody.text = body
+        if (extra.isBlank()) {
+            binding.containerAudioCard.visibility = View.GONE
+        } else {
+            binding.tvGuideExtra.text = extra
+            binding.containerAudioCard.visibility = View.VISIBLE
+        }
+
+        // 문제 이미지 (naming/selftalk만 — listen 제외)
+        if (turn.type == "NAMING" || turn.type == "SELF_TALK") {
+            val url = turn.imageUrl
+            if (!url.isNullOrBlank()) {
+                binding.cardGuideImage.visibility = View.VISIBLE
+                val full = resolveUrl(url)
+                binding.imgGuideProblem.load(full, AuthImageLoader.get(this)) {
+                    crossfade(true)
+                }
+            } else {
+                binding.cardGuideImage.visibility = View.GONE
+            }
+        } else {
+            binding.cardGuideImage.visibility = View.GONE
+        }
+    }
+
+    /** [준비됐어요!] 클릭 — GUIDE → QUESTION 전환 (문항 타이머는 여기서 시작) */
+    private fun enterQuestionPhase() {
+        if (currentPhase != PHASE_GUIDE) return
+        val turn = turns.getOrNull(currentIndex) ?: return
+        setPhase(PHASE_QUESTION)
+        // 문항 단계 진입 시점에 대기 카운트다운 시작 (가이드 중에는 시간 흐르지 않음)
+        when (turn.type) {
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
+                binding.tvWait.visibility = View.VISIBLE
+                startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true)
+            }
+            "NAMING" -> {
+                binding.tvWait.visibility = View.VISIBLE
+                startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
+            }
+            "SHADOWING" -> {
+                binding.btnTts.visibility = View.GONE
+                binding.tvWait.visibility = View.VISIBLE
+                startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true, isShadowing = true)
+            }
+            else -> {
+                binding.tvWait.visibility = View.VISIBLE
+                startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
+                if (turn.ttsUrl != null) binding.btnTts.visibility = View.VISIBLE
+            }
+        }
     }
 
     // ─── 턴 렌더 ────────────────────────────────────────────────
@@ -166,7 +277,7 @@ class ProblemActivity : AppCompatActivity() {
         }
         stopTts()
 
-        // 프로그레스
+        // 프로그레스 — A-6: 헤더는 화면 고정, 턴 전환에도 리셋 없이 값만 갱신
         binding.tvProgress.text = getString(R.string.progress_turn_fmt, index + 1, turns.size)
         binding.progressBar.progress = ((index + 1) * 100 / turns.size)
         binding.tvTypeBadge.text = typeLabel(turn.type)
@@ -177,16 +288,13 @@ class ProblemActivity : AppCompatActivity() {
         // 기본 상태 초기화 (D-7: 선택/제출 상태·카운트다운 포함)
         submittedThisTurn = false
         selectedChoice = null
+        recordingWasForcedSubmit = false
         noChoiceSentinel = (turn.choices.orEmpty().maxOfOrNull { it.order } ?: 0) + 1
         resetTurnViews()
 
-        when (turn.type) {
-            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> renderListen(turn)
-            "NAMING" -> renderNaming(turn)
-            "SHADOWING" -> renderRecordingTurn(turn, showImage = false)
-            "SELF_TALK" -> renderRecordingTurn(turn, showImage = true)
-            else -> renderRecordingTurn(turn, showImage = false)
-        }
+        // A-6: 각 턴은 GUIDE 단계부터 시작 — 가이드 렌더 후 [준비됐어요!] 대기
+        renderGuidePhase(turn, index)
+        setPhase(PHASE_GUIDE)
     }
 
     private fun resetTurnViews() {
@@ -237,13 +345,15 @@ class ProblemActivity : AppCompatActivity() {
         }
     }
 
-    /** LISTEN — 대기 카운트다운 3초 후 TTS, 선택지 탭 → 제출 상태 진입 */
+    /**
+     * LISTEN 문항 UI 준비 — 선택지 리스트 + [제출] 버튼 (타이머 시작은 enterQuestionPhase 몫).
+     * D-8-C2 A-4: 시안 ListenStep 전폭 primary, 선택 전 disabled(opacity 45%는 disabled 상태로 근사).
+     */
     private fun renderListen(turn: TurnDto) {
         binding.tvChoicesTitle.visibility = View.VISIBLE
         binding.containerChoices.visibility = View.VISIBLE
-        // D-8-C2 A-4: LISTEN에도 [제출] 버튼 제공 — 시안 ListenStep 전폭 primary, 선택 전 disabled.
-        // 기존 버그: containerRecordActions을 열지 않아 btnSubmitRecording이 VISIBLE이어도
-        // 부모가 GONE이라 버튼이 화면에 없었음. 녹음 카드(cardRecord)는 LISTEN에서 미표시.
+        // D-8-C2 A-4: LISTEN에도 [제출] 버튼 제공 — 기존 버그: containerRecordActions을
+        // 열지 않아 btnSubmitRecording이 VISIBLE이어도 부모가 GONE이라 버튼이 화면에 없었음.
         binding.containerRecordActions.visibility = View.VISIBLE
         binding.btnHint.visibility = View.GONE
         binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
@@ -295,32 +405,20 @@ class ProblemActivity : AppCompatActivity() {
             binding.containerChoices.addView(item)
         }
 
-        // D-7 1.2: 대기 카운트다운 3초 → 종료 직후 TTS 재생
-        binding.tvWait.visibility = View.VISIBLE
-        startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true)
+        // D-7 1.2: 대기 카운트다운 3초 → 종료 직후 TTS 재생 (타이머 시작은 enterQuestionPhase에서)
     }
 
     /** NAMING — 5초 사진 관찰 → 녹음 시작. 힌트는 카운트다운 중에도 가능 */
     private fun renderNaming(turn: TurnDto) {
         showImage(turn)
         showRecordingUI(showHintButton = true)
-        binding.tvWait.visibility = View.VISIBLE
-        startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
     }
 
     private fun renderRecordingTurn(turn: TurnDto, showImage: Boolean) {
         if (showImage) showImage(turn)
         showRecordingUI(showHintButton = false)
-        if (turn.type == "SHADOWING") {
-            // SHADOWING: 3초 → TTS 재생 → 재생 종료 후 3초 → 녹음 시작. [다시 듣기] 없음 (마이크 오염 방지)
-            binding.btnTts.visibility = View.GONE
-            binding.tvWait.visibility = View.VISIBLE
-            startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true, isShadowing = true)
-        } else {
-            // SELF_TALK: 5초 사진 관찰 → 녹음 시작
-            binding.tvWait.visibility = View.VISIBLE
-            startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
-            if (turn.ttsUrl != null) binding.btnTts.visibility = View.VISIBLE
+        if (turn.type != "SHADOWING" && turn.ttsUrl != null) {
+            binding.btnTts.visibility = View.VISIBLE
         }
     }
 
@@ -666,6 +764,7 @@ class ProblemActivity : AppCompatActivity() {
     /**
      * 제출 완료 상태 — D-8-C2 A-5: 강제 제출(타임오버·미선택 자동 제출)은
      * "이런! 시간이 초과되었어요!"로 표시해 시간 초과를 인지시킨다. 정상 제출은 기존 문구 유지.
+     * A-6: 같은 화면 내 SubmitResult 블록으로 전환 (SUBMITTED 단계).
      */
     private fun showSubmittedState(byTimeout: Boolean = false) {
         binding.scoringOverlay.visibility = View.GONE
@@ -673,6 +772,7 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvSubmittedStatus.text = getString(
             if (byTimeout) R.string.submit_timeout_msg else R.string.submitted_answer
         )
+        currentPhase = PHASE_SUBMITTED
         binding.containerSubmitted.visibility = View.VISIBLE
         binding.cardRecord.visibility = View.GONE
         binding.containerRecord.visibility = View.GONE
@@ -686,16 +786,16 @@ class ProblemActivity : AppCompatActivity() {
         binding.scoringOverlay.visibility = View.GONE
     }
 
-    /** [다음으로] — 이동 자유 (제한 없음) → 다음 턴 문제 가이드 화면 */
+    /**
+     * [다음으로] — A-6: 같은 Activity 내에서 다음 턴 가이드 단계로 전환.
+     * activity 이동(기존 ProblemGuideActivity startActivity+finish) 폐지 — 화면 고정 유지.
+     */
     private fun onNextClicked() {
         goToNextTurn()
     }
 
     private fun goToNextTurn() {
-        val intent = Intent(this, ProblemGuideActivity::class.java)
-            .putExtra(ProblemGuideActivity.EXTRA_TURN_INDEX, currentIndex + 1)
-        startActivity(intent)
-        finish()
+        showTurn(currentIndex + 1) // A-6: 내부 전환 — 마지막 턴이면 showTurn이 goToStorytelling 처리
     }
 
     private fun requestHint() {

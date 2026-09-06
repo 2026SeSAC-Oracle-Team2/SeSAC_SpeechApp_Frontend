@@ -77,7 +77,134 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/btnClose" />
 
-    <!-- 유형 배지 + 지문 -->
+    <!-- ═════ D-8-C2 A-6: 가이드 단계 컨테이너 (GUIDE 단계에서만 표시) ═════
+         ProblemGuideActivity의 UI를 이관 — 헤더(진행바)는 공용이라 미포함. -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/containerGuidePhase"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvProgress">
+
+        <!-- 유형 배지 (가이드 단계용 — 문항 단계는 하단 문항 블록이 자체 배지 사용) -->
+        <TextView
+            android:id="@+id/tvGuideTypeBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.Badge"
+            android:textColor="@color/accent"
+            tools:text="알아듣기"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/containerGuideDuck"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvGuideTypeBadge">
+
+            <ImageView
+                android:id="@+id/imgDuckGuide"
+                android:layout_width="@dimen/duck_banner"
+                android:layout_height="@dimen/duck_banner"
+                android:contentDescription="덕분이"
+                android:src="@drawable/img_duck" />
+
+            <TextView
+                android:id="@+id/tvGuideBody"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_duck_banner_d8c"
+                android:lineSpacingExtra="4dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                android:textColor="@color/text_primary"
+                tools:text="이번 문제는 '알아듣기' 입니다." />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/containerAudioCard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_ai_banner"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/containerGuideDuck">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="음성 안내"
+                android:src="@drawable/ic_volume_24"
+                app:tint="@color/accent" />
+
+            <TextView
+                android:id="@+id/tvGuideExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:lineSpacingExtra="4dp"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                android:textColor="@color/text_secondary"
+                tools:text="이번 문제는 AI 음성을 들어야 해요." />
+        </LinearLayout>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardGuideImage"
+            android:layout_width="0dp"
+            android:layout_height="176dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/radius_3xl"
+            app:cardElevation="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/containerAudioCard">
+
+            <ImageView
+                android:id="@+id/imgGuideProblem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="문제 이미지"
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnReady"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="24dp"
+            android:text="@string/guide_btn_ready"
+            app:cornerRadius="@dimen/radius_xl"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardGuideImage" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- ═════ A-6 가이드 단계 컨테이너 끝 ═════ -->
+
+    <!-- 유형 배지 + 지문 (문항 단계) -->
     <TextView
         android:id="@+id/tvTypeBadge"
         android:layout_width="wrap_content"
