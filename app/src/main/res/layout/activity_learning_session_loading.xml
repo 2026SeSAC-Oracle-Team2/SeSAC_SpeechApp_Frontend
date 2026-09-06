@@ -1,19 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  D-8-C1: 세션 로딩 화면 (시안 learn.$themeId intro 재작성).
-  intro = Loading(오리 bounce+메시지) → 1.2초 후 "로딩 완료!" + 오리 120dp +
+  D-8-C1/C2: 세션 로딩 화면 (시안 learn.$themeId intro 재작성).
+  D-8-C2 C-6: 상단에 공통 헤더 행 신설 [X 44dp 카드형 | 진행바 flex-1 0% | 0/{총 항목 수}] —
+  X=세션 이탈(세션 시작 전이라 데이터 소실 없음, 즉시 finish 허용; 팝업은 문항 단계만).
+  intro = Loading(오리 bounce+메시지) → API 응답 후 "로딩 완료!" + 오리 120dp +
   "{세션명} 준비가 끝났어요." + [시작] 버튼.
-  시간값 1.2초는 로딩 API 응답 대기가 우선(기획 06 v1.7) — API 응답 후 즉시 완료 전환
-  (기획 우선 적용 — 시안의 고정 1.2초 타이머는 폐기, 보고서 표기).
   ID 보존: imgMascotDuck/tvMascot(GONE)/tvMessage/spinner/tvError/btnRetry/btnStart.
-  신규: tvReadyTitle(로딩 완료! 제목)·tvReadySession(세션명 문구).
+  신규: btnSessionClose·progressLoading·tvLoadingProgress·tvReadyTitle·tvReadySession.
 -->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_grad_warm">
+
+    <!-- ═══ D-8-C2 C-6: 공통 헤더 행 [X | 진행바 | n/total] ═══ -->
+    <FrameLayout
+        android:id="@+id/btnSessionClose"
+        android:layout_width="@dimen/session_close_size"
+        android:layout_height="@dimen/session_close_size"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_session_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/session_close_desc"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/text_secondary" />
+    </FrameLayout>
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progressLoading"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:progress="0"
+        app:indicatorColor="@color/brand_grad_brand_start"
+        app:layout_constraintBottom_toBottomOf="@id/btnSessionClose"
+        app:layout_constraintEnd_toStartOf="@id/tvLoadingProgress"
+        app:layout_constraintStart_toEndOf="@id/btnSessionClose"
+        app:layout_constraintTop_toTopOf="@id/btnSessionClose"
+        app:trackColor="@color/brand_secondary"
+        app:trackCornerRadius="@dimen/radius_pill"
+        app:trackThickness="@dimen/progress_height" />
+
+    <TextView
+        android:id="@+id/tvLoadingProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRowDesc"
+        android:textColor="@color/text_secondary"
+        android:textStyle="bold"
+        tools:text="0/8"
+        app:layout_constraintBottom_toBottomOf="@id/btnSessionClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnSessionClose" />
+    <!-- ═══ C-6 헤더 끝 ═══ -->
 
     <!-- 오리 96dp(로딩) / 120dp(완료 — 코드에서 크기 전환) -->
     <ImageView
@@ -25,8 +76,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.32" />
+        app:layout_constraintTop_toBottomOf="@id/btnSessionClose"
+        app:layout_constraintVertical_bias="0.36" />
 
     <!-- 기존 텍스트 마스코트 — ID 보존, gone -->
     <TextView

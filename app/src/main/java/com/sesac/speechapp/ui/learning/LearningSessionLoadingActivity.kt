@@ -60,6 +60,11 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
         binding.btnRetry.setOnClickListener { createSession() }
         binding.btnStart.setOnClickListener { onStartClicked() }
         binding.btnStart.visibility = View.GONE
+        // D-8-C2 C-6: 로딩 화면 X = 세션 이탈 (세션 시작 전 — 데이터 소실 없어 즉시 finish 허용.
+        // 이탈 확인 팝업은 문항 단계(ProblemActivity)에서만)
+        binding.btnSessionClose.setOnClickListener { finish() }
+        // C-6: n/total — 총 항목 수는 세션 생성 후 확정이라 우선 0/{기획 기본 8} 형태 표시
+        binding.tvLoadingProgress.text = getString(R.string.progress_turn_fmt, 0, 8)
         createSession()
     }
 
