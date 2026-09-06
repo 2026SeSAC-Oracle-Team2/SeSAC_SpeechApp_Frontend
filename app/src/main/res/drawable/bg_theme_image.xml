@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 테마 대표 이미지 컨테이너 (위아래 크롭 — 카드 overflow-hidden) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_muted" />
+</shape>
