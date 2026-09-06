@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8-C1: 로그인 화면 (시안 index.tsx 73행 기준 재작성).
+  (1) 중앙 그룹(vertical chain packed): 오리 200dp → 앱명 30sp bold → 소개 2행 16sp muted
+  (2) 하단: 구글 버튼(outline 카드형, G 배지 원형 24dp) → 약관 안내 13sp 2행.
+  앱명은 확정 '덕담' 유지 (사용자 메모 — 시안 "덕분이" 폐기, 오리·구조만 시안 따름).
+  ID 보존: imgDuckLogin/logoArea(GONE)/tvTitle/tvSubtitle/btnGoogleSignIn (LoginActivity 바인딩).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_splash">
+    android:background="@drawable/bg_grad_warm">
 
-    <!-- D-8③ 시안 index: duck 마스코트 200dp (덕담 앱명 유지 — 사용자 확정) -->
+    <!-- 기존 로고 TextView — ID 보존, gone -->
+    <TextView
+        android:id="@+id/logoArea"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="🦆"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- (1) 오리 200dp — vertical chain packed 시작 -->
     <ImageView
         android:id="@+id/imgDuckLogin"
         android:layout_width="200dp"
@@ -18,60 +35,70 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
 
-    <!-- 기존 로고 TextView — ID 보존, gone (Binding 파손 방지) -->
-    <TextView
-        android:id="@+id/logoArea"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="🦆"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Title -->
+    <!-- 앱명 30sp bold (덕담 확정) -->
     <TextView
         android:id="@+id/tvTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="@string/splash_title"
-        android:textAppearance="@style/TextAppearance.SeSAC.Display"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle"
         android:textSize="30sp"
         android:textColor="@color/text_primary"
         app:layout_constraintBottom_toTopOf="@id/tvSubtitle"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/logoArea" />
+        app:layout_constraintTop_toBottomOf="@id/imgDuckLogin" />
 
-    <!-- Subtitle -->
+    <!-- 소개 2행 16sp muted -->
     <TextView
         android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/splash_subtitle"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="@string/login_subtitle_line2"
         android:textAppearance="@style/TextAppearance.SeSAC.Body"
         android:textColor="@color/text_secondary"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/btnGoogleSignIn"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-    <!-- Google Sign-In Button -->
+    <!-- (2) 하단 버튼 영역 — outline 카드형 + G 배지 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnGoogleSignIn"
         android:layout_width="0dp"
-        android:layout_height="52dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginBottom="32dp"
+        android:layout_height="@dimen/btn_height"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginBottom="40dp"
         android:backgroundTint="@color/surface"
-        android:text="@string/login_google"
+        android:drawableStart="@drawable/bg_login_google_badge"
+        android:drawablePadding="12dp"
+        android:gravity="center"
+        android:text="@string/login_google_btn"
         android:textAppearance="@style/TextAppearance.SeSAC.H4"
         android:textColor="@color/text_primary"
         android:textStyle="bold"
-        app:cornerRadius="16dp"
+        app:cornerRadius="@dimen/radius_xl"
         app:strokeColor="@color/border"
         app:strokeWidth="2dp"
+        app:layout_constraintBottom_toTopOf="@id/tvTerms"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- 약관 안내 13sp muted 2행 중앙정렬 -->
+    <TextView
+        android:id="@+id/tvTerms"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="24dp"
+        android:gravity="center"
+        android:text="@string/login_terms_notice"
+        android:textAppearance="@style/TextAppearance.SeSAC.Caption"
+        android:textColor="@color/text_secondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

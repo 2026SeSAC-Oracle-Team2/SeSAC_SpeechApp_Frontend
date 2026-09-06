@@ -1,17 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8-C1: 회원가입 1단계 (시안 signup.tsx 프로필 사진+이름/닉네임 부분 재작성).
+  PageTitle+desc → DuckSays → 프로필 사진 원형 112dp+하단 반투명 스트립(카메라+사진) →
+  이름/닉네임 필드(시안 스타일: 높이 52dp radius 22dp 보더 2dp) → 완료 버튼.
+  ID 보존: toolbar/btnBack/profileImageArea/ivProfilePreview/cameraOverlay/tvPhotoHint/
+           tilNickname/etNickname/btnComplete (SignUpActivity 바인딩).
+  ⚠ 성별·생년·취미·태그는 activity_sign_up_profile_step.xml (기존 2단계 플로우 유지).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm">
 
     <!-- Toolbar -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="56dp"
-        android:background="@android:color/white"
+        android:background="@android:color/transparent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -22,14 +30,8 @@
             android:layout_height="48dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="뒤로"
-            android:src="@android:drawable/ic_menu_close_clear_cancel" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="회원가입"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/text_secondary" />
     </androidx.appcompat.widget.Toolbar>
 
     <androidx.core.widget.NestedScrollView
@@ -45,15 +47,58 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:paddingHorizontal="20dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="32dp">
 
-            <!-- Profile Image Picker (circular preview + camera overlay) -->
+            <!-- PageTitle -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/signup_page_title_d8c"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/signup_page_desc_d8c"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc" />
+
+            <!-- DuckSays -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="bottom|start"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="@dimen/duck_banner"
+                    android:layout_height="@dimen/duck_banner"
+                    android:contentDescription="덕분이"
+                    android:src="@drawable/img_duck" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_duck_banner_d8c"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="12dp"
+                    android:text="@string/duck_says_signup"
+                    android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                    android:textColor="@color/text_primary" />
+            </LinearLayout>
+
+            <!-- (3) 프로필 사진 원형 112dp + 하단 반투명 스트립 -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/profileImageArea"
                 android:layout_width="112dp"
                 android:layout_height="112dp"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="24dp">
 
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/ivProfilePreview"
@@ -61,85 +106,109 @@
                     android:layout_height="112dp"
                     android:background="@drawable/bg_profile_circle"
                     android:scaleType="centerCrop"
-                    app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
 
-                <!-- Camera icon overlay -->
+                <!-- 시안 반투명 스트립: 카메라 아이콘 + 사진 12sp (cameraOverlay ID 보존) -->
                 <FrameLayout
                     android:id="@+id/cameraOverlay"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="2dp"
-                    android:layout_marginBottom="2dp"
-                    android:background="@drawable/bg_camera_badge"
+                    android:layout_width="0dp"
+                    android:layout_height="24dp"
+                    android:background="#99412B17"
                     android:clickable="true"
                     android:focusable="true"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:contentDescription="프로필 사진 선택"
-                        android:src="@drawable/ic_camera_24" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:contentDescription="프로필 사진 선택"
+                            android:src="@drawable/ic_camera_24"
+                            app:tint="@color/brand_on_success" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="@string/signup_photo_badge"
+                            android:textColor="@color/brand_on_success"
+                            android:textSize="12sp" />
+                    </LinearLayout>
                 </FrameLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Photo picker hint -->
             <TextView
                 android:id="@+id/tvPhotoHint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginTop="8dp"
-                android:text="사진을 눌러 프로필 이미지를 선택하세요 (선택)"
-                android:textAppearance="@style/TextAppearance.SeSAC.Caption" />
+                android:layout_marginTop="12dp"
+                android:text="@string/signup_photo_hint_d8c"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+                android:textColor="@color/text_secondary" />
 
-            <!-- Nickname Input -->
+            <!-- (4) 이름/닉네임: 라벨 15sp semibold + 시안 스타일 필드 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/signup_label_name"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+                android:textSize="15sp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/tilNickname"
-                style="@style/Widget.SeSAC.TextField"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:hint="닉네임">
+                app:boxBackgroundColor="@color/surface"
+                app:boxCornerRadiusBottomEnd="@dimen/radius_xl"
+                app:boxCornerRadiusBottomStart="@dimen/radius_xl"
+                app:boxCornerRadiusTopEnd="@dimen/radius_xl"
+                app:boxCornerRadiusTopStart="@dimen/radius_xl"
+                app:boxStrokeColor="@color/border"
+                app:boxStrokeWidth="2dp"
+                app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etNickname"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="닉네임을 입력하세요"
+                    android:layout_height="52dp"
+                    android:hint="@string/signup_name_placeholder"
                     android:inputType="text"
                     android:maxLength="20"
-                    android:maxLines="1" />
+                    android:maxLines="1"
+                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
+                    android:textSize="17sp" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Helper: char counter note -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="공백만 입력할 수 없으며 최대 20자까지 가능합니다."
-                android:textAppearance="@style/TextAppearance.SeSAC.Tiny" />
-
-            <!-- Submit Button -->
+            <!-- (6) 완료 버튼 전폭 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnComplete"
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="@dimen/btn_height"
                 android:layout_marginTop="32dp"
-                android:background="@drawable/bg_grad_brand"
+                android:background="@drawable/bg_grad_brand_r22"
                 android:backgroundTint="@null"
                 android:enabled="false"
-                android:text="완료"
+                android:text="@string/signup_btn_next_d8c"
                 android:textAppearance="@style/TextAppearance.SeSAC.H4"
                 android:textColor="@color/brand_on_primary"
                 android:textStyle="bold"
-                app:cornerRadius="16dp"
+                app:cornerRadius="@dimen/radius_xl"
                 tools:enabled="true" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
