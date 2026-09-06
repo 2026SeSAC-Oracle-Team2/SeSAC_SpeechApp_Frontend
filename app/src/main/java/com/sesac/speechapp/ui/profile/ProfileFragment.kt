@@ -111,14 +111,8 @@ class ProfileFragment : Fragment() {
                 TokenManager(requireContext()).getUserEmail() ?: ""
             } ?: getString(R.string.profile_google_linked)
 
-            // 레벨 뱃지 (null이면 숨김 — 시안에 없어 항상 GONE 방향)
-            val level = user.level
-            if (level != null && level > 0) {
-                binding.tvLevel.visibility = View.VISIBLE
-                binding.tvLevel.text = "Lv. $level"
-            } else {
-                binding.tvLevel.visibility = View.GONE
-            }
+            // 레벨 뱃지: 기획에 level 개념 없음 — 항상 숨김 (D-8④ 사이클3 사용자 확정)
+            binding.tvLevel.visibility = View.GONE
 
             loadProfileImage(user.profileImageUrl)
         }

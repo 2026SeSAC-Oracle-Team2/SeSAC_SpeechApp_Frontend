@@ -50,7 +50,12 @@ class AuthRepository(private val context: Context) {
 
             Result.success(loginResult)
         } catch (e: ApiException) {
-            Result.failure(Exception("Google Sign-In failed: ${e.statusCode}"))
+            // D-8④ 사이클3: 취소(12501)는 사용자가 자주 겪는 정상 흐름 — 친화 문구로 안내
+            if (e.statusCode == 12501) {
+                Result.failure(Exception("로그인을 취소하셨어요. 다시 로그인해 주세요"))
+            } else {
+                Result.failure(Exception("Google Sign-In failed: ${e.statusCode}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
