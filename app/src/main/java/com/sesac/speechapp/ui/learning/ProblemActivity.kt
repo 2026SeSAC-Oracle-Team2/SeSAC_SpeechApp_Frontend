@@ -88,6 +88,8 @@ class ProblemActivity : AppCompatActivity() {
 
     /** D-8-C2 A-2: 마이크 pulse 애니메이터 — 녹음 중에만 활성 */
     private var micPulseAnimator: android.animation.ObjectAnimator? = null
+    private var micPulseAnimatorY: android.animation.ObjectAnimator? = null
+    private var micPulseAnimatorSet: android.animation.AnimatorSet? = null
 
     /** D-8-C2 A-6: 현재 내부 단계 — showTurn(GUIDE) → enterQuestionPhase(QUESTION) → showSubmittedState(SUBMITTED) */
     private var currentPhase = PHASE_GUIDE
@@ -324,21 +326,37 @@ class ProblemActivity : AppCompatActivity() {
     private fun startMicPulse() {
         stopMicPulse()
         val pulse = android.animation.ObjectAnimator.ofFloat(
-            binding.frameMicPulse, View.SCALE_X, View.SCALE_Y, 1f, 1.08f
+            binding.frameMicPulse, View.SCALE_X, 1f, 1.08f
         ).apply {
             duration = 700
             repeatMode = android.animation.ValueAnimator.REVERSE
             repeatCount = android.animation.ValueAnimator.INFINITE
             interpolator = android.view.animation.AccelerateDecelerateInterpolator()
         }
-        pulse.start()
+        val pulseY = android.animation.ObjectAnimator.ofFloat(
+            binding.frameMicPulse, View.SCALE_Y, 1f, 1.08f
+        ).apply {
+            duration = 700
+            repeatMode = android.animation.ValueAnimator.REVERSE
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+        }
+        android.animation.AnimatorSet().apply {
+            playTogether(pulse, pulseY)
+            start()
+        }.also { micPulseAnimatorSet = it }
         micPulseAnimator = pulse
+        micPulseAnimatorY = pulseY
     }
 
     /** pulse 정지 + 스케일 원복 — 녹음 종료·제출 완료·턴 전환 */
     private fun stopMicPulse() {
+        micPulseAnimatorSet?.cancel()
+        micPulseAnimatorSet = null
         micPulseAnimator?.cancel()
         micPulseAnimator = null
+        micPulseAnimatorY?.cancel()
+        micPulseAnimatorY = null
         if (this::binding.isInitialized) {
             binding.frameMicPulse.scaleX = 1f
             binding.frameMicPulse.scaleY = 1f
