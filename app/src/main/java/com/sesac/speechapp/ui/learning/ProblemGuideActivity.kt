@@ -8,6 +8,7 @@ import com.sesac.speechapp.R
 import com.sesac.speechapp.data.remote.dto.session.SessionCreateData
 import com.sesac.speechapp.data.remote.dto.session.TurnDto
 import com.sesac.speechapp.databinding.ActivityProblemGuideBinding
+import coil.load
 
 /**
  * D-7 1.1 문제 가이드 화면 — 턴마다 표시되는 안내 화면 (06 §3).
@@ -86,10 +87,28 @@ class ProblemGuideActivity : AppCompatActivity() {
         }
         binding.tvGuideBody.text = body
         if (extra.isBlank()) {
-            binding.tvGuideExtra.visibility = View.GONE
+            binding.containerAudioCard.visibility = View.GONE
         } else {
             binding.tvGuideExtra.text = extra
-            binding.tvGuideExtra.visibility = View.VISIBLE
+            binding.containerAudioCard.visibility = View.VISIBLE
+        }
+
+        // D-8-C1 시안: 문제 이미지 (naming/selftalk만 — listen 제외, h-44=176dp)
+        if (turn.type == "NAMING" || turn.type == "SELF_TALK") {
+            val url = turn.imageUrl
+            if (!url.isNullOrBlank()) {
+                binding.cardGuideImage.visibility = View.VISIBLE
+                val full = if (url.startsWith("http")) url
+                else com.sesac.speechapp.BuildConfig.SERVER_BASE_URL.trimEnd('/') +
+                    if (url.startsWith("/")) url else "/$url"
+                binding.imgGuideProblem.load(full, com.sesac.speechapp.data.remote.AuthImageLoader.get(this)) {
+                    crossfade(true)
+                }
+            } else {
+                binding.cardGuideImage.visibility = View.GONE
+            }
+        } else {
+            binding.cardGuideImage.visibility = View.GONE
         }
     }
 }

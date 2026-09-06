@@ -1,13 +1,10 @@
 package com.sesac.speechapp.ui.learning
 
-import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.sesac.speechapp.R
 import com.sesac.speechapp.data.repository.SessionFlowRepository
@@ -15,19 +12,18 @@ import com.sesac.speechapp.databinding.ActivityLearningSessionLoadingBinding
 import kotlinx.coroutines.launch
 
 /**
- * P3-26 로딩 화면 — POST /api/v1/sessions/today(·theme) 수신까지 대기 + D-7 1.3 [시작] 게이트.
+ * 세션 로딩 화면 — D-8-C1 시안 learn.$themeId intro 재작성.
  *
- * - 마스코트 + "문제를 준비하고 있어요…" + 스피너
- * - 스텁 응답 2~3초 (자연 지연 — 로딩 UX 필수)
- * - 실패 시 재시도 버튼
- * - D-7 1.3: "로딩 완료!" 후 [시작] 버튼 → 마이크 권한 선제 확인(획득, 거절 시 폴백 안내)
- *   — 문제 생성 전 차단해 자원 낭비 방지. 기존 PermissionOnboarding과 연계 유지
- * - 성공 시 ProblemGuideActivity(턴1 가이드)로 sessionId 전달 (turns는 캐시 경유)
+ * - Loading(오리 + 메시지) → API 응답 수신 후 즉시 "로딩 완료!" + 오리 + "{세션명} 준비가
+ *   끝났어요." + [시작] (시안의 고정 1.2초 타이머 폐기 — API 응답 대기가 기획 우선 06 v1.7)
+ * - D-7 1.3: [시작] → 마이크 권한 선제 확인 → ProblemGuideActivity
+ * - 오리 크기: 로딩 96dp → 완료 120dp (코드 전환)
+ * - 세션명: EXTRA_THEMA에서 라벨 산출 (today=오늘의 학습 / CAFE·HOSPITAL은 ProblemActivity
+ *   TYPE_LABELS 톤 근사 — 서버 sessionName은 턴 응답에 없어 클라 라벨 사용, 보고서 표기)
  */
 class LearningSessionLoadingActivity : AppCompatActivity() {
 
     companion object {
-        /** 로딩 성공 → ProblemGuideActivity 전달용 extras */
         const val EXTRA_SESSION_ID = "session_id"
         const val EXTRA_THEME = "theme"
 
@@ -43,12 +39,11 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
 
     /** 마이크 권한 런처 — onCreate 이전 등록 필수 (프로퍼티 등록 규약) */
     private val micPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (granted) {
             goToGuide()
         } else {
-            // 거절 시 폴백 안내 — 음성 문제 진입 차단 (자원 낭비 방지)
             binding.tvError.text = getString(R.string.mic_denied_fallback)
             binding.tvError.visibility = View.VISIBLE
             Toast.makeText(this, getString(R.string.mic_denied_fallback), Toast.LENGTH_LONG).show()
@@ -71,8 +66,15 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
     private fun createSession() {
         binding.btnRetry.visibility = View.GONE
         binding.tvError.visibility = View.GONE
-        binding.tvMessage.text = getString(com.sesac.speechapp.R.string.loading_session)
+        binding.tvMessage.visibility = View.VISIBLE
+        binding.tvMessage.text = getString(R.string.loading_session)
         binding.spinner.visibility = View.VISIBLE
+        binding.tvReadyTitle.visibility = View.GONE
+        binding.tvReadySession.visibility = View.GONE
+        binding.imgMascotDuck.layoutParams = binding.imgMascotDuck.layoutParams.apply {
+            width = resources.getDimensionPixelSize(R.dimen.duck_loading)
+            height = resources.getDimensionPixelSize(R.dimen.duck_loading)
+        }
 
         lifecycleScope.launch {
             try {
@@ -87,14 +89,22 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
                 SessionFlowCache.set(data)
                 sessionId = data.sessionId
 
-                // D-7 1.3: "로딩 완료!" + [시작] 버튼 (문제 화면 자동 진입 폐지)
+                // D-8-C1 시안 완료 상태: "로딩 완료!" + "{세션명} 준비가 끝났어요."
                 binding.spinner.visibility = View.GONE
-                binding.tvMessage.text = getString(R.string.loading_done)
+                binding.tvMessage.visibility = View.GONE
+                binding.imgMascotDuck.layoutParams = binding.imgMascotDuck.layoutParams.apply {
+                    width = resources.getDimensionPixelSize(R.dimen.duck_done)
+                    height = resources.getDimensionPixelSize(R.dimen.duck_done)
+                }
+                binding.tvReadyTitle.visibility = View.VISIBLE
+                binding.tvReadySession.text =
+                    getString(R.string.loading_ready_fmt, sessionLabel(thema))
+                binding.tvReadySession.visibility = View.VISIBLE
                 binding.btnStart.visibility = View.VISIBLE
                 readyToStart = true
             } catch (e: Exception) {
                 binding.spinner.visibility = View.GONE
-                binding.tvMessage.text = getString(com.sesac.speechapp.R.string.loading_session_fail)
+                binding.tvMessage.text = getString(R.string.loading_session_fail)
                 binding.tvError.text = e.message
                 binding.tvError.visibility = View.VISIBLE
                 binding.btnRetry.visibility = View.VISIBLE
@@ -102,10 +112,17 @@ class LearningSessionLoadingActivity : AppCompatActivity() {
         }
     }
 
+    /** 세션명 라벨 — thema 코드 → 화면 표기 (서버 sessionName은 턴 데이터에 미포함) */
+    private fun sessionLabel(thema: String?): String = when (thema?.uppercase()) {
+        "CAFE" -> getString(R.string.theme_cafe_title)
+        "HOSPITAL" -> getString(R.string.theme_hospital_title)
+        else -> getString(R.string.session_type_today)
+    }
+
     /** [시작] — 마이크 권한 선제 확인 후 가이드 화면 진입 (06 §3, D-7 1.3) */
     private fun onStartClicked() {
         if (!readyToStart || sessionId <= 0) return
-        val granted = ContextCompat.checkSelfPermission(
+        val granted = androidx.core.content.ContextCompat.checkSelfPermission(
             this, android.Manifest.permission.RECORD_AUDIO
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED
         if (granted) {

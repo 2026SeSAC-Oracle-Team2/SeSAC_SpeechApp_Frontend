@@ -206,11 +206,22 @@ class ProblemActivity : AppCompatActivity() {
         binding.containerChoices.visibility = View.VISIBLE
 
         val choices = turn.choices.orEmpty()
+        // D-8-C1 시안: 이미지 모드 = 2열 그리드 / 텍스트 모드 = 세로 행
+        val isImageMode = choices.isNotEmpty() && choices.all { it.mediaType.equals("image", ignoreCase = true) }
+        binding.containerChoices.orientation =
+            if (isImageMode) android.widget.LinearLayout.HORIZONTAL else android.widget.LinearLayout.VERTICAL
         choices.forEach { choice ->
             val isImage = choice.mediaType.equals("image", ignoreCase = true)
             val item = layoutInflater.inflate(
                 R.layout.item_listen_choice, binding.containerChoices, false
             )
+            if (isImageMode) {
+                val lp = item.layoutParams as? android.widget.LinearLayout.LayoutParams
+                    ?: android.widget.LinearLayout.LayoutParams(0, android.widget.LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+                lp.width = 0
+                lp.weight = 1f
+                item.layoutParams = lp
+            }
             val tvText = item.findViewById<TextView>(R.id.tvChoiceText)
             val ivImage = item.findViewById<com.google.android.material.imageview.ShapeableImageView>(R.id.ivChoiceImage)
 
@@ -229,15 +240,12 @@ class ProblemActivity : AppCompatActivity() {
                 tvText.text = choice.context
             }
             item.setOnClickListener {
-                // D-8③ 시안 선택 상태: secondary 배경 강조 (선택지 카드들 원복 후 적용)
+                // D-8-C1 시안 선택 상태: bg_choice_selected (primary 보더 + secondary 배경) —
+                // 배경 drawable 전환(패딩 보존) — setBackgroundColor 대체
                 for (i in 0 until binding.containerChoices.childCount) {
-                    binding.containerChoices.getChildAt(i).setBackgroundColor(
-                        androidx.core.content.ContextCompat.getColor(this@ProblemActivity, android.R.color.transparent)
-                    )
+                    binding.containerChoices.getChildAt(i).setBackgroundResource(R.drawable.bg_question_card)
                 }
-                item.setBackgroundColor(
-                    androidx.core.content.ContextCompat.getColor(this@ProblemActivity, R.color.brand_secondary)
-                )
+                item.setBackgroundResource(R.drawable.bg_choice_selected)
                 onChoiceSelected(choice)
             }
             binding.containerChoices.addView(item)
@@ -296,18 +304,21 @@ class ProblemActivity : AppCompatActivity() {
 
     /**
      * 대기 카운트다운 — 종료 직후 TTS 재생(LISTEN·SHADOWING) 또는 녹음 시작(음성형).
-     * 시니어 UI: 큰 숫자 카운트 + 안내 문구 (06 §3).
+     * D-8-C1 시안 WaitCountdown 카드: 원형 숫자(tvWaitNumber) + 메시지(tvWaitMessage).
+     * 문구는 기획(strings_d7 wait_*_fmt) 우선 — 시안 문구와 대조해 기획 적용.
      */
     private fun startWaitCountdown(seconds: Int, isListen: Boolean) {
         var remaining = seconds
         val fmt = if (isListen) R.string.wait_listen_fmt else R.string.wait_record_fmt
-        binding.tvWait.text = getString(fmt, remaining)
+        binding.tvWaitNumber.text = remaining.toString()
+        binding.tvWaitMessage.text = getString(fmt, remaining)
 
         waitRunnable = object : Runnable {
             override fun run() {
                 remaining--
                 if (remaining > 0) {
-                    binding.tvWait.text = getString(fmt, remaining)
+                    binding.tvWaitNumber.text = remaining.toString()
+                    binding.tvWaitMessage.text = getString(fmt, remaining)
                     mainHandler.postDelayed(this, 1000)
                 } else {
                     binding.tvWait.visibility = View.GONE
@@ -398,6 +409,7 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvSubmitCountdown.visibility = View.VISIBLE
         var remaining = SUBMIT_LIMIT_SECONDS
         binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+        applySubmitCountdownTone(remaining)
 
         submitCountdownRunnable = object : Runnable {
             override fun run() {
@@ -405,6 +417,7 @@ class ProblemActivity : AppCompatActivity() {
                 remaining--
                 if (remaining > 0) {
                     binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+                    applySubmitCountdownTone(remaining)
                     mainHandler.postDelayed(this, 1000)
                 } else {
                     onSubmitTimeUp()
@@ -412,6 +425,23 @@ class ProblemActivity : AppCompatActivity() {
             }
         }
         mainHandler.postDelayed(submitCountdownRunnable!!, 1000)
+    }
+
+    /**
+     * D-8-C1 시안 SubmitCountdown: 남은 10초 이하 = destructive 보더+배경 10%+글자 (색 반전 강조).
+     */
+    private fun applySubmitCountdownTone(remaining: Int) {
+        if (remaining <= 10) {
+            binding.tvSubmitCountdown.setBackgroundResource(R.drawable.bg_grad_brand_r22_error)
+            binding.tvSubmitCountdown.setTextColor(
+                androidx.core.content.ContextCompat.getColor(this, R.color.error)
+            )
+        } else {
+            binding.tvSubmitCountdown.setBackgroundResource(R.drawable.bg_countdown_pill)
+            binding.tvSubmitCountdown.setTextColor(
+                androidx.core.content.ContextCompat.getColor(this, R.color.text_primary)
+            )
+        }
     }
 
     /** 30초 도달 — 타입별 강제 제출 (06 §3) */

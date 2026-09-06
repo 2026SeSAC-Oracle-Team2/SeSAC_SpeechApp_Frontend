@@ -78,6 +78,15 @@ class SessionReportActivity : AppCompatActivity() {
 
         binding.tvAQ.text = data.sessionAQ.toString()
 
+        // D-8-C1 시안 (3) AI 대화 요약 배너 — talk 피드백 있을 때만 표시
+        val talkText = data.feedbacks?.talkFeedback
+        if (!talkText.isNullOrBlank()) {
+            binding.tvTalkBanner.text = talkText
+            binding.tvTalkBanner.visibility = View.VISIBLE
+        } else {
+            binding.tvTalkBanner.visibility = View.GONE
+        }
+
         // 방사형 그래프: 턴별 type+score 집계 (Intent로 전달받은 것)
         val scores = intent.getIntegerArrayListExtra(EXTRA_TURN_SCORES).orEmpty()
         val types = intent.getStringArrayListExtra(EXTRA_TURN_TYPES).orEmpty()
