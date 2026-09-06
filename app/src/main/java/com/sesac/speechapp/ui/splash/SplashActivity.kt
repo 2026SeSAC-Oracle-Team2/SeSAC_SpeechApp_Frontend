@@ -22,17 +22,18 @@ import kotlinx.coroutines.withContext
 import kotlin.random.Random
 
 /**
- * P3-27 스플래시: 덕담 로고 + 토큰 선제 검증.
+ * P3-27 스플래시: 덕담 로고 + 라우팅 진입점.
  *
- * 로직 (지시문 §5 1):
- *  - 토큰 없음 → 로그인 (최초 설치)
- *  - 토큰 있음 → GET /users/me 1회 검증
- *      성공 → 홈 (만료였다면 Authenticator가 무음 refresh 후 성공)
- *      실패(네트워크 오류 제외한 인증 실패) → 로그인
- *    401/403 + refresh 실패 시 TokenAuthenticator가 토큰을 클리어하므로
- *    이 검증은 "refresh까지 실패한 진짜 만료" 케이스를 걸러낸다.
+ * 로직 (D-8④ 사이클1 — 사용자 확정 플로우로 단순화):
+ *  1) 스플래시에서 마이크 권한을 최우선 확인한다
+ *  2-1) 권한 있음(또는 온보딩 완료) → 토큰 라우팅 진행
+ *  2-2) 권한 없음 → PermissionOnboarding 노출 → 결과 무관 토큰 라우팅 진행
+ *  토큰 라우팅 (기존 P3-27 유지):
+ *   - 토큰 없음 → 로그인 (최초 설치)
+ *   - 토큰 있음 → GET /users/me 1회 검증
+ *       성공 → 홈 (만료였다면 Authenticator가 무음 refresh 후 성공)
+ *       실패(네트워크 오류 제외한 인증 실패) → 로그인
  *  - 감성 지연: 0.5~1.5초 랜덤 후 검증 시작
- *  - 온보딩: 로그인 전환 직전 PermissionOnboarding 분기 유지 (P3-22)
  */
 class SplashActivity : AppCompatActivity() {
 
@@ -40,7 +41,7 @@ class SplashActivity : AppCompatActivity() {
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { goToNext() }
+    ) { routeNext() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,12 +52,26 @@ class SplashActivity : AppCompatActivity() {
             // 스플래시 감성 지연 0.5~1.5초
             delay(Random.nextLong(500, 1500))
 
-            if (!tokenManager.isLoggedIn()) {
-                goToLogin()
+            // D-8④ 사이클1: 권한 확인이 라우팅(로그인/메인)보다 선행한다 (사용자 확정 플로우)
+            // 1) 권한 없음 → 온보딩 노출 → 결과 무관 2) 토큰 라우팅
+            // 2-1) 권한 있음(또는 온보딩 완료) → 바로 토큰 라우팅
+            if (PermissionOnboardingActivity.shouldShow(this@SplashActivity)) {
+                permissionLauncher.launch(Intent(this@SplashActivity, PermissionOnboardingActivity::class.java))
                 return@launch
             }
+            routeNext()
+        }
+    }
 
-            // 토큰 선제 검증 — GET /users/me 1회
+    /** 권한 게이트 통과 후 토큰 라우팅 (기존 P3-27 로직 그대로 이동) */
+    private fun routeNext() {
+        if (!tokenManager.isLoggedIn()) {
+            goToLogin()
+            return
+        }
+
+        // 토큰 선제 검증 — GET /users/me 1회
+        lifecycleScope.launch {
             val profileOk = withContext(Dispatchers.IO) {
                 try {
                     val response = RetrofitClient.apiService.getMyProfile()
@@ -81,21 +96,12 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun goToMain() {
-        if (PermissionOnboardingActivity.shouldShow(this)) {
-            permissionLauncher.launch(Intent(this, PermissionOnboardingActivity::class.java))
-        } else {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
-        }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
     private fun goToLogin() {
         startActivity(Intent(this, LoginActivity::class.java))
-        finish()
-    }
-
-    private fun goToNext() {
-        startActivity(Intent(this, MainActivity::class.java))
         finish()
     }
 }
