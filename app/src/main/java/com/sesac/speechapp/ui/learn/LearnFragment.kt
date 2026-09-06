@@ -136,6 +136,7 @@ class LearnFragment : Fragment() {
      * → 로그 추가 + 실패 시 1회 재시도 (네트워크 일시 실패 대비 — 지시문 C-1).
      */
     private fun loadRecent(retried: Boolean = false) {
+        if (_binding == null) return  // D-8④ 사이클5: fragment 이탈 후 콜백 NPE 방지
         lifecycleScope.launch {
             try {
                 val data = repository.getSessionHistory()
@@ -147,9 +148,10 @@ class LearnFragment : Fragment() {
                 binding.tvMoreHint.visibility =
                     if (data.sessions.size > 3) View.VISIBLE else View.GONE
                 items.forEach { it_ ->
+                    // D-8④ 사이클5: 루트가 MaterialCardView로 바뀜(D-8-C1) — 캐스트 제거(View 수신)
                     val row = layoutInflater.inflate(
                         R.layout.item_home_recent, binding.containerRecent, false
-                    ) as LinearLayout
+                    )
                     row.findViewById<TextView>(R.id.tvRecentTopic).text = it_.sessionName
                     row.findViewById<TextView>(R.id.tvRecentDate).text = DateFormats.toDashDate(it_.createdAt)
                     row.findViewById<TextView>(R.id.tvRecentAq).text = it_.aq.toString()
@@ -168,7 +170,7 @@ class LearnFragment : Fragment() {
                 // D-8-C2 C-1: 실패 시 1회 재시도 (일시적 네트워크 실패 대비)
                 if (!retried) {
                     kotlinx.coroutines.delay(1500)
-                    loadRecent(retried = true)
+                    if (_binding != null) loadRecent(retried = true)  // 탭 이탈 후 재시도 금지 — NPE 방지
                     return@launch
                 }
                 binding.containerRecent.removeAllViews()
