@@ -35,12 +35,23 @@ import java.io.File
  *  - 상단 헤더(X + 진행바 + n/total)는 화면 고정 — 턴이 바뀌어도 리셋 없음 (끊김 해소)
  *  - 단계 전환 시 200ms alpha fade (과한 애니 금지 — 시안에도 없음)
  *
- * - LISTEN: 대기 카운트다운 3초 → TTS → TTS 완료 후 제출 카운트다운 → 선택지 탭 → [제출] (30초)
+ * D-8-C3 (시안 learn.$themeId 1:1 재작성 — R-0 근본원인 수정):
+ *  R-0: A-6(1b2dec5)에서 showTurn의 유형별 render* 호출부가 소실되어 문항 UI 전체가
+ *  미표시(데드코드) — enterQuestionPhase에 호출부 복원 + 시안 stage별 표시 시점 정리.
+ *
+ * - LISTEN: 대기 3초 → 재생 카드("질문을 들려드리고 있어요") → TTS 완료 → answer 단계
+ *   (문구 전환 + [다시 듣기] + 선택지 + [제출] + 30초 pill).
+ *   정오답 실시간 표시 없음 (사용자 확정 2026-09-06 — 제출 후 선택지 숨김)
  *   30초 도달: 선택 누름=최근 선택지 제출 / 미선택=오답 처리 제출
- * - NAMING/SELF_TALK: 대기 카운트다운 5초(사진 관찰) → 녹음 시작 → 30초
- * - SHADOWING: 대기 3초 → TTS → 재생 종료 후 3초 → 녹음 시작 → 30초. [다시 듣기] 없음
- * - 음성형: [녹음 완료] or 30초 도달 → 녹음 컷 → multipart 강제 제출
- * - 제출 완료 흐름: 제출 중 → 제출 완료 → [다음으로] (제출/이동 버튼 분리)
+ * - NAMING: 이미지 + 대기 5초(사진 관찰) → 녹음 카드 표시 + 녹음 시작 → 30초.
+ *   힌트 [힌트 보기 (n/2)] — 2회 소진 시 disabled 유지 (시안 NamingStep)
+ * - SELF_TALK: 이미지 + 대기 5초 → 녹음 카드 + 녹음 시작 → 30초. [다시 듣기] 없음
+ * - SHADOWING: 대기 3초 → 재생 카드("문장을 들려드리고 있어요" — 문장 텍스트 미표시) →
+ *   재생 종료 후 3초 → 녹음 카드 + 녹음 시작 → 30초. [다시 듣기] 없음 (기획 06 v1.7 금지)
+ * - 음성형: [녹음 완료](카드 내부 fabRecord 단일 버튼) or 30초 도달 → 녹음 컷 → multipart 강제 제출
+ * - 제출 카운트다운: LISTEN=pill(tvSubmitCountdown) / 음성형=녹음 카드 상태 문구에 통합
+ *   (시안 RecordPanel: "녹음 중이에요 · 남은 시간 N초")
+ * - 제출 완료 흐름: 제출 중 → 완료 멘트(DuckSays, 음성형만) → SubmitResult → [다음으로]
  * - 힌트(NAMING): 30초 카운트다운 진행 중에도 요청 가능 (시간 정지 없음)
  * - 타이머: Handler postDelayed — 턴 이동/제출 시 cancel, onDestroy 해제 (누수 방지)
  */
@@ -62,6 +73,8 @@ class ProblemActivity : AppCompatActivity() {
         private const val WAIT_RECORD_SECONDS = 5
         /** SHADOWING: TTS 재생 종료 후 3초 후 녹음 시작 */
         private const val SHADOWING_PRE_RECORD_SECONDS = 3
+        /** D-8-C3: NAMING 힌트 최대 2회 (06 §3) */
+        private const val HINT_MAX = 2
 
         private val TYPE_LABELS = mapOf(
             "LISTEN" to "알아듣기",
@@ -102,6 +115,8 @@ class ProblemActivity : AppCompatActivity() {
     private var recordingWasForcedSubmit = false
     /** LISTEN 미선택 오답 제출용 — choices 최대 order + 1 (서버 정답 ref와 절대 일치하지 않는 값) */
     private var noChoiceSentinel = 0
+    /** D-8-C3: NAMING 힌트 노출 수 (시안 [힌트 보기 (n/2)] 카운터) */
+    private var hintShownCount = 0
 
     // ─── 타이머 (D-7 1.2 — Handler 기반, 턴 이동/종료 시 cancel) ───
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -237,6 +252,14 @@ class ProblemActivity : AppCompatActivity() {
         if (currentPhase != PHASE_GUIDE) return
         val turn = turns.getOrNull(currentIndex) ?: return
         setPhase(PHASE_QUESTION)
+        // D-8-C3 R-0: A-6에서 소실된 유형별 render* 호출부 복원 — 문항 UI 준비.
+        // 기존 코드가 없어 문항 화면이 빈 상태였던 것이 사용자 피드백의 근본원인.
+        when (turn.type) {
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> renderListen(turn)
+            "NAMING" -> renderNaming(turn)
+            "SHADOWING" -> renderRecordingTurn(turn, showImage = false)
+            "SELF_TALK" -> renderRecordingTurn(turn, showImage = true)
+        }
         // 문항 단계 진입 시점에 대기 카운트다운 시작 (가이드 중에는 시간 흐르지 않음)
         when (turn.type) {
             "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
@@ -248,14 +271,12 @@ class ProblemActivity : AppCompatActivity() {
                 startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
             }
             "SHADOWING" -> {
-                binding.btnTts.visibility = View.GONE
                 binding.tvWait.visibility = View.VISIBLE
                 startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true, isShadowing = true)
             }
             else -> {
                 binding.tvWait.visibility = View.VISIBLE
                 startWaitCountdown(WAIT_RECORD_SECONDS, isListen = false)
-                if (turn.ttsUrl != null) binding.btnTts.visibility = View.VISIBLE
             }
         }
     }
@@ -282,15 +303,22 @@ class ProblemActivity : AppCompatActivity() {
         // 프로그레스 — A-6: 헤더는 화면 고정, 턴 전환에도 리셋 없이 값만 갱신
         binding.tvProgress.text = getString(R.string.progress_turn_fmt, index + 1, turns.size)
         binding.progressBar.progress = ((index + 1) * 100 / turns.size)
-        binding.tvTypeBadge.text = typeLabel(turn.type)
-        // SELF_TALK: 지문 고정 문구 (사용자 확정) — 스텁 상황 설명은 이미지가 담당
-        binding.tvPassage.text = if (turn.type == "SELF_TALK") "다음 상황을 보고 묘사해보세요"
-        else turn.passage ?: ""
+        // D-8-C3 S-0: 시안 배지 = "세션명 · 유형명" — 세션명은 캐시 theme 라벨 (계약 무변경)
+        binding.tvTypeBadge.text = "${sessionLabel()} · ${typeLabel(turn.type)}"
+        // D-8-C3 S-0: 문항 단계 제목 = 시안 유형별 고정 제목 (서버 passage 미표시)
+        binding.tvPassage.text = when (turn.type) {
+            "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> getString(R.string.listen_question_title)
+            "NAMING" -> getString(R.string.naming_question_title)
+            "SHADOWING" -> getString(R.string.shadowing_question_title)
+            "SELF_TALK" -> getString(R.string.selftalk_question_title)
+            else -> turn.passage ?: ""
+        }
 
         // 기본 상태 초기화 (D-7: 선택/제출 상태·카운트다운 포함)
         submittedThisTurn = false
         selectedChoice = null
         recordingWasForcedSubmit = false
+        hintShownCount = 0
         noChoiceSentinel = (turn.choices.orEmpty().maxOfOrNull { it.order } ?: 0) + 1
         resetTurnViews()
 
@@ -308,12 +336,16 @@ class ProblemActivity : AppCompatActivity() {
         binding.containerRecord.visibility = View.GONE
         binding.containerRecordActions.visibility = View.GONE
         stopMicPulse()
+        binding.containerHint.visibility = View.GONE
         binding.tvHint.visibility = View.GONE
         binding.btnHint.visibility = View.GONE
+        binding.btnHint.isEnabled = true
         binding.tvHint.text = ""
         binding.tvSubmitCountdown.visibility = View.GONE
         binding.containerSubmitted.visibility = View.GONE
         binding.btnTts.visibility = View.GONE
+        binding.containerAudioPlay.visibility = View.GONE
+        binding.tvAudioPlayStatus.text = ""
         // D-8-C2 A-1: 재진입 시 INVISIBLE 잔존 상태 초기화 (GONE 복귀 — 다음 턴 대기 카드 정상 표시)
         binding.tvWait.visibility = View.GONE
         recordedFile = null
@@ -364,19 +396,22 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     /**
-     * LISTEN 문항 UI 준비 — 선택지 리스트 + [제출] 버튼 (타이머 시작은 enterQuestionPhase 몫).
-     * D-8-C2 A-4: 시안 ListenStep 전폭 primary, 선택 전 disabled(opacity 45%는 disabled 상태로 근사).
+     * LISTEN 문항 UI 준비 — D-8-C3 시안 ListenStep:
+     * answer 단계(TTS 완료)까지 선택지·[제출]을 숨기고, 재생 카드와 문구만 준비.
+     * 표시 시점: 선택지/pill/다시듣기 = startAnswerStage, 재생 카드 = startPlayStage.
+     * 제출 후 정오답 표시 없음 (사용자 확정 — 정오답 색 drawable은 이번에 미사용).
      */
     private fun renderListen(turn: TurnDto) {
-        binding.tvChoicesTitle.visibility = View.VISIBLE
-        binding.containerChoices.visibility = View.VISIBLE
-        // D-8-C2 A-4: LISTEN에도 [제출] 버튼 제공 — 기존 버그: containerRecordActions을
-        // 열지 않아 btnSubmitRecording이 VISIBLE이어도 부모가 GONE이라 버튼이 화면에 없었음.
-        binding.containerRecordActions.visibility = View.VISIBLE
-        binding.btnHint.visibility = View.GONE
-        binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
-        binding.btnSubmitRecording.isEnabled = false
+        // 문항 단계에서는 서버 passage(질문 텍스트)를 화면에 표시하지 않음 (시안 — 듣기 문제)
+        binding.tvPassage.visibility = View.GONE
+        // 재생 카드 (시안: 원형 64dp gradient + 스피커 + 상태 문구) — play 단계에서 표시
+        binding.tvAudioPlayStatus.text = getString(R.string.listen_play_now)
+        // 선택지 데이터는 answer 단계에서 채움 — 여기서는 컨테이너만 준비
+        fillListenChoices(turn)
+    }
 
+    /** 선택지 행 생성 — answer 진입 시 표시 (시안: stage answer에서 리스트 렌더) */
+    private fun fillListenChoices(turn: TurnDto) {
         val choices = turn.choices.orEmpty()
         // D-8-C1 시안: 이미지 모드 = 2열 그리드 / 텍스트 모드 = 세로 행
         val isImageMode = choices.isNotEmpty() && choices.all { it.mediaType.equals("image", ignoreCase = true) }
@@ -412,8 +447,7 @@ class ProblemActivity : AppCompatActivity() {
                 tvText.text = choice.context
             }
             item.setOnClickListener {
-                // D-8-C1 시안 선택 상태: bg_choice_selected (primary 보더 + secondary 배경) —
-                // 배경 drawable 전환(패딩 보존) — setBackgroundColor 대체
+                // 시안 선택 상태: bg_choice_selected (primary 보더 + secondary 배경)
                 for (i in 0 until binding.containerChoices.childCount) {
                     binding.containerChoices.getChildAt(i).setBackgroundResource(R.drawable.bg_question_card)
                 }
@@ -422,22 +456,49 @@ class ProblemActivity : AppCompatActivity() {
             }
             binding.containerChoices.addView(item)
         }
-
-        // D-7 1.2: 대기 카운트다운 3초 → 종료 직후 TTS 재생 (타이머 시작은 enterQuestionPhase에서)
     }
 
-    /** NAMING — 5초 사진 관찰 → 녹음 시작. 힌트는 카운트다운 중에도 가능 */
+    /**
+     * LISTEN play 단계 (시안 stage "play") — 대기 종료 직후: 재생 카드 + TTS 재생.
+     * tvPassage는 문항 단계에서 미표시(듣기 문제) — setPhase가 VISIBLE로 전환한 것을 다시 숨김.
+     */
+    private fun startPlayStage() {
+        binding.tvPassage.visibility = View.GONE
+        binding.tvWait.visibility = View.INVISIBLE
+        binding.containerAudioPlay.visibility = View.VISIBLE
+        binding.tvAudioPlayStatus.text = getString(R.string.listen_play_now)
+        binding.btnTts.visibility = View.GONE
+    }
+
+    /**
+     * LISTEN answer 단계 (시안 stage "answer") — TTS 완료 직후:
+     * 재생 카드 문구 전환 + [다시 듣기] + 선택지 + [제출] + 30초 pill.
+     */
+    private fun startAnswerStage() {
+        binding.containerAudioPlay.visibility = View.VISIBLE
+        binding.tvAudioPlayStatus.text = getString(R.string.listen_play_done)
+        binding.btnTts.visibility = View.VISIBLE
+        binding.tvChoicesTitle.visibility = View.VISIBLE
+        binding.containerChoices.visibility = View.VISIBLE
+        binding.containerRecordActions.visibility = View.VISIBLE
+        binding.btnHint.visibility = View.GONE
+        binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
+        binding.btnSubmitRecording.isEnabled = false
+    }
+
+    /** NAMING — 5초 사진 관찰 → 녹음 시작. 힌트는 카운트다운 중에도 가능.
+     *  D-8-C3: 힌트 라벨을 시안식 카운터로 (hintShownCount는 requestHint에서 갱신) */
     private fun renderNaming(turn: TurnDto) {
         showImage(turn)
-        showRecordingUI(showHintButton = true)
+        updateHintButtonLabel()
+        // 녹음 카드는 녹음 시작 시점(startRecordingAuto)에 표시 — 시안 stage wait에는
+        // 이미지+카운트다운만 존재
     }
 
     private fun renderRecordingTurn(turn: TurnDto, showImage: Boolean) {
         if (showImage) showImage(turn)
-        showRecordingUI(showHintButton = false)
-        if (turn.type != "SHADOWING" && turn.ttsUrl != null) {
-            binding.btnTts.visibility = View.VISIBLE
-        }
+        // D-8-C3: [다시 듣기](btnTts)는 LISTEN 전용 — 음성형 렌더에서 표시하지 않음
+        // (시안 SpontaneousStep/NamingStep에 재생 버튼 없음. SHADOWING은 기획 06 v1.7 금지)
     }
 
     private fun showImage(turn: TurnDto) {
@@ -451,16 +512,19 @@ class ProblemActivity : AppCompatActivity() {
         }
     }
 
-    private fun showRecordingUI(showHintButton: Boolean) {
-        // D-8-C2 A-2: 시안 RecordPanel 카드 + 보조 행 동시 표시
+    /** 녹음 카드 UI — 시안 RecordPanel. 녹음 시작 시점에만 호출 (D-8-C3 표시 시점 정리) */
+    private fun showRecordingUI() {
         binding.cardRecord.visibility = View.VISIBLE
         binding.containerRecord.visibility = View.VISIBLE
-        binding.containerRecordActions.visibility = View.VISIBLE
-        binding.btnHint.visibility = if (showHintButton) View.VISIBLE else View.GONE
-        binding.btnSubmitRecording.isEnabled = false
-        binding.btnSubmitRecording.text = getString(R.string.btn_recording_start)
+        binding.containerRecordActions.visibility = View.GONE // 보조행 폐지 — [녹음 완료]는 카드 내부 fabRecord 단일 버튼
         binding.tvRecordingStatus.text = getString(R.string.recording_now)
         binding.tvRecordingTimer.text = getString(R.string.recording_timer_default)
+    }
+
+    /** NAMING 힌트 버튼 라벨 — 시안 [힌트 보기 (n/2)] 카운터 (2회 소진 시 disabled) */
+    private fun updateHintButtonLabel() {
+        binding.btnHint.text = getString(R.string.btn_hint_d8c, hintShownCount)
+        binding.btnHint.isEnabled = hintShownCount < HINT_MAX
     }
 
     // ─── 대기 카운트다운 (3초/5초) ────────────────────────────────
@@ -503,13 +567,19 @@ class ProblemActivity : AppCompatActivity() {
         val turn = turns.getOrNull(currentIndex) ?: return
         when (turn.type) {
             "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
-                // D-8-C2 A-3: TTS 재생 완료 후 제출 카운트다운 시작 (재생 중 표시/감소 없음)
-                playTtsWithCompletion { startSubmitCountdown() }
+                // D-8-C3 시안 ListenStep: play 단계 — 재생 카드 표시 후 TTS, 완료 시 answer 단계
+                startPlayStage()
+                playTtsWithCompletion { startAnswerStage(); startSubmitCountdown() }
             }
             "SHADOWING" -> {
+                // D-8-C3 시안 RepeatStep: play 단계 — 재생 카드("문장을 들려드리고 있어요")만,
+                // 문장 텍스트 미표시. TTS 완료 → 3초 재대기 → 녹음 (기존 체계 유지)
+                startPlayStage()
                 playTtsWithCompletion { startShadowingPreRecord() }
             }
             "NAMING", "SELF_TALK" -> {
+                // 시안 stage record 진입 — 녹음 카드 표시와 녹음 시작이 동일 시점
+                showRecordingUI()
                 startRecordingAuto()
             }
         }
@@ -564,13 +634,11 @@ class ProblemActivity : AppCompatActivity() {
             return
         }
         if (recordingHelper.start()) {
-            // 녹음 중 확실한 표시 — 버튼을 [녹음 완료]로 전환 (시니어 UI: 색상 대신 텍스트)
+            // 시안 RecordPanel: 카드 내부 [녹음 완료] 단일 버튼 — text 전환으로 상태 표시
             binding.fabRecord.text = getString(R.string.btn_recording_stop)
             binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 ContextCompat.getColor(this, R.color.error)
             )
-            binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
-            binding.btnSubmitRecording.isEnabled = true
             binding.tvRecordingStatus.text = getString(R.string.recording_now)
             startMicPulse()
             startSubmitCountdown()
@@ -582,23 +650,35 @@ class ProblemActivity : AppCompatActivity() {
     // ─── 제출 카운트다운 30초 (모든 타입 공통) ──────────────────────
 
     /**
-     * 제출 카운트다운 30초 — 시각적 표시.
+     * 제출 카운트다운 30초 — D-8-C3: 시안에서 LISTEN=SubmitCountdown pill /
+     * 음성형=RecordPanel 내부 상태 문구("녹음 중이에요 · 남은 시간 N초")로 분기 표시.
      * 도달 시: LISTEN=CASE 2/3 강제 제출 / 음성형=녹음 컷 → multipart 강제 제출.
      */
     private fun startSubmitCountdown() {
         if (submittedThisTurn) return
-        binding.tvSubmitCountdown.visibility = View.VISIBLE
         var remaining = SUBMIT_LIMIT_SECONDS
-        binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
-        applySubmitCountdownTone(remaining)
+        val turn = turns.getOrNull(currentIndex)
+        val isListen = turn?.type?.startsWith("LISTEN") == true
+        if (isListen) {
+            binding.tvSubmitCountdown.visibility = View.VISIBLE
+            binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+            applySubmitCountdownTone(remaining)
+        } else {
+            binding.tvSubmitCountdown.visibility = View.GONE
+            binding.tvRecordingStatus.text = getString(R.string.record_panel_fmt, remaining)
+        }
 
         submitCountdownRunnable = object : Runnable {
             override fun run() {
                 if (submittedThisTurn) return
                 remaining--
                 if (remaining > 0) {
-                    binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
-                    applySubmitCountdownTone(remaining)
+                    if (isListen) {
+                        binding.tvSubmitCountdown.text = getString(R.string.submit_countdown_fmt, remaining)
+                        applySubmitCountdownTone(remaining)
+                    } else {
+                        binding.tvRecordingStatus.text = getString(R.string.record_panel_fmt, remaining)
+                    }
                     mainHandler.postDelayed(this, 1000)
                 } else {
                     onSubmitTimeUp()
@@ -667,13 +747,11 @@ class ProblemActivity : AppCompatActivity() {
     private fun onChoiceSelected(choice: ChoiceDto) {
         if (submittedThisTurn) return
         selectedChoice = choice
-        // 선택 완료 → [제출] 버튼 (06 §3: 제출(제한)과 다음으로(자유) 분리)
-        binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
+        // 선택 완료 → [제출] 활성 (answer 단계에서만 존재하는 버튼)
         binding.btnSubmitRecording.isEnabled = true
-        binding.btnSubmitRecording.visibility = View.VISIBLE
     }
 
-    /** 음성형: [녹음 시작]→[녹음 완료] 토글 / LISTEN: [제출] */
+    /** 음성형: 카드 내부 [녹음 완료](fabRecord) 토글 / LISTEN: [제출] */
     private fun onRecordingSubmitClicked() {
         val turn = turns.getOrNull(currentIndex) ?: return
         if (turn.type == "LISTEN" || turn.type == "LISTEN_TEXT" || turn.type == "LISTEN_PICTURE") {
@@ -693,7 +771,6 @@ class ProblemActivity : AppCompatActivity() {
             binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
                 ContextCompat.getColor(this, R.color.primary)
             )
-            binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
             submitRecording()
         } else {
             if (!recordingHelper.hasPermission()) {
@@ -706,8 +783,6 @@ class ProblemActivity : AppCompatActivity() {
                 binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
                     ContextCompat.getColor(this, R.color.error)
                 )
-                binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
-                binding.btnSubmitRecording.isEnabled = true
                 binding.tvRecordingStatus.text = getString(R.string.recording_now)
                 startMicPulse()
                 startSubmitCountdown()
@@ -718,13 +793,15 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     /**
-     * LISTEN 제출 — byTimeout=true면 A-5 타임오버 문구로 표시 (정상 제출은 기존 문구 유지).
+     * LISTEN 제출 — 제출 후 정오답 표시 없음 (사용자 확정): 선택지·pill 즉시 숨김,
+     * SubmitResult(체크+답안이 제출되었어요+[다음으로])만 표시.
      */
     private fun submitListen(selected: Int, byTimeout: Boolean = false) {
         if (submittedThisTurn) return
         submittedThisTurn = true
         val turn = turns[currentIndex]
         cancelSubmitCountdown()
+        hideListenAnswerUi()
         showSubmitProgress()
 
         lifecycleScope.launch {
@@ -739,6 +816,14 @@ class ProblemActivity : AppCompatActivity() {
                 Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    /** 제출 시작 직후 LISTEN 문항 UI 정리 — 시안은 제출 후 선택지 블록이 사라짐 */
+    private fun hideListenAnswerUi() {
+        binding.containerChoices.visibility = View.GONE
+        binding.tvChoicesTitle.visibility = View.GONE
+        binding.containerRecordActions.visibility = View.GONE
+        binding.btnTts.visibility = View.GONE
     }
 
     private fun submitRecording() {
@@ -780,13 +865,27 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     /**
-     * 제출 완료 상태 — D-8-C2 A-5: 강제 제출(타임오버·미선택 자동 제출)은
-     * "이런! 시간이 초과되었어요!"로 표시해 시간 초과를 인지시킨다. 정상 제출은 기존 문구 유지.
-     * A-6: 같은 화면 내 SubmitResult 블록으로 전환 (SUBMITTED 단계).
+     * 제출 완료 상태 — 시안 SubmitResult(체크 원형 + "답안이 제출되었어요" + [다음으로]).
+     * D-8-C3 사용자 확정: 정오답 실시간 표시 없음 — 음성형은 완료 멘트(DuckSays)만,
+     * 타임오버 강제 제출은 기존 "이런! 시간이 초과되었어요!" 문구 유지 (A-5).
      */
     private fun showSubmittedState(byTimeout: Boolean = false) {
         binding.scoringOverlay.visibility = View.GONE
         binding.tvSubmitCountdown.visibility = View.GONE
+        // 음성형 완료 멘트 (시안 DuckSays — 유형별 문구) — LISTEN은 멘트 없음 (사용자 확정)
+        val turn = turns.getOrNull(currentIndex)
+        val doneMsg = when (turn?.type) {
+            "NAMING" -> getString(R.string.duck_naming_done)
+            "SHADOWING" -> getString(R.string.duck_repeat_done)
+            "SELF_TALK" -> getString(R.string.duck_selftalk_done)
+            else -> null
+        }
+        if (doneMsg != null && !byTimeout) {
+            binding.tvDuckDoneMessage.text = doneMsg
+            binding.containerDuckDone.visibility = View.VISIBLE
+        } else {
+            binding.containerDuckDone.visibility = View.GONE
+        }
         binding.tvSubmittedStatus.text = getString(
             if (byTimeout) R.string.submit_timeout_msg else R.string.submitted_answer
         )
@@ -797,6 +896,8 @@ class ProblemActivity : AppCompatActivity() {
         binding.containerRecordActions.visibility = View.GONE
         binding.containerChoices.visibility = View.GONE
         binding.tvChoicesTitle.visibility = View.GONE
+        binding.containerHint.visibility = View.GONE
+        binding.containerAudioPlay.visibility = View.GONE
         stopMicPulse()
     }
 
@@ -830,18 +931,18 @@ class ProblemActivity : AppCompatActivity() {
                 val existing = binding.tvHint.text?.toString().orEmpty()
                 binding.tvHint.text = if (existing.isBlank()) "$label: ${hint.text}"
                 else "$existing\n$label: ${hint.text}"
+                // D-8-C3 R-0 수정: tvHint만 VISIBLE한 버그 — 부모 containerHint를 함께 표시
+                // (기존: containerHint GONE 방치 → 힌트 요청해도 화면에 안 보임)
+                binding.containerHint.visibility = View.VISIBLE
                 binding.tvHint.visibility = View.VISIBLE
+                hintShownCount = hint.hintOrder.coerceAtLeast(hintShownCount)
 
-                // 힌트 소진 (2개) → 버튼 숨김 (다음 턴에서 showRecordingUI가 상태 리셋)
-                if (hint.hintOrder >= 2) {
-                    binding.btnHint.visibility = View.GONE
-                } else {
-                    binding.btnHint.isEnabled = true
-                }
+                // 힌트 소진 (2개) → 시안대로 disabled 유지 (라벨 n/2 카운터 유지)
+                updateHintButtonLabel()
             } catch (e: Exception) {
                 if (turnIndex == currentIndex) {
                     Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
-                    binding.btnHint.isEnabled = true
+                    updateHintButtonLabel()
                 }
             }
         }
@@ -882,6 +983,16 @@ class ProblemActivity : AppCompatActivity() {
         val base = BuildConfig.SERVER_BASE_URL.trimEnd('/')
         val relative = if (path.startsWith("/")) path else "/$path"
         return base + relative
+    }
+
+    /**
+     * D-8-C3 S-0: 세션명 라벨 — 시안 배지 "세션명 · 유형명"용.
+     * 캐시의 theme 필드로 산출 (서버 DTO 무변경 — LearningSessionLoadingActivity와 동일 매핑).
+     */
+    private fun sessionLabel(): String = when (SessionFlowCache.get()?.theme?.uppercase()) {
+        "CAFE" -> getString(R.string.theme_cafe_title)
+        "HOSPITAL" -> getString(R.string.theme_hospital_title)
+        else -> getString(R.string.session_type_today)
     }
 
     // ─── 타이머 해제 (지시문 4.5 — onDestroy + 턴 이동 시 cancel) ──────
