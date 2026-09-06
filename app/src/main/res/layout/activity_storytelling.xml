@@ -1,61 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 이야기 턴 — 채팅 UI + D-7 AI 대화 UX (중단/마치기 전환·덕분이 생각중 버블·음성 답변 버튼) -->
+<!--
+  D-8-C1: AI 대화 화면 (시안 chat.tsx + ChatStep.tsx 재작성 — 기존 D-7 UX 로직 유지).
+  헤더[X 닫기 44dp 카드형 | "덕분이와 대화하기" 17sp bold] → 바디 라벨+턴 배지 →
+  채팅 로그(secondary 50% 컨테이너 radius 30dp) → 하단 [음성으로 답변하기] gradient-brand.
+  waiting(thinkingBubble)·녹음 UI·이탈 확인 팝업(AlertDialog 기존 로직) 유지.
+  ID 보존: tvTitle/btnStopOrFinish/rvChat/thinkingBubble/containerInput/tvTimer/
+           tvRecordingHint/btnRecord (StorytellingActivity 바인딩).
+  신규: btnClose(X 카드형 — btnStopOrFinish와 별개 헤더 요소)·tvChatTurnBadge.
+  ⚠ 시안 하단 버튼 [나가기/그만하기] = 기존 우상단 [학습 중단하기/학습 마치기] 전환 체계와
+    통합 — 시니어 텍스트 버튼 규약 유지로 우상단 유지, X는 닫기(이탈 팝업 연결 보류 표기).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_grad_warm">
 
+    <!-- 공통 헤더: X 닫기 44dp 카드형 -->
+    <FrameLayout
+        android:id="@+id/btnClose"
+        android:layout_width="@dimen/session_close_size"
+        android:layout_height="@dimen/session_close_size"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_session_close"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/session_close_desc"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/text_secondary" />
+    </FrameLayout>
+
+    <!-- "덕분이와 대화하기" 17sp bold -->
     <TextView
         android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
-        android:text="이야기하기"
-        android:textAppearance="@style/TextAppearance.SeSAC.H3"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="8dp"
+        android:text="@string/chat_header_title"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle"
+        app:layout_constraintBottom_toBottomOf="@id/btnClose"
+        app:layout_constraintEnd_toStartOf="@id/btnStopOrFinish"
+        app:layout_constraintStart_toEndOf="@id/btnClose"
+        app:layout_constraintTop_toTopOf="@id/btnClose" />
 
-    <!-- D-7 2.1/2.2: 우상단 [학습 중단하기] — 4턴째 답변 후 [학습 마치기]로 전환 (코드에서 라벨 갱신) -->
-    <!-- D-8③ 시안 chat: X 버튼 카드형 — 라벨 유지(시니어 텍스트 버튼 규약), 카드 배경만 -->
+    <!-- D-7 2.1/2.2: [학습 중단하기]→[학습 마치기] 전환 (코드에서 라벨 갱신) — 시니어 텍스트 버튼 유지 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStopOrFinish"
         style="@style/Widget.Material3.Button.TextButton"
         android:layout_width="wrap_content"
         android:layout_height="44dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="20dp"
         android:backgroundTint="@color/surface"
         android:text="@string/talk_stop_btn"
         android:textColor="@color/error"
-        app:cornerRadius="16dp"
+        app:cornerRadius="@dimen/radius_xl"
         app:strokeColor="@color/border"
         app:strokeWidth="1dp"
         app:layout_constraintBaseline_toBaselineOf="@id/tvTitle"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- 바디 라벨 + 턴 배지 -->
+    <LinearLayout
+        android:id="@+id/containerChatMeta"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnClose">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/chat_body_label"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:textColor="@color/text_secondary" />
+
+        <!-- n/max턴 pill 배지 (코드에서 갱신) -->
+        <TextView
+            android:id="@+id/tvChatTurnBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.Badge"
+            android:textColor="@color/accent"
+            tools:text="1/8턴" />
+    </LinearLayout>
+
+    <!-- 채팅 로그 컨테이너 (secondary 50% radius 30dp — RecyclerView 패딩으로 시안 재현) -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChat"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/bg_chat_log_container"
         android:clipToPadding="false"
+        android:padding="16dp"
         android:paddingBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/thinkingBubble"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+        app:layout_constraintTop_toBottomOf="@id/containerChatMeta" />
 
-    <!-- D-7 2.4 + D-8③ 시안 Loading: 덕분이 마스코트 + 생각중 말풍선 -->
+    <!-- D-7 2.4 + 시안 Loading: 덕분이 마스코트 + 생각중 말풍선 -->
     <LinearLayout
         android:id="@+id/thinkingBubble"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="20dp"
         android:layout_marginBottom="8dp"
-        android:background="@drawable/bg_duck_banner"
+        android:background="@drawable/bg_duck_banner_d8c"
         android:gravity="center_vertical"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
@@ -65,8 +135,8 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="@dimen/duck_chat"
+            android:layout_height="@dimen/duck_chat"
             android:contentDescription="덕분이"
             android:src="@drawable/img_duck" />
 
@@ -82,11 +152,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:text="@string/talk_thinking"
-            android:textAppearance="@style/TextAppearance.SeSAC.Body"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
             android:textColor="@color/text_secondary" />
     </LinearLayout>
 
-    <!-- 하단 입력 영역: [음성으로 답변하기] + 30초 제한 표시 (D-7 2.5) -->
+    <!-- 하단 입력 영역: [음성으로 답변하기] gradient-brand + 30초 제한 표시 (D-7 2.5) -->
     <LinearLayout
         android:id="@+id/containerInput"
         android:layout_width="0dp"
@@ -113,7 +183,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/recording_timer_default"
-                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
                 android:textColor="@color/text_secondary" />
 
             <TextView
@@ -123,22 +193,21 @@
                 android:layout_weight="2"
                 android:gravity="center"
                 android:text="@string/btn_voice_answer"
-                android:textAppearance="@style/TextAppearance.SeSAC.Body"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
                 android:textColor="@color/text_muted" />
         </LinearLayout>
 
-        <!-- D-7 시니어 UI: 마이크 아이콘 대신 굵은 텍스트 버튼 — [음성으로 답변하기]/[녹음 완료] 전환 -->
+        <!-- [음성으로 답변하기] — 시니어 텍스트 버튼 + 마이크 아이콘 20dp -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRecord"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="@dimen/btn_height"
             android:layout_marginTop="8dp"
-            android:backgroundTint="@color/primary"
+            android:drawableEnd="@drawable/ic_mic_filled_24"
+            android:drawableTint="@color/brand_on_primary"
             android:text="@string/btn_voice_answer"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/surface"
-            android:textStyle="bold"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

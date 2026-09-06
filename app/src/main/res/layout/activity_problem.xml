@@ -1,143 +1,214 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 문제 풀이 화면 — 유형별 레이아웃 전환(visibility) + 상단 프로그레스 + D-7 시간 통제 -->
+<!--
+  D-8-C1: 문제 풀이 화면 (시안 learn.$themeId StepView 재작성 — 기존 유형별 전환 로직 유지).
+  공통 헤더[X 44dp | 진행바 flex-1 | n/total] → 유형 배지+지문 → WaitCountdown 카드
+  (원형 80dp secondary + 숫자 32sp extrabold accent + 메시지 16sp) → 재생 카드(원형 64dp
+  gradient-brand 스피커) → SubmitCountdown(보더 2dp pill 배지, 위험 상태 색 반전) →
+  선택지 리스트(텍스트 세로 64dp / 이미지 2열 h-32=128dp) → RecordPanel(원형 96dp accent
+  마이크 pulse + "녹음 중이에요 · 남은 시간 N초" + [녹음 완료]) → SubmitResult(체크 원형 40dp).
+  ID 보존 전수: tvProgress/tvTypeBadge/progressBar/tvPassage/tvWait/tvSubmitCountdown/btnTts/
+    cardImage/ivProblem/tvChoicesTitle/containerChoices/tvHint/containerRecord/tvTimer/
+    fabRecord/btnHint/btnSubmitRecording/tvRecordingHint/containerSubmitted/btnNext/scoringOverlay.
+  시간값(3초/5초/30초)은 기획 06 v1.7 유지 — 시안과 동일해 그대로.
+-->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm">
 
 <androidx.core.widget.NestedScrollView
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-
-
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingHorizontal="20dp"
     android:paddingBottom="24dp">
 
-    <!-- 상단: 프로그레스 "n / 8" -->
-    <TextView
-        android:id="@+id/tvProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H3"
-        android:textColor="@color/text_primary"
-        tools:text="1 / 8"
+    <!-- 공통 헤더: X 닫기 44dp 카드형 (이탈 확인 팝업은 ProblemActivity finish 흐름 — 보류 표기) -->
+    <FrameLayout
+        android:id="@+id/btnClose"
+        android:layout_width="@dimen/session_close_size"
+        android:layout_height="@dimen/session_close_size"
+        android:background="@drawable/bg_session_close"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-        android:id="@+id/tvTypeBadge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:background="@drawable/bg_badge"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
-        android:textColor="@color/primary"
-        tools:text="따라말하기"
-        app:layout_constraintBaseline_toBaselineOf="@id/tvProgress"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <ImageView
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="center"
+            android:contentDescription="@string/session_close_desc"
+            android:src="@drawable/ic_close_24"
+            app:tint="@color/text_secondary" />
+    </FrameLayout>
 
+    <!-- 진행바 flex-1 -->
     <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/progressBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="12dp"
-        app:indicatorColor="@color/primary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvProgress"
-        app:trackColor="@color/border"
-        app:trackCornerRadius="4dp"
-        app:trackThickness="6dp" />
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        app:indicatorColor="@color/brand_grad_brand_start"
+        app:layout_constraintBottom_toBottomOf="@id/btnClose"
+        app:layout_constraintEnd_toStartOf="@id/tvProgress"
+        app:layout_constraintStart_toEndOf="@id/btnClose"
+        app:layout_constraintTop_toTopOf="@id/btnClose"
+        app:trackColor="@color/brand_secondary"
+        app:trackCornerRadius="@dimen/radius_pill"
+        app:trackThickness="@dimen/progress_height" />
 
-    <!-- 공통: 문제 지문 -->
+    <!-- n/total -->
+    <TextView
+        android:id="@+id/tvProgress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRowDesc"
+        android:textColor="@color/text_secondary"
+        android:textStyle="bold"
+        tools:text="1/8"
+        app:layout_constraintBottom_toBottomOf="@id/btnClose"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btnClose" />
+
+    <!-- 유형 배지 + 지문 -->
+    <TextView
+        android:id="@+id/tvTypeBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/bg_badge"
+        android:paddingHorizontal="12dp"
+        android:paddingVertical="4dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.Badge"
+        android:textColor="@color/accent"
+        tools:text="이름대기"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/btnClose" />
+
     <TextView
         android:id="@+id/tvPassage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="20dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.StepTitle"
         android:textColor="@color/text_primary"
-        tools:text="여기서 금요일이 며칠인지 말해보세요"
+        tools:text="사진 안의 물건은 무엇인가요?"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/progressBar" />
+        app:layout_constraintTop_toBottomOf="@id/tvTypeBadge" />
 
-    <!-- D-7: 대기 카운트다운 (3초/5초 — 시니어 UI 큰 문구) -->
-    <TextView
+    <!-- ─── WaitCountdown 카드: 원형 80dp secondary + 숫자 32sp + 메시지 (코드에서 갱신) ─── -->
+    <LinearLayout
         android:id="@+id/tvWait"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_feedback_card"
-        android:gravity="center"
-        android:padding="16dp"
-        android:lineSpacingExtra="6dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H3"
-        android:textColor="@color/primary"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingVertical="32dp"
         android:visibility="gone"
-        tools:text="3초 후 질문 음성이 나와요.\n집중하세요! 3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvPassage" />
+        app:layout_constraintTop_toBottomOf="@id/tvPassage">
 
-    <!-- D-7: 제출 카운트다운 30초 (시각적 표시) -->
-    <!-- D-8③ 시안 SubmitCountdown: 보더 카드형 — 남은시간 강조 -->
+        <FrameLayout
+            android:layout_width="@dimen/wait_circle_size"
+            android:layout_height="@dimen/wait_circle_size"
+            android:background="@drawable/bg_wait_circle">
+
+            <TextView
+                android:id="@+id/tvWaitNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.WaitNumber"
+                tools:text="3" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvWaitMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+            tools:text="3초 후 질문 음성이 나와요. 집중하세요!" />
+    </LinearLayout>
+
+    <!-- ─── 재생 카드 (LISTEN·SHADOWING 재생 중 표시 — 코드에서 표시 전환) ─── -->
+    <LinearLayout
+        android:id="@+id/containerAudioPlay"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingVertical="24dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvWait">
+
+        <FrameLayout
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:background="@drawable/bg_grad_brand_r22">
+
+            <ImageView
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center"
+                android:contentDescription="음성 재생"
+                android:src="@drawable/ic_volume_24"
+                app:tint="@color/brand_on_primary" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvAudioPlayStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+            tools:text="질문을 들려드리고 있어요" />
+    </LinearLayout>
+
+    <!-- ─── SubmitCountdown 30초 (보더 2dp pill — 위험 상태 배경 전환은 코드) ─── -->
     <TextView
         android:id="@+id/tvSubmitCountdown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="16dp"
         android:background="@drawable/bg_countdown_pill"
         android:paddingHorizontal="16dp"
         android:paddingVertical="10dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
         android:textColor="@color/text_primary"
         android:textStyle="bold"
         android:visibility="gone"
         tools:text="남은 시간 30초"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvWait" />
+        app:layout_constraintTop_toBottomOf="@id/containerAudioPlay" />
 
-    <!-- TTS 재생 (LISTEN 공통 — 있을 때만 표시. SHADOWING은 코드에서 GONE) -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTts"
-        style="@style/Widget.Material3.Button.TonalButton"
-        android:layout_width="wrap_content"
-        android:layout_height="44dp"
-        android:layout_marginTop="12dp"
-        android:text="▶ 다시듣기"
-        app:cornerRadius="12dp"
-        app:layout_constraintStart_toStartOf="@id/tvPassage"
-        app:layout_constraintTop_toBottomOf="@id/tvSubmitCountdown" />
-
-    <!-- 이미지 영역 (NAMING/SELF_TALK) -->
+    <!-- ─── 이미지 영역 (NAMING/SELF_TALK 208dp radius 30dp) ─── -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardImage"
         android:layout_width="0dp"
-        android:layout_height="200dp"
-        android:layout_marginHorizontal="24dp"
+        android:layout_height="208dp"
         android:layout_marginTop="16dp"
         android:visibility="gone"
-        app:cardCornerRadius="30dp"
+        app:cardCornerRadius="@dimen/radius_3xl"
         app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnTts">
+        app:layout_constraintTop_toBottomOf="@id/tvSubmitCountdown">
 
         <ImageView
             android:id="@+id/ivProblem"
@@ -154,44 +225,27 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="정답을 골라주세요"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
-        android:textColor="@color/text_secondary"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@id/tvPassage"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardImage" />
 
     <LinearLayout
         android:id="@+id/containerChoices"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvChoicesTitle" />
 
-    <!-- ─── 힌트 표시 (NAMING) ─── -->
-    <TextView
-        android:id="@+id/tvHint"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/bg_feedback_card"
-        android:padding="12dp"
-        android:textAppearance="@style/TextAppearance.SeSAC.Body"
-        android:textColor="@color/text_primary"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/containerRecord" />
-
     <!-- ─── 녹음/제출 (NAMING/SHADOWING/SELF_TALK + LISTEN 제출 버튼 공용) ─── -->
+    <!-- 시안 RecordPanel: 원형 96dp accent 마이크 + "녹음 중이에요 · 남은 시간 N초" + [녹음 완료] -->
     <LinearLayout
         android:id="@+id/containerRecord"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:gravity="center_horizontal"
@@ -201,100 +255,182 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardImage">
 
-        <TextView
-            android:id="@+id/tvTimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/recording_timer_default"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
-            android:textColor="@color/text_primary" />
+        <FrameLayout
+            android:layout_width="@dimen/record_mic_size"
+            android:layout_height="@dimen/record_mic_size"
+            android:background="@drawable/bg_mic_circle_accent">
 
-        <!-- D-7 시니어 UI: 마이크 아이콘 대신 굵은 텍스트 버튼 (녹음 시작/녹음 완료) -->
-        <!-- D-8③ 시안 RecordPanel: [녹음 시작/완료] — gradient-brand 버튼 (녹음 중 코드 tint로 error 전환) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/fabRecord"
-            android:layout_width="wrap_content"
-            android:layout_height="64dp"
-            android:layout_marginTop="12dp"
-            android:minWidth="220dp"
-            android:backgroundTint="@color/primary"
-            android:text="@string/btn_recording_start"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
-            android:textColor="@color/brand_on_primary"
-            android:textStyle="bold"
-            app:cornerRadius="16dp" />
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHint"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:layout_marginEnd="8dp"
-                android:text="@string/hint_request"
-                android:visibility="gone"
-                app:cornerRadius="12dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSubmitRecording"
-                android:layout_width="wrap_content"
-                android:layout_height="44dp"
-                android:backgroundTint="@color/primary"
-                android:text="@string/btn_recording_stop"
-                android:textColor="@color/surface"
-                android:enabled="false"
-                app:cornerRadius="12dp" />
-        </LinearLayout>
+            <ImageView
+                android:id="@+id/ivRecordMic"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:contentDescription="녹음"
+                android:src="@drawable/ic_mic_filled_24" />
+        </FrameLayout>
 
         <TextView
             android:id="@+id/tvRecordingHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/recording_now"
-            android:textAppearance="@style/TextAppearance.SeSAC.Body"
-            android:textColor="@color/text_muted" />
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+
+        <!-- 녹음 시간 (기존 체계 유지 — 시안에 없지만 타이머 표시는 기획 요소) -->
+        <TextView
+            android:id="@+id/tvTimer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/recording_timer_default"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+            android:textColor="@color/text_secondary" />
+
+        <!-- D-8③ 시니어 UI 유지: 텍스트 버튼 (시안 [녹음 완료] 텍스트 근사) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/fabRecord"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="16dp"
+            android:minWidth="220dp"
+            android:text="@string/btn_recording_start"
+            app:cornerRadius="@dimen/radius_xl" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHint"
+                style="@style/Widget.SeSAC.Button.D8C.Outline"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/btn_height"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:drawableStart="@drawable/ic_lightbulb_24"
+                android:drawablePadding="6dp"
+                android:drawableTint="@color/brand_on_primary"
+                android:text="@string/hint_request"
+                android:textSize="15sp"
+                android:visibility="gone"
+                app:cornerRadius="@dimen/radius_xl" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSubmitRecording"
+                style="@style/Widget.SeSAC.Button.D8C.Primary"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/btn_height"
+                android:layout_weight="1"
+                android:enabled="false"
+                android:text="@string/btn_recording_stop"
+                app:cornerRadius="@dimen/radius_xl" />
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- D-7: 제출 완료 상태 — "답안이 제출되었어요" + [다음으로] (제출/이동 분리) -->
+    <!-- ─── 힌트 표시 (NAMING) — DuckSays 패턴 ─── -->
+    <LinearLayout
+        android:id="@+id/containerHint"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="bottom|start"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/containerRecord">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="덕분이"
+            android:src="@drawable/img_duck" />
+
+        <TextView
+            android:id="@+id/tvHint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_duck_banner_d8c"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+
+    <!-- ─── 제출 완료 상태: SubmitResult — 체크 원형 40dp + "답안이 제출되었어요" + [다음으로] ─── -->
     <LinearLayout
         android:id="@+id/containerSubmitted"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
         android:layout_marginTop="24dp"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/containerRecord">
+        app:layout_constraintTop_toBottomOf="@id/containerHint">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/submitted_answer"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
-            android:textColor="@color/success" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp">
+
+            <FrameLayout
+                android:layout_width="@dimen/result_check_size"
+                android:layout_height="@dimen/result_check_size"
+                android:background="@drawable/bg_check_circle_success">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="제출 완료"
+                    android:src="@drawable/ic_check_24"
+                    app:tint="@color/success" />
+            </FrameLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:text="@string/submitted_answer"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNext"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
+            android:layout_height="@dimen/btn_height"
             android:layout_marginTop="16dp"
-            android:background="@drawable/bg_grad_brand"
-            android:backgroundTint="@null"
             android:text="@string/btn_next"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/brand_on_primary"
-            android:textStyle="bold"
-            app:cornerRadius="16dp" />
+            app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
+
+    <!-- TTS 다시듣기 (LISTEN — 있을 때만 표시. 시안 [다시 듣기] outline) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnTts"
+        style="@style/Widget.SeSAC.Button.D8C.Outline"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginTop="12dp"
+        android:drawableStart="@drawable/ic_volume_24"
+        android:drawablePadding="6dp"
+        android:drawableTint="@color/text_primary"
+        android:text="@string/btn_replay"
+        android:textSize="15sp"
+        android:visibility="gone"
+        app:cornerRadius="@dimen/radius_xl"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/containerSubmitted" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

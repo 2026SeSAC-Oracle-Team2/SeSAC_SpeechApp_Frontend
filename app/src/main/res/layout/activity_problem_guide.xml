@@ -1,123 +1,202 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- D-7 1.1 문제 가이드 화면 — 턴별 안내 텍스트 + [준비됐어요!] (06 §3, 안내 TTS 없음) -->
+<!--
+  D-8-C1: 문제 가이드 화면 (시안 learn.$themeId GuideView 재작성).
+  공통 헤더[X 44dp 카드형 | 진행바 flex-1 | n/total 14sp semibold muted] →
+  DuckSays 가이드 텍스트(기획 06 v1.7 문구 우선) + 음성 안내 카드(listen/repeat만) +
+  문제 이미지(naming/selftalk, 176dp radius 30dp) + [준비됐어요!]/[다음](chat) 버튼.
+  ID 보존: tvProgress/tvTypeBadge/progressBar/imgDuckGuide/tvMascot(GONE)/tvGuideBody/
+           tvGuideExtra/btnReady (ProblemGuideActivity 바인딩).
+  신규: btnClose(X 닫기 — 이탈 팝업 연결은 보류, 일단 finish 흐름은 기존 없음 → 비연결 보류 표기)·
+        imgGuideProblem(문제 이미지)·containerAudioCard(음성 안내 카드).
+-->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/bg_grad_warm"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="24dp"
-        android:paddingTop="32dp"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
         android:paddingBottom="32dp">
 
-        <!-- 상단: n / 8 + 유형 배지 (문제 화면과 동일 체계) -->
-        <TextView
-            android:id="@+id/tvProgress"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
-            android:textColor="@color/text_primary"
-            tools:text="1 / 8"
+        <!-- 공통 헤더: X 닫기 44dp 카드형 -->
+        <FrameLayout
+            android:id="@+id/btnClose"
+            android:layout_width="@dimen/session_close_size"
+            android:layout_height="@dimen/session_close_size"
+            android:background="@drawable/bg_session_close"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent">
 
-        <TextView
-            android:id="@+id/tvTypeBadge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_badge"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="4dp"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/primary"
-            tools:text="알아듣기"
-            app:layout_constraintBaseline_toBaselineOf="@id/tvProgress"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_gravity="center"
+                android:contentDescription="@string/session_close_desc"
+                android:src="@drawable/ic_close_24"
+                app:tint="@color/text_secondary" />
+        </FrameLayout>
 
+        <!-- 진행바 flex-1 -->
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/progressBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:indicatorColor="@color/primary"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvProgress"
-            app:trackColor="@color/border"
-            app:trackCornerRadius="4dp"
-            app:trackThickness="6dp" />
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            app:indicatorColor="@color/brand_grad_brand_start"
+            app:layout_constraintBottom_toBottomOf="@id/btnClose"
+            app:layout_constraintEnd_toStartOf="@id/tvProgress"
+            app:layout_constraintStart_toEndOf="@id/btnClose"
+            app:layout_constraintTop_toTopOf="@id/btnClose"
+            app:trackColor="@color/brand_secondary"
+            app:trackCornerRadius="@dimen/radius_pill"
+            app:trackThickness="@dimen/progress_height" />
 
-        <!-- D-8③ 시안 GuideView: duck 마스코트 + 말풍선 안내 (DuckSays 패턴) -->
-        <ImageView
-            android:id="@+id/imgDuckGuide"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
-            android:layout_marginTop="24dp"
-            android:contentDescription="덕분이"
-            android:src="@drawable/img_duck"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/progressBar" />
-
-        <!-- 기존 텍스트 마스코트 — ID 보존, gone -->
+        <!-- n/total 14sp semibold muted -->
         <TextView
-            android:id="@+id/tvMascot"
+            android:id="@+id/tvProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/splash_title"
-            android:visibility="gone"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/progressBar" />
-
-        <!-- 타입별 안내 본문 (strings_d7: guide_*_body + 부가 문구 병합) -->
-        <TextView
-            android:id="@+id/tvGuideBody"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:background="@drawable/bg_feedback_card"
-            android:padding="20dp"
-            android:lineSpacingExtra="6dp"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/text_primary"
-            tools:text="이번 문제는 '알아듣기' 입니다."
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRowDesc"
+            android:textColor="@color/text_secondary"
+            android:textStyle="bold"
+            tools:text="1/8"
+            app:layout_constraintBottom_toBottomOf="@id/btnClose"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvMascot" />
+            app:layout_constraintTop_toTopOf="@id/btnClose" />
 
+        <!-- 유형 배지 (n/total 옆 — 기존 체계 유지) -->
         <TextView
-            android:id="@+id/tvGuideExtra"
-            android:layout_width="0dp"
+            android:id="@+id/tvTypeBadge"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:lineSpacingExtra="4dp"
-            android:textAppearance="@style/TextAppearance.SeSAC.Body"
-            android:textColor="@color/text_secondary"
-            tools:text="질문을 듣고 30초 안에 선택지를 골라야해요."
+            android:background="@drawable/bg_badge"
+            android:paddingHorizontal="12dp"
+            android:paddingVertical="4dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.Badge"
+            android:textColor="@color/accent"
+            tools:text="알아듣기"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/btnClose" />
+
+        <!-- DuckSays 가이드 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="bottom|start"
+            android:orientation="horizontal"
+            android:id="@+id/containerGuideDuck"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/imgDuckGuide" />
+            app:layout_constraintTop_toBottomOf="@id/tvTypeBadge">
 
+            <ImageView
+                android:id="@+id/imgDuckGuide"
+                android:layout_width="@dimen/duck_banner"
+                android:layout_height="@dimen/duck_banner"
+                android:contentDescription="덕분이"
+                android:src="@drawable/img_duck" />
+
+            <!-- 기존 텍스트 마스코트 — ID 보존, gone -->
+            <TextView
+                android:id="@+id/tvMascot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/splash_title"
+                android:visibility="gone" />
+
+            <!-- 타입별 안내 본문 (strings_d7 guide_* — 기획 문구 우선) -->
+            <TextView
+                android:id="@+id/tvGuideBody"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_duck_banner_d8c"
+                android:lineSpacingExtra="4dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                android:textColor="@color/text_primary"
+                tools:text="이번 문제는 '알아듣기' 입니다." />
+        </LinearLayout>
+
+        <!-- 음성 안내 카드 (listen/repeat만 — 코드에서 표시 전환) -->
+        <LinearLayout
+            android:id="@+id/containerAudioCard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_ai_banner"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/containerGuideDuck">
+
+            <ImageView
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="음성 안내"
+                android:src="@drawable/ic_volume_24"
+                app:tint="@color/accent" />
+
+            <TextView
+                android:id="@+id/tvGuideExtra"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:lineSpacingExtra="4dp"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                android:textColor="@color/text_secondary"
+                tools:text="이번 문제는 AI 음성을 들어야 해요." />
+        </LinearLayout>
+
+        <!-- 문제 이미지 (naming/selftalk — 176dp radius 30dp, 코드에서 표시 전환) -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardGuideImage"
+            android:layout_width="0dp"
+            android:layout_height="176dp"
+            android:layout_marginTop="20dp"
+            android:visibility="gone"
+            app:cardCornerRadius="@dimen/radius_3xl"
+            app:cardElevation="2dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/containerAudioCard">
+
+            <ImageView
+                android:id="@+id/imgGuideProblem"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="문제 이미지"
+                android:scaleType="centerCrop" />
+        </androidx.cardview.widget.CardView>
+
+        <!-- [준비됐어요!] / [다음] -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnReady"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="32dp"
-            android:background="@drawable/bg_grad_brand"
-            android:backgroundTint="@null"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="24dp"
             android:text="@string/guide_btn_ready"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/brand_on_primary"
-            android:textStyle="bold"
-            app:cornerRadius="16dp"
+            app:cornerRadius="@dimen/radius_xl"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvGuideExtra" />
+            app:layout_constraintTop_toBottomOf="@id/cardGuideImage" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

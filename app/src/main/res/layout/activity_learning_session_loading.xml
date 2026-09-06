@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 로딩 화면: 마스코트 + 스피너 + 재시도 + D-7 [시작] 게이트 (로딩 완료 후 권한 선제 확인) -->
+<!--
+  D-8-C1: 세션 로딩 화면 (시안 learn.$themeId intro 재작성).
+  intro = Loading(오리 bounce+메시지) → 1.2초 후 "로딩 완료!" + 오리 120dp +
+  "{세션명} 준비가 끝났어요." + [시작] 버튼.
+  시간값 1.2초는 로딩 API 응답 대기가 우선(기획 06 v1.7) — API 응답 후 즉시 완료 전환
+  (기획 우선 적용 — 시안의 고정 1.2초 타이머는 폐기, 보고서 표기).
+  ID 보존: imgMascotDuck/tvMascot(GONE)/tvMessage/spinner/tvError/btnRetry/btnStart.
+  신규: tvReadyTitle(로딩 완료! 제목)·tvReadySession(세션명 문구).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm">
 
-    <!-- D-8③ 시안 Loading 컴포넌트: duck 마스코트 96dp (애니메이션 없음 — 시니어 가독성) -->
+    <!-- 오리 96dp(로딩) / 120dp(완료 — 코드에서 크기 전환) -->
     <ImageView
         android:id="@+id/imgMascotDuck"
         android:layout_width="96dp"
@@ -18,9 +26,9 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.40" />
+        app:layout_constraintVertical_bias="0.32" />
 
-    <!-- 기존 텍스트 마스코트 — D-8③에서 이미지로 대체 (ID 보존, gone) -->
+    <!-- 기존 텍스트 마스코트 — ID 보존, gone -->
     <TextView
         android:id="@+id/tvMascot"
         android:layout_width="wrap_content"
@@ -30,17 +38,43 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- 로딩 상태 메시지 (로딩 중/실패) -->
     <TextView
         android:id="@+id/tvMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="@string/loading_session"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
+        android:textAppearance="@style/TextAppearance.SeSAC.Body"
         android:textColor="@color/text_secondary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvMascot" />
+
+    <!-- 완료 상태: "로딩 완료!" 22sp bold + "{세션명} 준비가 끝났어요." -->
+    <TextView
+        android:id="@+id/tvReadyTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/loading_ready_title"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.ReadyTitle"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgMascotDuck" />
+
+    <TextView
+        android:id="@+id/tvReadySession"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+        android:textColor="@color/text_secondary"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvReadyTitle" />
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/spinner"
@@ -68,14 +102,14 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRetry"
-        android:layout_width="wrap_content"
+        style="@style/Widget.SeSAC.Button.D8C.Outline"
+        android:layout_width="match_parent"
         android:layout_height="48dp"
+        android:layout_marginHorizontal="20dp"
         android:layout_marginTop="16dp"
-        android:backgroundTint="@color/primary"
         android:text="@string/btn_retry"
-        android:textColor="@color/surface"
         android:visibility="gone"
-        app:cornerRadius="14dp"
+        app:cornerRadius="@dimen/radius_xl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvError" />
@@ -83,18 +117,16 @@
     <!-- D-7 1.3: 로딩 완료 후 [시작] — 마이크 권한 선제 확인 게이트 -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnStart"
-        android:layout_width="wrap_content"
-        android:layout_height="56dp"
-        android:layout_marginTop="16dp"
-        android:minWidth="200dp"
-        android:backgroundTint="@color/primary"
-        android:text="@string/btn_start"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
-        android:textColor="@color/surface"
+        style="@style/Widget.SeSAC.Button.D8C.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/btn_height"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/btn_start_session"
         android:visibility="gone"
-        app:cornerRadius="14dp"
+        app:cornerRadius="@dimen/radius_xl"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnRetry" />
+        app:layout_constraintTop_toBottomOf="@id/tvReadySession" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

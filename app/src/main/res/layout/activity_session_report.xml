@@ -1,26 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- P3-26 결과 화면: AQ + 방사형 그래프 + 피드백 6종 -->
+<!--
+  D-8-C1: 학습 결과 보고서 (시안 report.tsx 302행 기준 재작성 — 기존 실데이터 바인딩 유지).
+  (1) PageTitle+desc → (2) DuckSays → (3) AI 대화 요약 배너 → (4) AQ 카드[헤더행|점수 44sp|
+  방사형 h-64 256dp] → 피드백 6종(시안 4지표 접기 카드 — 기존 피드백 카드 체계 유지로 재배치) →
+  [홈으로 돌아가기] 전폭.
+  ID 보존: tvTitle/containerLoading/containerResult/tvAQ/radarChart/tvFeedback{Listen,Naming,
+  Shadowing,SelfTalk,Talk,Total}/tvError/btnRetry/btnDone (SessionReportActivity 바인딩).
+  시안 접기 카드·문제별 상세·RecordingPlayer는 세부 보고서(SessionDetail) 데이터 계약이
+  필요 — 이 화면은 간이 보고서(finish 응답)라 기존 구조 유지 + 시안 스타일 적용.
+  세부 보고서(§8.3)의 접기 카드는 activity_session_detail 쪽 후속 작업 (보고서 표기).
+-->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingHorizontal="24dp"
+        android:paddingHorizontal="20dp"
         android:paddingTop="24dp"
         android:paddingBottom="32dp">
 
+        <!-- (1) PageTitle -->
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/report_title"
-            android:textAppearance="@style/TextAppearance.SeSAC.H1" />
+            android:text="@string/report_page_title_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/report_page_desc_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc" />
+
+        <!-- (2) DuckSays -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:gravity="bottom|start"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/duck_banner"
+                android:layout_height="@dimen/duck_banner"
+                android:contentDescription="덕분이"
+                android:src="@drawable/img_duck" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_duck_banner_d8c"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:text="@string/duck_says_report"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+
+        <!-- (3) AI 대화 요약 배너 -->
+        <TextView
+            android:id="@+id/tvTalkBanner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_ai_banner"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:text="@string/report_ai_banner_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:textColor="@color/text_primary"
+            android:visibility="gone" />
 
         <!-- 로딩 상태 -->
         <LinearLayout
@@ -30,19 +91,18 @@
             android:gravity="center"
             android:orientation="vertical">
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                app:indicatorColor="@color/primary"
-                app:indicatorSize="44dp" />
+            <ImageView
+                android:layout_width="@dimen/duck_loading"
+                android:layout_height="@dimen/duck_loading"
+                android:contentDescription="덕분이"
+                android:src="@drawable/img_duck" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="@string/report_loading"
-                android:textAppearance="@style/TextAppearance.SeSAC.H4"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
                 android:textColor="@color/text_secondary" />
         </LinearLayout>
 
@@ -54,38 +114,63 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- AQ 큰 숫자 -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/report_aq_label"
-                android:textAppearance="@style/TextAppearance.SeSAC.H4"
-                android:textColor="@color/text_secondary" />
-
-            <TextView
-                android:id="@+id/tvAQ"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"
-                android:textColor="@color/primary"
-                android:textSize="72sp"
-                android:textStyle="bold" />
-
-            <!-- 방사형 그래프 -->
-            <com.sesac.speechapp.ui.learning.RadarChartView
-                android:id="@+id/radarChart"
+            <!-- (4) AQ 카드 -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.SeSAC.Card.D8C"
                 android:layout_width="match_parent"
-                android:layout_height="280dp"
-                android:layout_marginTop="8dp" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp">
 
-            <!-- 피드백 6종 카드 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/dash_aq_title_d8c"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/report_aq_max"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+                            android:textColor="@color/text_secondary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvAQ"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="0"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.AqBig"
+                        tools:text="88" />
+
+                    <!-- 방사형 차트 h-64 = 256dp -->
+                    <com.sesac.speechapp.ui.learning.RadarChartView
+                        android:id="@+id/radarChart"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/radar_height"
+                        android:layout_marginTop="16dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 항목별 점수 섹션 (기존 피드백 6종 — 시안 4지표 체계로 라벨만 4지표 우선) -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="피드백"
-                android:textAppearance="@style/TextAppearance.SeSAC.H3" />
+                android:layout_marginTop="28dp"
+                android:text="@string/report_metric_title"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle" />
 
             <TextView
                 android:id="@+id/tvFeedbackListen"
@@ -136,25 +221,23 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnRetry"
-            android:layout_width="wrap_content"
+            style="@style/Widget.SeSAC.Button.D8C.Outline"
+            android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginTop="12dp"
-            android:backgroundTint="@color/primary"
             android:text="@string/btn_retry"
-            android:textColor="@color/surface"
             android:visibility="gone"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="@dimen/radius_xl" />
 
+        <!-- [홈으로 돌아가기] 전폭 버튼 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDone"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
             android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="24dp"
-            android:backgroundTint="@color/primary"
-            android:text="@string/btn_done"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/surface"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginTop="28dp"
+            android:text="@string/report_btn_home"
             android:visibility="gone"
-            app:cornerRadius="14dp" />
+            app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>
