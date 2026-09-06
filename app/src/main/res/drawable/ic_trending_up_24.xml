@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <!-- lucide TrendingUp (홈 통계: 평균 점수) -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M2,17 L9,10 L13,14 L21,6" />
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M14,6 L21,6 L21,13 Z" />
+</vector>

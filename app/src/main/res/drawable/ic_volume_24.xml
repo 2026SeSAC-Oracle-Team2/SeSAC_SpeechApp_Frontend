@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <!-- lucide Volume2 (음성 안내 카드·재생 카드) -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M4,9 L8,9 L13,5 L13,19 L8,15 L4,15 Z" />
+    <path
+        android:pathData="M16,9 A4,4 0 0 1 16,15 M18.5,6.5 A8,8 0 0 1 18.5,17.5"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2"
+        android:fillColor="@android:color/transparent" />
+</vector>

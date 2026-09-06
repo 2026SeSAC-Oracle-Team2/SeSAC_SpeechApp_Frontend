@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <!-- lucide Lightbulb (NAMING 힌트) -->
+    <path
+        android:fillColor="@android:color/white"
+        android:pathData="M12,2 A7,7 0 0 1 19,9 C19,11.5 17.5,13 16.5,14.5 C15.8,15.5 15.5,16 15.5,17 L8.5,17 C8.5,16 8.2,15.5 7.5,14.5 C6.5,13 5,11.5 5,9 A7,7 0 0 1 12,2 Z M9,19 L15,19 L15,21 L9,21 Z" />
+</vector>
