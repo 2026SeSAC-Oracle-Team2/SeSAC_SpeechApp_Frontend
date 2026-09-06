@@ -5,10 +5,15 @@
   D-8-C2 A-2: 녹음 UI = 시안 RecordPanel 카드 (원형 96dp accent + 마이크 40dp pulse + 상태 semibold
   + [녹음 완료] 전폭) + 보조 행([녹음 완료]·[힌트 보기]) — tvRecordingHint→tvRecordingStatus/
   tvTimer→tvRecordingTimer 개명 (kt 동기 수정).
-  ID: tvProgress/tvTypeBadge/progressBar/tvPassage/tvWait/tvSubmitCountdown/btnTts/
+  D-8-C3: 시안 1:1 상태머신 재작성 — render* 호출부 복원(R-0), play 카드(+btnTts 이동),
+  완료 멘트 containerDuckDone, 제출 후 정오답 표시 없음(사용자 확정), LISTEN pill/음성형
+  카드 문구 카운트다운 분기.
+  ID: tvProgress/tvTypeBadge/progressBar/tvPassage/tvWait/tvSubmitCountdown
+    containerAudioPlay/tvAudioPlayStatus/btnTts(재생카드 내부)
     cardImage/ivProblem/tvChoicesTitle/containerChoices/cardRecord/containerRecord/
     tvRecordingStatus/tvRecordingTimer/fabRecord/containerRecordActions/btnHint/
-    btnSubmitRecording/tvHint/containerHint/containerSubmitted/btnNext/scoringOverlay.
+    btnSubmitRecording/tvHint/containerHint/containerDuckDone/tvDuckDoneMessage/
+    containerSubmitted/btnNext/scoringOverlay.
   시간값(3초/5초/30초)은 기획 06 v1.7 유지.
 -->
 <FrameLayout
@@ -269,7 +274,8 @@
             tools:text="3초 후 질문 음성이 나와요. 집중하세요!" />
     </LinearLayout>
 
-    <!-- ─── 재생 카드 (LISTEN·SHADOWING 재생 중 표시 — 코드에서 표시 전환) ─── -->
+    <!-- ─── 재생 카드 (LISTEN·SHADOWING play 단계 — 시안: 원형 gradient + 스피커 + 상태 문구
+         + [다시 듣기] outline은 LISTEN answer 단계에만 코드에서 표시) ─── -->
     <LinearLayout
         android:id="@+id/containerAudioPlay"
         android:layout_width="0dp"
@@ -304,6 +310,21 @@
             android:layout_marginTop="12dp"
             android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
             tools:text="질문을 들려드리고 있어요" />
+
+        <!-- D-8-C3 S-1: [다시 듣기]는 시안상 재생 카드 내부 (containerSubmitted 아래에서 이동) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnTts"
+            style="@style/Widget.SeSAC.Button.D8C.Outline"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:drawableStart="@drawable/ic_volume_24"
+            android:drawablePadding="6dp"
+            android:drawableTint="@color/text_primary"
+            android:text="@string/btn_replay"
+            android:textSize="15sp"
+            android:visibility="gone"
+            app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
 
     <!-- ─── SubmitCountdown 30초 (보더 2dp pill — 위험 상태 배경 전환은 코드) ─── -->
@@ -508,7 +529,41 @@
             android:textColor="@color/text_primary" />
     </LinearLayout>
 
-    <!-- ─── 제출 완료 상태: SubmitResult — 체크 원형 40dp + "답안이 제출되었어요" + [다음으로] ─── -->
+    <!-- ─── 제출 완료 상태 ───
+         D-8-C3: 음성형 완료 멘트(DuckSays 패턴 containerDuckDone — 유형별 문구) +
+         시안 SubmitResult(체크 원형 40dp + "답안이 제출되었어요" + [다음으로]).
+         LISTEN은 멘트 없음 (사용자 확정 — 정오답 실시간 표시 폐기). -->
+    <LinearLayout
+        android:id="@+id/containerDuckDone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="bottom|start"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/containerHint">
+
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="덕분이"
+            android:src="@drawable/img_duck" />
+
+        <TextView
+            android:id="@+id/tvDuckDoneMessage"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_duck_banner_d8c"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:textColor="@color/text_primary" />
+    </LinearLayout>
+
     <LinearLayout
         android:id="@+id/containerSubmitted"
         android:layout_width="0dp"
@@ -519,7 +574,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/containerHint">
+        app:layout_constraintTop_toBottomOf="@id/containerDuckDone">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -560,23 +615,6 @@
             android:text="@string/btn_next"
             app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
-
-    <!-- TTS 다시듣기 (LISTEN — 있을 때만 표시. 시안 [다시 듣기] outline) -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTts"
-        style="@style/Widget.SeSAC.Button.D8C.Outline"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginTop="12dp"
-        android:drawableStart="@drawable/ic_volume_24"
-        android:drawablePadding="6dp"
-        android:drawableTint="@color/text_primary"
-        android:text="@string/btn_replay"
-        android:textSize="15sp"
-        android:visibility="gone"
-        app:cornerRadius="@dimen/radius_xl"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/containerSubmitted" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
