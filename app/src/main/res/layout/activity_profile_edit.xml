@@ -236,7 +236,7 @@
         android:layout_width="0dp"
         android:layout_height="52dp"
         android:layout_marginHorizontal="24dp"
-        android:layout_marginBottom="32dp"
+        android:layout_marginTop="24dp"
         android:background="@drawable/bg_grad_brand"
         android:backgroundTint="@null"
         android:text="@string/profile_save"
@@ -244,9 +244,9 @@
         android:textColor="@color/brand_on_primary"
         android:textStyle="bold"
         app:cornerRadius="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chipGroupTags" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -256,7 +256,7 @@
         app:layout_constraintBottom_toTopOf="@id/btnSave"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/chipGroupTags" />
+        app:layout_constraintTop_toBottomOf="@id/btnSave" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
