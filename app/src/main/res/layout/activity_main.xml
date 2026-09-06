@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8-C1: 하단 네비 (시안 BottomNav.tsx — 4탭 홈·학습·기록·프로필).
+  라벨: strings_d8c tab_*_d8c (시안 라벨). ID 매핑 불변: learnFragment=홈(practiceFragment=학습/
+  dashboardFragment=기록/profileFragment=프로필 — nav_graph 순서 유지, kt 변경 없음).
+  아이콘 24dp + 라벨 12sp, 상단 1dp border, 비활성 muted/활성 accent.
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm">
 
     <!-- Fragment Container -->
     <androidx.fragment.app.FragmentContainerView
@@ -18,17 +24,17 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation: 최소 60dp, 아이콘 24dp, 라벨 12sp -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="0dp"
         android:layout_height="64dp"
         android:background="@color/surface"
-        app:elevation="4dp"
+        app:elevation="0dp"
         app:itemIconSize="24dp"
         app:itemIconTint="@color/nav_item_color"
-        app:itemTextAppearanceActive="@style/TextAppearance.SeSAC.Tiny"
-        app:itemTextAppearanceInactive="@style/TextAppearance.SeSAC.Tiny"
+        app:itemTextAppearanceActive="@style/TextAppearance.SeSAC.D8C.NavLabel"
+        app:itemTextAppearanceInactive="@style/TextAppearance.SeSAC.D8C.NavLabel"
         app:itemTextColor="@color/nav_item_color"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"

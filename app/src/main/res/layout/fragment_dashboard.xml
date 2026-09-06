@@ -1,142 +1,218 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  D-8-C1: 학습 기록 탭 (시안 records.tsx 99행 기준 전면 재작성).
+  (1) PageTitle+desc → (2) AI 대화 요약 배너 → (3) AQ 지수 카드[헤더행/대형 점수 40sp/
+  방사형 차트 h-64(256dp)/4지표 2열 칩] → (4) 지난 보고서 리스트.
+  ID 보존: tvTitle/radarDashboard/tvAqBig/tvAqFallback/tvHistoryEmpty/rvHistory.
+  폐기: cardAq(구 AQ 큰숫자 카드)·cardChart 래퍼 카드 — 시안 구조로 통합 (Binding 정리 kt에서).
+  신규: tvDashDate(AQ 기준일)·tvAiBanner·chipListen/Naming/Shadowing/SelfTalk(+점수).
+-->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/bg_grad_warm"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/d8c_screen_h"
+        android:paddingBottom="96dp">
 
-        <!-- Header -->
+        <!-- (1) PageTitle -->
         <TextView
             android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="32dp"
-            android:text="@string/tab_dashboard"
-            android:textAppearance="@style/TextAppearance.SeSAC.H1"
+            android:layout_marginTop="@dimen/d8c_screen_top"
+            android:text="@string/dashboard_page_title_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- D-7 3.2: AQ 큰 숫자 카드 (대표 AQ — §8.1 userAq) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardAq"
+        <TextView
+            android:id="@+id/tvDashDesc"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@color/primary"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/dashboard_page_desc_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvTitle">
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
 
-            <androidx.constraintlayout.widget.ConstraintLayout
+        <!-- (2) AI 대화 요약 배너 -->
+        <TextView
+            android:id="@+id/tvAiBanner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_ai_banner"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp"
+            android:text="@string/dash_ai_banner_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:textColor="@color/text_primary"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDashDesc" />
+
+        <!-- (3) AQ 지수 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAq"
+            style="@style/Widget.SeSAC.Card.D8C"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAiBanner">
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="24dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvAqLabel"
-                    android:layout_width="wrap_content"
+                <!-- 헤더행: AQ 지수 | 기준일 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@string/detail_aq_label"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Label"
-                    android:textColor="@android:color/white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:orientation="horizontal">
 
+                    <TextView
+                        android:id="@+id/tvAqLabel"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/dash_aq_title_d8c"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+                        android:textColor="@color/text_primary" />
+
+                    <TextView
+                        android:id="@+id/tvDashDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+                        android:textColor="@color/text_secondary"
+                        tools:text="9월 6일 기준" />
+                </LinearLayout>
+
+                <!-- 대형 점수 40sp + 폴백 -->
                 <TextView
                     android:id="@+id/tvAqBig"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="4dp"
                     android:text="0"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Display"
-                    android:textColor="@android:color/white"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvAqLabel" />
+                    android:textAppearance="@style/TextAppearance.SeSAC.D8C.AqBig"
+                    tools:text="88" />
 
-                <!-- 폴백 문구: 점수 전부 null → "학습을 시작해보세요" -->
                 <TextView
                     android:id="@+id/tvAqFallback"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="@string/dash_fallback_empty"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
-                    android:textColor="#CCFFFFFF"
-                    android:visibility="gone"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/tvAqBig" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
-        </androidx.cardview.widget.CardView>
+                    android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+                    android:visibility="gone" />
 
-        <!-- 대표점수 방사형 그래프 (§8.1 대표점수 4축) -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardChart"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            app:cardBackgroundColor="@android:color/white"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardAq">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/dash_chart_title"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H4"
-                    android:textColor="@color/text_primary" />
-
+                <!-- 방사형 차트 h-64 = 256dp (기존 RadarChartView 재사용) -->
                 <com.sesac.speechapp.ui.learning.RadarChartView
                     android:id="@+id/radarDashboard"
                     android:layout_width="match_parent"
-                    android:layout_height="280dp"
-                    android:layout_marginTop="8dp" />
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:layout_height="@dimen/radar_height"
+                    android:layout_marginTop="12dp" />
 
-        <!-- 이력 리스트 (구 이력 탭에서 이동) -->
+                <!-- 4지표 2열 그리드 칩 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chipListen"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_metric_chip"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="8dp"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.MetricChipLabel"
+                        tools:text="알아듣기  8 / 10" />
+
+                    <TextView
+                        android:id="@+id/chipNaming"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_metric_chip"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="8dp"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.MetricChipLabel"
+                        tools:text="이름대기  9 / 10" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:baselineAligned="false"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/chipShadowing"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_metric_chip"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="8dp"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.MetricChipLabel"
+                        tools:text="따라말하기  7 / 10" />
+
+                    <TextView
+                        android:id="@+id/chipSelfTalk"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@drawable/bg_metric_chip"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="8dp"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.MetricChipLabel"
+                        tools:text="스스로말하기  16 / 20" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- (4) 지난 보고서 섹션 -->
         <TextView
             android:id="@+id/tvHistoryTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/dash_history_title"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+            android:layout_marginTop="@dimen/gap_section"
+            android:text="@string/dash_history_title_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle"
+            android:textColor="@color/text_primary"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cardChart" />
+            app:layout_constraintTop_toBottomOf="@id/cardAq" />
 
-        <!-- D-7 3.2: 빈 목록 상태 문구 -->
         <TextView
             android:id="@+id/tvHistoryEmpty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
-            android:gravity="center"
-            android:padding="24dp"
-            android:text="@string/dash_history_empty"
-            android:textAppearance="@style/TextAppearance.SeSAC.H4"
-            android:textColor="@color/text_muted"
+            android:layout_marginTop="12dp"
+            android:text="@string/dash_history_empty_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -146,11 +222,9 @@
             android:id="@+id/rvHistory"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:nestedScrollingEnabled="false"
+            android:layout_marginTop="12dp"
             android:clipToPadding="false"
-            android:paddingBottom="24dp"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:nestedScrollingEnabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tvHistoryEmpty" />

@@ -1,214 +1,390 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  D-8-C1: 프로필 탭 (시안 profile.tsx 158행 기준 전면 재작성).
+  (1) PageTitle → (2) 프로필 카드[원형 64dp+카메라 배지 28dp | 닉네임 19sp bold+연필 /
+  Google 연결 14sp] → (3) 설정 섹션(토글 2개+알림 시간 행) → (4) 계정 카드(로그아웃/회원탈퇴).
+  ID 보존: tvNickname/tvEmail/ivProfile/frameProfileImage/spinnerProfile/progressBar/
+           tvLevel(시안에 없음 — GONE 유지)/btnSettings(시안에 없음 — GONE 전환)/btnLogout.
+  신규: ivCameraBadge(카메라 배지)·btnEditNickname·switchPushProfile/switchReminderProfile/
+        tvNotiTime·btnWithdrawProfile. 기존 기능 흐름 유지(프로필 편집=ProfileEditActivity 호출).
+  ⚠ 닉네임 인라인 편집은 기존 ProfileEditActivity 호출로 통일 (지시문 §4-10).
+-->
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@drawable/bg_grad_warm"
+    android:fillViewport="true">
 
-    <!-- Header -->
-    <TextView
-        android:id="@+id/tvTitle"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        android:text="프로필"
-        android:textAppearance="@style/TextAppearance.SeSAC.H1"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:paddingHorizontal="@dimen/d8c_screen_h"
+        android:paddingBottom="96dp">
 
-    <!-- Profile Image (circular) -->
-    <TextView
-        android:id="@+id/tvNickname"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="사용자"
-        android:textAppearance="@style/TextAppearance.SeSAC.H2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
-
-    <TextView
-        android:id="@+id/tvEmail"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:text=""
-        android:textAppearance="@style/TextAppearance.SeSAC.Caption"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvNickname" />
-
-    <TextView
-        android:id="@+id/tvLevel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:background="@drawable/bg_badge"
-        android:paddingHorizontal="12dp"
-        android:paddingVertical="4dp"
-        android:text="Lv. 1"
-        android:textAppearance="@style/TextAppearance.SeSAC.Label"
-        android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvEmail" />
-
-    <FrameLayout
-        android:id="@+id/frameProfileImage"
-        android:layout_width="96dp"
-        android:layout_height="96dp"
-        android:layout_marginTop="10dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvLevel">
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/ivProfile"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:background="@drawable/bg_profile_circle"
-            android:contentDescription="프로필 사진"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
-
-        <!-- 이미지 로딩 스피너: 이미지가 실제로 그려지는 동안에만 표시 -->
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:id="@+id/spinnerProfile"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:layout_gravity="center"
-            android:indeterminate="true"
-            android:visibility="gone"
-            app:indicatorColor="@color/primary"
-            app:indicatorSize="28dp"
-            app:trackThickness="3dp" />
-    </FrameLayout>
-
-    <!-- Nickname -->
-
-    <!-- Email -->
-
-    <!-- Level Badge -->
-
-    <!-- Loading Progress -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginTop="8dp"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvLevel" />
-
-    <!-- Stats Row -->
-    <androidx.cardview.widget.CardView
-        android:id="@+id/cardStats"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="20dp"
-        app:cardBackgroundColor="@android:color/white"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="2dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/frameProfileImage">
-
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- (1) PageTitle -->
+        <TextView
+            android:id="@+id/tvPageTitle"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="20dp">
+            android:layout_marginTop="@dimen/d8c_screen_top"
+            android:text="@string/profile_page_title_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- (2) 프로필 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardProfile"
+            style="@style/Widget.SeSAC.Card.D8C"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPageTitle">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tvSessionsCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="12"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H2"
-                    android:textColor="@color/accent" />
+                <!-- 원형 사진 64dp + 카메라 배지 28dp -->
+                <FrameLayout
+                    android:id="@+id/frameProfileImage"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                    <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/ivProfile"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:background="@drawable/bg_profile_circle"
+                        android:contentDescription="프로필 사진"
+                        android:scaleType="centerCrop"
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.SeSAC.CircleImage" />
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/spinnerProfile"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="center"
+                        android:indeterminate="true"
+                        android:visibility="gone"
+                        app:indicatorColor="@color/primary"
+                        app:indicatorSize="24dp"
+                        app:trackThickness="3dp" />
+
+                    <FrameLayout
+                        android:id="@+id/ivCameraBadge"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_gravity="bottom|end"
+                        android:background="@drawable/bg_camera_badge"
+                        android:clickable="true"
+                        android:focusable="true">
+
+                        <ImageView
+                            android:layout_width="15dp"
+                            android:layout_height="15dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="프로필 사진 변경"
+                            android:src="@drawable/ic_camera_24"
+                            app:tint="@color/brand_on_primary" />
+                    </FrameLayout>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="완료한 세션"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Caption" />
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:id="@+id/btnEditNickname"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tvNickname"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="사용자"
+                            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                            android:textColor="@color/text_primary"
+                            android:textSize="19sp" />
+
+                        <ImageView
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginStart="6dp"
+                            android:contentDescription="@string/profile_nickname_edit_desc"
+                            android:src="@drawable/ic_pencil_24"
+                            app:tint="@color/text_secondary" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tvEmail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/profile_google_linked"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+                        android:textColor="@color/text_secondary" />
+
+                    <!-- 시안에 없는 요소 — 숨김 유지 (삭제 금지: 바인딩 보존) -->
+                    <TextView
+                        android:id="@+id/tvLevel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/bg_badge"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="4dp"
+                        android:textAppearance="@style/TextAppearance.SeSAC.Label"
+                        android:textColor="@color/brand_on_primary"
+                        android:visibility="gone" />
+                </LinearLayout>
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="40dp"
-                android:background="@color/divider" />
+        <!-- 로딩 스피너 (시안에 없음 — GONE 유지, 바인딩 보존) -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="8dp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardProfile" />
+
+        <!-- (3) 설정 섹션 -->
+        <TextView
+            android:id="@+id/tvSettingsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/gap_section"
+            android:text="@string/profile_section_settings"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/progressBar" />
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardSettingsRows"
+            style="@style/Widget.SeSAC.Card.D8C"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:contentPadding="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvSettingsLabel">
 
             <LinearLayout
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvAvgScore"
-                    android:layout_width="wrap_content"
+                <!-- 토글 1: 푸시 알림 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="78"
-                    android:textAppearance="@style/TextAppearance.SeSAC.H2"
-                    android:textColor="@color/accent" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="12dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_toggle_push"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/profile_toggle_push_desc"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRowDesc" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchPushProfile"
+                        android:layout_width="56dp"
+                        android:layout_height="32dp"
+                        android:checked="true" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border" />
+
+                <!-- 토글 2: 연습 알림 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="평균 점수"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Caption" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="12dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_toggle_practice"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/profile_toggle_practice_desc"
+                            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRowDesc" />
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switchReminderProfile"
+                        android:layout_width="56dp"
+                        android:layout_height="32dp"
+                        android:checked="true" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border" />
+
+                <!-- 알림 시간 행 -->
+                <LinearLayout
+                    android:id="@+id/tvNotiTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/profile_noti_time"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/setting_time_default"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+                        android:textColor="@color/accent" />
+                </LinearLayout>
             </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+        <!-- (4) 계정 카드 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAccount"
+            style="@style/Widget.SeSAC.Card.D8C"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:contentPadding="4dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardSettingsRows">
 
-    <!-- Settings Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSettings"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="@color/primary"
-        android:text="설정"
-        android:textAppearance="@style/TextAppearance.SeSAC.H4"
-        android:textColor="@android:color/white"
-        app:cornerRadius="14dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardStats" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-    <!-- Logout Button -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="12dp"
-        android:backgroundTint="@android:color/transparent"
-        android:text="로그아웃"
-        android:textAppearance="@style/TextAppearance.SeSAC.Body"
-        android:textColor="@color/error"
-        app:cornerRadius="14dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/btnSettings"
-        app:strokeColor="@color/error"
-        app:strokeWidth="1dp" />
+                <LinearLayout
+                    android:id="@+id/btnLogout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="12dp">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/profile_logout"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="열기"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/text_secondary" />
+                </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border" />
+
+                <LinearLayout
+                    android:id="@+id/btnWithdrawProfile"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="12dp"
+                    android:paddingVertical="12dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/profile_withdraw"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+                        android:textColor="@color/error" />
+
+                    <ImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:contentDescription="열기"
+                        android:src="@drawable/ic_chevron_right_24"
+                        app:tint="@color/text_secondary" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 기존 설정 진입 버튼 — 시안에 없음 → GONE 유지 (SettingActivity 진입은 카드 행으로 대체 가능하나
+             기존 로직 유지 원칙에 따라 바인딩만 보존) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSettings"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="설정"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/cardAccount" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>

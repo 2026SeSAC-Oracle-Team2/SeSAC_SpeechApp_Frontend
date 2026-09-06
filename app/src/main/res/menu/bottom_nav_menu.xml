@@ -1,22 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 하단 네비 아이콘 — 시안 lucide (House·GraduationCap·ChartLine·User) 스트로크형 교체 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- 홈 (구 학습): 오늘의 학습 + 실력 지표 -->
+    <!-- 홈 (learnFragment) — 시안 House -->
     <item
         android:id="@+id/learnFragment"
         android:icon="@drawable/ic_home_24"
-        android:title="@string/tab_home" />
-    <!-- 학습: 테마별 학습 (구 이력 자리) -->
+        android:title="@string/tab_home_d8c" />
+    <!-- 학습 (practiceFragment) — 시안 GraduationCap -->
     <item
         android:id="@+id/practiceFragment"
-        android:icon="@drawable/ic_theme_24"
-        android:title="@string/tab_practice" />
-    <!-- 대시보드: 점수 추이(방사형) + 이력 리스트 이동 -->
+        android:icon="@drawable/ic_school_24"
+        android:title="@string/tab_practice_d8c" />
+    <!-- 기록 (dashboardFragment) — 시안 ChartLine -->
     <item
         android:id="@+id/dashboardFragment"
         android:icon="@drawable/ic_analytics_24"
-        android:title="@string/tab_dashboard" />
+        android:title="@string/tab_dashboard_d8c" />
+    <!-- 프로필 (profileFragment) — 시안 User -->
     <item
         android:id="@+id/profileFragment"
         android:icon="@drawable/ic_person_24"
-        android:title="@string/tab_profile" />
+        android:title="@string/tab_profile_d8c" />
 </menu>

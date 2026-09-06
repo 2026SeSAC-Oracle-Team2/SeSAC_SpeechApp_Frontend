@@ -1,35 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8-C1: 홈 탭 (시안 home.tsx 112행 기준 전면 재작성 — "레이아웃은 전적으로 design 기준").
+  구성 순서: (1) 날짜+인사 헤더 → (2) DuckSays → (3) 2열 통계 카드 → (4) 오늘의 학습 카드
+  → (5) 최근 학습 결과 → (6) 최근 3건 리스트 → (7) FAB(말풍선+오리).
+  ID 보존: tvTitle/cardHero/btnStart/containerStats(tvStreakValue·tvAvgValue·tvDeltaValue)/
+           containerRecent/tvRecentEmpty/tvMoreHint (Binding 파손 방지 — 지시문 §5).
+-->
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background"
+    android:background="@drawable/bg_grad_warm"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/d8c_screen_h"
+        android:paddingBottom="160dp">
 
-        <!-- Title: 홈 -->
-        <TextView
-            android:id="@+id/tvTitle"
+        <!-- (7) FAB: 말풍선 + 오리 원형 버튼 (시안 home.tsx 우하단 — ChatActivity 연결) -->
+        <LinearLayout
+            android:id="@+id/fabChat"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="24dp"
-            android:text="@string/tab_home"
-            android:textAppearance="@style/TextAppearance.SeSAC.H1"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_fab_bubble"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="10dp"
+                    android:text="@string/fab_speech_bubble"
+                    android:textAppearance="@style/TextAppearance.SeSAC.D8C.FabBubble" />
+
+                <!-- 꼬리(회전 사각) -->
+                <View
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="-6dp"
+                    android:background="@drawable/bg_fab_bubble_tail"
+                    android:rotation="45" />
+            </FrameLayout>
+
+            <FrameLayout
+                android:layout_width="@dimen/fab_duck_size"
+                android:layout_height="@dimen/fab_duck_size"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_fab_circle"
+                android:elevation="6dp">
+
+                <ImageView
+                    android:layout_width="@dimen/fab_duck_inner"
+                    android:layout_height="@dimen/fab_duck_inner"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/fab_chat_desc"
+                    android:src="@drawable/img_duck" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- (1) 헤더: 오늘 날짜 + 인사 -->
+        <TextView
+            android:id="@+id/tvHomeDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/d8c_screen_top"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            tools:text="9월 6일 토요일"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- D-8③ 시안 home: DuckSays 배너 (마스코트 + 말풍선) -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/home_greeting"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageTitle"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvHomeDate" />
+
+        <!-- (2) DuckSays 버블: 오리 72dp + 말풍선 카드 -->
         <LinearLayout
             android:id="@+id/containerDuckSaysHome"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:gravity="bottom|start"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
@@ -37,8 +107,8 @@
             app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
             <ImageView
-                android:layout_width="72dp"
-                android:layout_height="72dp"
+                android:layout_width="@dimen/duck_banner"
+                android:layout_height="@dimen/duck_banner"
                 android:contentDescription="덕분이"
                 android:src="@drawable/img_duck" />
 
@@ -47,30 +117,31 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
-                android:background="@drawable/bg_duck_banner"
-                android:padding="16dp"
-                android:text="@string/duck_says_theme_banner"
-                android:textAppearance="@style/TextAppearance.SeSAC.Body"
+                android:background="@drawable/bg_duck_banner_d8c"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:text="@string/duck_says_home_banner"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
                 android:textColor="@color/text_primary" />
         </LinearLayout>
 
-        <!-- D-8②b 홈 통계 2카드 (연속 학습 / 평균 점수) — 시안 home.tsx 기준 -->
+        <!-- (3) 2열 통계 카드 grid-cols-2 gap-3 — include 경유 참조 규약(binding.containerStats.tvX) -->
         <include
             android:id="@+id/containerStats"
             layout="@layout/view_home_stats_cards"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/containerDuckSaysHome" />
 
-        <!-- Hero Card: 오늘의 학습 -->
+        <!-- (4) 오늘의 학습 카드 -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardHero"
-            style="@style/Widget.SeSAC.Card.Hero"
+            style="@style/Widget.SeSAC.Card.D8C"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -78,12 +149,9 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-                <!-- 제목 + 문항 배지 (시안: 오늘의 학습 · 12문항 뱃지 → SSOT 문구) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -95,7 +163,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/card_today_title"
-                        android:textAppearance="@style/TextAppearance.SeSAC.H3"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle"
                         android:textColor="@color/text_primary" />
 
                     <TextView
@@ -104,57 +172,50 @@
                         android:background="@drawable/bg_badge"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="4dp"
-                        android:text="@string/card_today_sub_d8b"
-                        android:textAppearance="@style/TextAppearance.SeSAC.Label"
+                        android:text="@string/card_today_badge_d8c"
+                        android:textAppearance="@style/TextAppearance.SeSAC.D8C.Badge"
                         android:textColor="@color/accent" />
                 </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="@string/card_today_sub"
-                    android:textAppearance="@style/TextAppearance.SeSAC.Body"
-                    android:textColor="@color/text_secondary" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnStart"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
+                    android:layout_height="@dimen/btn_height"
                     android:layout_marginTop="16dp"
-                    android:background="@drawable/bg_grad_brand"
+                    android:background="@drawable/bg_grad_brand_r22"
                     android:backgroundTint="@null"
-                    android:text="@string/card_today_start"
+                    android:drawableEnd="@drawable/ic_play_24"
+                    android:drawableTint="@color/brand_on_primary"
+                    android:gravity="center"
+                    android:text="@string/card_today_btn"
                     android:textAppearance="@style/TextAppearance.SeSAC.H4"
                     android:textColor="@color/brand_on_primary"
                     android:textStyle="bold"
-                    app:cornerRadius="16dp" />
+                    app:cornerRadius="@dimen/radius_xl" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- D-8③ 시안 home: 최근 학습 결과 — 최근 3개 (더보기는 기록 탭) -->
+        <!-- (5) 최근 학습 결과 섹션 제목 -->
         <TextView
             android:id="@+id/tvRecentTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="28dp"
-            android:text="@string/home_recent_title"
-            android:textAppearance="@style/TextAppearance.SeSAC.H3"
+            android:layout_marginTop="@dimen/gap_section"
+            android:text="@string/home_recent_title_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SectionTitle"
             android:textColor="@color/text_primary"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardHero" />
 
+        <!-- (6) 최근 3건 — 빈 상태 + 리스트 (kt가 item_home_recent inflate) -->
         <TextView
             android:id="@+id/tvRecentEmpty"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
             android:layout_marginTop="12dp"
-            android:text="@string/home_recent_empty"
-            android:textAppearance="@style/TextAppearance.SeSAC.Body"
-            android:textColor="@color/text_secondary"
+            android:text="@string/home_recent_empty_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
             android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -164,30 +225,23 @@
             android:id="@+id/containerRecent"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
             android:layout_marginTop="12dp"
-            android:layout_marginBottom="24dp"
             android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tvRecentTitle" />
+            app:layout_constraintTop_toBottomOf="@id/tvRecentEmpty" />
 
-        <!-- 기록 탭 안내 (최근 목록 전체는 기록 탭) -->
         <TextView
             android:id="@+id/tvMoreHint"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="24dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="24dp"
-            android:text="@string/home_recent_more"
-            android:textAppearance="@style/TextAppearance.SeSAC.Caption"
-            android:textColor="@color/text_secondary"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/home_recent_more_d8c"
+            android:textAppearance="@style/TextAppearance.SeSAC.D8C.PageDesc"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/containerRecent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>
