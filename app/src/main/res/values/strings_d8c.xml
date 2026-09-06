@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  D-8-C1 레이아웃 재작성 신규 문구 (strings.xml 커밋 금지 상태 회피용 별도 파일 — d8b 계열 연장).
+  문구 원칙: 시안 톤 + 기획(SSOT) 우선 — 시안 표기와 기획 문구가 다르면 기획 우선 적용.
+-->
+<resources>
+    <!-- ═══ 공통 ═══ -->
+    <string name="d8c_screen_padding_note">화면 공통 여백은 dimens screen_padding_* 토큰 사용</string>
+
+    <!-- ═══ 하단 네비 (시안 BottomNav: 홈·학습·기록·프로필) ═══ -->
+    <string name="tab_home_d8c">홈</string>
+    <string name="tab_practice_d8c">학습</string>
+    <string name="tab_dashboard_d8c">기록</string>
+    <string name="tab_profile_d8c">프로필</string>
+
+    <!-- ═══ 홈 (시안 home.tsx — 헤더/덕분이/FAB) ═══ -->
+    <string name="home_greeting">덕분님, 오늘도 반가워요</string>
+    <string name="home_greeting_nickname_fmt">%s님, 오늘도 반가워요</string>
+    <string name="duck_says_home_banner">같이 오늘의 학습을 해볼까요? 꽥꽥꽥</string>
+    <string name="home_stat_streak_label_d8c">연속 학습</string>
+    <string name="home_stat_avg_label_d8c">평균 점수</string>
+    <string name="card_today_badge_d8c">문제 8개 + 덕분이 대화, 약 8분</string>
+    <string name="card_today_btn">학습하기</string>
+    <string name="home_recent_title_d8c">최근 학습 결과</string>
+    <string name="home_recent_empty_d8c">아직 학습 기록이 없어요. 오늘의 학습을 시작해보세요!</string>
+    <string name="home_recent_more_d8c">더 많은 기록은 기록 탭에서 볼 수 있어요</string>
+    <string name="fab_speech_bubble">덕분이와 함께 대화해요</string>
+    <string name="fab_chat_desc">덕분이와 대화 시작하기</string>
+
+    <!-- ═══ 테마별 학습 (시안 learn.index.tsx) ═══ -->
+    <string name="practice_page_title_d8c">테마별 학습</string>
+    <string name="practice_page_desc_d8c">오늘 마음이 가는 상황을 골라 주세요.</string>
+    <string name="duck_says_practice">한 세션은 12개 항목, 약 8분이에요.</string>
+
+    <!-- ═══ 학습 기록 (시안 records.tsx) ═══ -->
+    <string name="dashboard_page_title_d8c">학습 기록</string>
+    <string name="dashboard_page_desc_d8c">조금씩 쌓인 연습을 살펴보세요.</string>
+    <string name="dash_ai_banner_d8c">AI 대화: 최근 대화에서 대답이 한층 또렷해지셨어요.</string>
+    <string name="dash_aq_title_d8c">AQ 지수</string>
+    <string name="dash_aq_basis_fmt">%s 기준</string>
+    <string name="dash_history_title_d8c">지난 보고서</string>
+    <string name="dash_history_empty_d8c">아직 학습 기록이 없어요</string>
+    <string name="dash_history_row_aq_fmt">%s · AQ %d</string>
+
+    <!-- ═══ 프로필 (시안 profile.tsx) ═══ -->
+    <string name="profile_page_title_d8c">프로필</string>
+    <string name="profile_google_linked">Google 계정으로 연결됨</string>
+    <string name="profile_section_settings">설정</string>
+    <string name="profile_toggle_push">푸시 알림</string>
+    <string name="profile_toggle_push_desc">오늘의 덕담, 주간 요약을 보내드려요.</string>
+    <string name="profile_toggle_practice">연습 알림</string>
+    <string name="profile_toggle_practice_desc">정하신 시간에 부담 없이 알려드려요.</string>
+    <string name="profile_noti_time">알림 시간 설정</string>
+    <string name="profile_logout">로그아웃</string>
+    <string name="profile_withdraw">회원탈퇴</string>
+    <string name="profile_nickname_edit_desc">닉네임 편집</string>
+
+    <!-- ═══ 로그인 (시안 index.tsx — 앱명은 확정 '덕담' 유지) ═══ -->
+    <string name="login_subtitle_line1">오늘도 한 마디씩 편안하게.</string>
+    <string name="login_subtitle_line2">매일 8분, 생활 속 말하기 연습을 함께해요.</string>
+    <string name="login_google_btn">Google 계정으로 시작하기</string>
+    <string name="login_terms_notice">로그인하시면 서비스 이용약관과 개인정보 처리방침에 동의하시게 됩니다.</string>
+
+    <!-- ═══ 회원가입 (시안 signup.tsx) ═══ -->
+    <string name="signup_page_title_d8c">반가워요, 몇 가지만 알려주세요</string>
+    <string name="signup_page_desc_d8c">연습 내용을 편하게 맞춰 드릴게요.</string>
+    <string name="duck_says_signup">천천히 하셔도 괜찮아요. 나중에 설정에서 바꾸실 수 있어요.</string>
+    <string name="signup_photo_hint_d8c">프로필 사진을 골라주세요. (선택)</string>
+    <string name="signup_photo_badge">사진</string>
+    <string name="signup_label_name">이름/닉네임</string>
+    <string name="signup_name_placeholder">예) 김덕분</string>
+    <string name="signup_label_gender">성별</string>
+    <string name="signup_gender_none">선택 안 함</string>
+    <string name="signup_label_birth">생년월일</string>
+    <string name="signup_label_hobby">취미</string>
+    <string name="signup_hobby_placeholder">예) 산책, 텃밭 가꾸기</string>
+    <string name="signup_tag_title">관심사 태그</string>
+    <string name="signup_tag_count_fmt">5개를 골라주세요. (%1$d/5)</string>
+    <string name="signup_btn_next_d8c">다음으로</string>
+
+    <!-- ═══ 설문 (시안 survey.tsx — 문항·척도는 기획 우선) ═══ -->
+    <string name="survey_page_title_d8c">지금 상태를 알려주세요</string>
+    <string name="survey_page_desc_d8c">정답은 없어요. 느끼시는 대로 골라 주세요.</string>
+    <string name="survey_progress_fmt">%1$d / %2$d 문항</string>
+    <string name="duck_says_survey">편하게 답하셔도 돼요. 결과로 난이도를 나누지 않아요.</string>
+    <string name="survey_btn_submit_d8c">답변 마치기</string>
+
+    <!-- ═══ 설정 (시안 settings.tsx) ═══ -->
+    <string name="setting_page_title_d8c">설정</string>
+    <string name="setting_section_noti">알림</string>
+    <string name="setting_section_accessibility">접근성</string>
+    <string name="setting_section_account">계정</string>
+    <string name="setting_noti_general">일반 알림</string>
+    <string name="setting_noti_general_desc">오늘의 덕담, 주간 요약을 보내드려요.</string>
+    <string name="setting_noti_practice">연습 알림</string>
+    <string name="setting_noti_practice_desc">정하신 시간에 부담 없이 알려드려요.</string>
+    <string name="setting_practice_time">연습 시간</string>
+    <string name="setting_time_default">오전 10:00</string>
+    <string name="setting_a11y_big_text">큰 글자</string>
+    <string name="setting_a11y_big_text_desc">본문 글자를 더 크게 보여드려요.</string>
+    <string name="setting_a11y_voice_guide">음성 안내</string>
+    <string name="setting_a11y_voice_guide_desc">문항을 소리로 읽어드려요.</string>
+    <string name="setting_a11y_slow_audio">느린 속도로 듣기</string>
+    <string name="setting_a11y_slow_audio_desc">듣기 문항을 천천히 들려드려요.</string>
+    <string name="setting_logout">로그아웃</string>
+    <string name="setting_withdraw">회원 탈퇴</string>
+
+    <!-- ═══ 세션 플로우 (시안 learn.$themeId — 시간값·문구는 06 v1.7 대조) ═══ -->
+    <string name="session_close_desc">학습 목록으로 나가기</string>
+    <string name="session_exit_confirm_pre">잠깐만! 지금 나가면 피드백을 받을 수 없고, 학습 기록을 다시 확인할 수 없어요!</string>
+    <string name="session_exit_btn_stay">계속 이야기하기</string>
+    <string name="session_exit_btn_leave">그래도 나가기</string>
+    <string name="duck_correct_answer_fmt">정답은 \"%s\"예요.</string>
+    <string name="duck_listen_correct">정확히 들으셨어요. 잘하셨어요!</string>
+    <string name="duck_repeat_done">또박또박 따라 말씀해 주셨어요.</string>
+    <string name="duck_selftalk_done">상황을 잘 설명해 주셔서 고맙습니다.</string>
+    <string name="listen_question_title">질문을 듣고 올바른 선택지를 골라주세요.</string>
+    <string name="naming_question_title">사진 안의 물건은 무엇인가요?</string>
+    <string name="shadowing_question_title">문장을 듣고 똑같이 따라 말해주세요.</string>
+    <string name="selftalk_question_title">사진을 보고 상황을 자유롭게 표현해주세요.</string>
+    <string name="listen_play_now">질문을 들려드리고 있어요</string>
+    <string name="listen_play_done">질문을 다 들으셨나요?</string>
+    <string name="btn_replay">다시 듣기</string>
+    <string name="btn_hint_d8c">힌트 보기 (%1$d/2)</string>
+    <string name="btn_start_session">시작</string>
+    <string name="loading_ready_title">로딩 완료!</string>
+    <string name="loading_ready_fmt">%s 준비가 끝났어요.</string>
+    <string name="session_type_today">오늘의 학습</string>
+    <string name="wait_listen_card_fmt">3초 후 질문 음성이 나와요. 집중하세요!</string>
+    <string name="wait_shadow_card_fmt">3초 후 따라 말할 음성이 나와요. 집중하세요!</string>
+    <string name="wait_record_card_fmt">5초 후 녹음이 시작돼요.</string>
+    <string name="wait_record2_card_fmt">3초 후에 녹음이 시작돼요.</string>
+    <string name="shadowing_play_now">문장을 들려드리고 있어요</string>
+    <string name="record_panel_fmt">녹음 중이에요 · 남은 시간 %1$d초</string>
+
+    <!-- ═══ 보고서 (시안 report.tsx — 지표명은 기획 4지표) ═══ -->
+    <string name="report_page_title_d8c">오늘의 보고서</string>
+    <string name="report_page_desc_d8c">차분히 살펴보시면 돼요.</string>
+    <string name="duck_says_report">오늘도 끝까지 함께해 주셔서 고맙습니다.</string>
+    <string name="report_ai_banner_d8c">AI 대화: 덕분이와의 대화에서 말문이 편하게 트이셨어요.</string>
+    <string name="report_aq_max">100점 만점</string>
+    <string name="report_metric_title">항목별 점수</string>
+    <string name="report_btn_home">홈으로 돌아가기</string>
+    <string name="report_answer_label">정답</string>
+    <string name="report_my_answer_fmt">내가 고른 답: %s</string>
+    <string name="report_recording_label">내가 말한 답변</string>
+    <string name="report_recording_hint">녹음 · 눌러서 들어보기</string>
+
+    <!-- ═══ 채팅 (시안 chat.tsx + ChatStep) ═══ -->
+    <string name="chat_header_title">덕분이와 대화하기</string>
+    <string name="chat_body_label">덕분이와 이야기 나누기</string>
+    <string name="chat_turn_badge_fmt">%1$d/%2$d턴</string>
+    <string name="chat_exit_confirm_post">정말로 나가시겠어요?</string>
+    <string name="chat_exit_no_pre">계속 이야기하기</string>
+    <string name="chat_exit_no_post">아니오</string>
+    <string name="chat_exit_yes_pre">그래도 나가기</string>
+    <string name="chat_exit_yes_post">예</string>
+    <string name="chat_recording_title">녹음 중이에요</string>
+    <string name="chat_recording_left_fmt">남은 시간 %d초</string>
+</resources>

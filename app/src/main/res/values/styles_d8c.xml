@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1 신규 스타일 추가 (기존 styles.xml 키 값 변경 금지 — 지시문 §6) -->
+<resources>
+    <!-- ═══ 시안 ui.tsx 대응 ═══ -->
+
+    <!-- PageTitle: 24sp bold (text-2xl) -->
+    <style name="TextAppearance.SeSAC.D8C.PageTitle" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">32sp</item>
+    </style>
+
+    <!-- PageTitle desc: 15sp muted -->
+    <style name="TextAppearance.SeSAC.D8C.PageDesc" parent="TextAppearance.Material3.BodyLarge">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:lineHeight">24sp</item>
+    </style>
+
+    <!-- 통계 값: 26sp bold accent -->
+    <style name="TextAppearance.SeSAC.D8C.StatValue" parent="TextAppearance.Material3.HeadlineMedium">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:lineHeight">30sp</item>
+    </style>
+
+    <!-- 델타: 14sp semibold success -->
+    <style name="TextAppearance.SeSAC.D8C.StatDelta" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/success</item>
+    </style>
+
+    <!-- 배지: 13sp semibold accent (pill secondary) -->
+    <style name="TextAppearance.SeSAC.D8C.Badge" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">13sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <!-- 카드 리스트 제목 16sp semibold -->
+    <style name="TextAppearance.SeSAC.D8C.RowTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- 카드 리스트 날짜 14sp muted -->
+    <style name="TextAppearance.SeSAC.D8C.RowDate" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- 행 점수 17sp bold accent -->
+    <style name="TextAppearance.SeSAC.D8C.RowScore" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <!-- 섹션 제목 17sp bold -->
+    <style name="TextAppearance.SeSAC.D8C.SectionTitle" parent="TextAppearance.Material3.TitleLarge">
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- 설정 섹션 라벨 15sp bold muted -->
+    <style name="TextAppearance.SeSAC.D8C.SectionLabel" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">15sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- 토글 행 라벨 16sp semibold -->
+    <style name="TextAppearance.SeSAC.D8C.SettingRow" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- 토글 행 desc 14sp muted -->
+    <style name="TextAppearance.SeSAC.D8C.SettingRowDesc" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- AQ 대형 점수: 대시보드 40sp / 보고서 44sp bold accent -->
+    <style name="TextAppearance.SeSAC.D8C.AqBig" parent="TextAppearance.Material3.DisplayLarge">
+        <item name="android:textSize">40sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:lineHeight">44sp</item>
+    </style>
+
+    <style name="TextAppearance.SeSAC.D8C.AqBig44" parent="TextAppearance.SeSAC.D8C.AqBig">
+        <item name="android:textSize">44sp</item>
+    </style>
+
+    <!-- 방사형/지표 칩: 14sp muted + 14sp bold -->
+    <style name="TextAppearance.SeSAC.D8C.MetricChipLabel" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <style name="TextAppearance.SeSAC.D8C.MetricChipValue" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- 대기 카운트다운 숫자: 32sp extrabold accent -->
+    <style name="TextAppearance.SeSAC.D8C.WaitNumber" parent="TextAppearance.Material3.DisplayMedium">
+        <item name="android:textSize">32sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/accent</item>
+    </style>
+
+    <!-- 세션 질문 제목: 20sp bold -->
+    <style name="TextAppearance.SeSAC.D8C.StepTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineHeight">28sp</item>
+    </style>
+
+    <!-- 로딩 완료 제목 22sp bold -->
+    <style name="TextAppearance.SeSAC.D8C.ReadyTitle" parent="TextAppearance.Material3.HeadlineSmall">
+        <item name="android:textSize">22sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+
+    <!-- 채팅 FAB 말풍선 14sp bold -->
+    <style name="TextAppearance.SeSAC.D8C.FabBubble" parent="TextAppearance.Material3.LabelLarge">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/brand_on_primary</item>
+    </style>
+
+    <!-- 네비 탭 라벨 12sp -->
+    <style name="TextAppearance.SeSAC.D8C.NavLabel" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <!-- 부모 그룹 스타일 (암묵 부모 참조 해결용 빈 껍데기) -->
+    <style name="TextAppearance.SeSAC.D8C" parent="TextAppearance.Material3.BodyLarge" />
+
+    <!-- ═══ 컴포넌트 스타일 ═══ -->
+
+    <!-- Btn primary: gradient-brand + 흰 글자 17sp semibold (기존 Widget.SeSAC.Button.Primary의 26dp radius 버전) -->
+    <style name="Widget.SeSAC.Button.D8C.Primary" parent="Widget.Material3.Button">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/btn_height</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/brand_on_primary</item>
+        <item name="android:background">@drawable/bg_grad_brand</item>
+        <item name="backgroundTint">@null</item>
+        <item name="cornerRadius">@dimen/radius_xl</item>
+        <item name="android:elevation">2dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:stateListAnimator">@null</item>
+    </style>
+
+    <!-- Btn outline: 2dp border -->
+    <style name="Widget.SeSAC.Button.D8C.Outline" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/btn_height</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="strokeColor">@color/border</item>
+        <item name="strokeWidth">2dp</item>
+        <item name="backgroundTint">@color/surface</item>
+        <item name="cornerRadius">@dimen/radius_xl</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <!-- Btn ghost: muted 글자만 -->
+    <style name="Widget.SeSAC.Button.D8C.Ghost" parent="Widget.Material3.Button.TextButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">@dimen/btn_height</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="cornerRadius">@dimen/radius_xl</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+    </style>
+
+    <!-- Card: card-soft (기존 Widget.SeSAC.Card와 동일 스펙 — contentPadding 20dp) -->
+    <style name="Widget.SeSAC.Card.D8C" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">@dimen/radius_2xl</item>
+        <item name="cardElevation">1dp</item>
+        <item name="cardBackgroundColor">@color/surface</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="strokeColor">@color/border</item>
+        <item name="contentPadding">@dimen/card_padding</item>
+    </style>
+
+    <!-- 진행바 pill 12dp gradient-brand -->
+    <style name="Widget.SeSAC.Progress.D8C" parent="Widget.Material3.LinearProgressIndicator">
+        <item name="trackColor">@color/brand_secondary</item>
+        <item name="indicatorColor">@color/brand_grad_brand_start</item>
+        <item name="trackCornerRadius">@dimen/radius_pill</item>
+        <item name="trackThickness">@dimen/progress_height</item>
+    </style>
+
+    <!-- 설문 5점 척도 칸 (비선택 상태 — 선택 배경은 kt에서 리스너로 전환) -->
+    <style name="SurveyScaleBtn">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_marginEnd">4dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:background">@drawable/bg_survey_choice</item>
+        <item name="android:button">@null</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.SeSAC.H4</item>
+        <item name="android:textColor">@color/text_primary</item>
+    </style>
+    <!-- rounded 이미지 (선택지 이미지 18dp — 시안 radius-2xl 근사) -->
+    <style name="ShapeAppearance.SeSAC.RoundedImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">18dp</item>
+    </style>
+</resources>

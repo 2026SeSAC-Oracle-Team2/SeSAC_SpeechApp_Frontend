@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1 신규 토큰 추가 (기존 colors.xml 키 값 변경 금지 — 지시문 §6) -->
+<resources>
+    <!-- 시안 ChatStep/RecordPanel: accent 원형 배경 위 흰 마이크 -->
+    <color name="brand_accent_10">#1AAA714A</color>
+    <!-- 시안 success/15% 배경 (SubmitResult 체크 원형) -->
+    <color name="brand_success_15">#2638A065</color>
+    <!-- 시안 destructive/10% 배경 (SubmitCountdown 위험 상태·오답 선택지) -->
+    <color name="brand_error_10">#1AD33B36</color>
+    <!-- 시안 secondary 50% (채팅 로그 컨테이너) -->
+    <color name="brand_secondary_50">#80F6EEDB</color>
+    <!-- 시안 foreground 50% (녹음/이탈 확인 팝업 배경 — bg_recording_overlay와 동일 톤) -->
+    <color name="brand_fg_scrim">#80412B17</color>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1 신규 치수 추가 (기존 dimens.xml 키 값 변경 금지 — 지시문 §6) -->
+<resources>
+    <!-- 화면 공통 (Screen px-5 pt-6 pb-28) -->
+    <dimen name="d8c_screen_h">20dp</dimen>
+    <dimen name="d8c_screen_top">24dp</dimen>
+    <dimen name="d8c_screen_bottom">112dp</dimen>
+    <!-- DuckSays 오리 크기별 -->
+    <dimen name="duck_chat">48dp</dimen>
+    <dimen name="duck_done">120dp</dimen>
+    <!-- FAB -->
+    <dimen name="fab_duck_size">80dp</dimen>
+    <dimen name="fab_duck_inner">56dp</dimen>
+    <!-- 세션 헤더 X 버튼 -->
+    <dimen name="session_close_size">44dp</dimen>
+    <!-- WaitCountdown 원형 -->
+    <dimen name="wait_circle_size">80dp</dimen>
+    <!-- RecordPanel 마이크 원형 -->
+    <dimen name="record_mic_size">96dp</dimen>
+    <!-- SubmitResult 체크 원형 -->
+    <dimen name="result_check_size">40dp</dimen>
+    <!-- 보고서 방사형 -->
+    <dimen name="radar_height">256dp</dimen>
+    <!-- 진행바 -->
+    <dimen name="progress_height">12dp</dimen>
+    <!-- 채팅 -->
+    <dimen name="chat_ai_bubble_max">280dp</dimen>
+    <!-- 홈 통계 값 큰 폰트는 styles_d8c TextAppearance 사용 -->
+</resources>
