@@ -113,7 +113,9 @@
     <string name="duck_correct_answer_fmt">정답은 \"%s\"예요.</string>
     <string name="duck_listen_correct">정확히 들으셨어요. 잘하셨어요!</string>
     <string name="duck_repeat_done">또박또박 따라 말씀해 주셨어요.</string>
-    <string name="duck_selftalk_done">상황을 잘 설명해 주셔서 고맙습니다.</string>
+    <string name="duck_selftalk_done">상황을 잘 설명해 주셨어요.</string>
+    <!-- D-8-C3: NAMING 완료 멘트 (시안은 정답 카드 — 사용자 확정으로 완료 멘트 대체. 임시 기본안) -->
+    <string name="duck_naming_done">이름을 또렷하게 말씀해 주셨어요.</string>
     <string name="listen_question_title">질문을 듣고 올바른 선택지를 골라주세요.</string>
     <string name="naming_question_title">사진 안의 물건은 무엇인가요?</string>
     <string name="shadowing_question_title">문장을 듣고 똑같이 따라 말해주세요.</string>
