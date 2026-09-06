@@ -133,7 +133,7 @@ class ProblemActivity : AppCompatActivity() {
         binding.btnHint.setOnClickListener { requestHint() }
         binding.btnNext.setOnClickListener { onNextClicked() }
 
-        // D-7 1.2: 제출 카운트다운 표시 + 제출 완료 상태 영역
+        // D-8-C2 A-1: SubmitCountdown 텍스트 중복 제거 — pill 배지 숫자만 갱신 (문항 단계 상시 표시 유지)
         binding.tvSubmitCountdown.visibility = View.GONE
         binding.containerSubmitted.visibility = View.GONE
 
@@ -195,6 +195,7 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvSubmitCountdown.visibility = View.GONE
         binding.containerSubmitted.visibility = View.GONE
         binding.btnTts.visibility = View.GONE
+        // D-8-C2 A-1: 재진입 시 INVISIBLE 잔존 상태 초기화 (GONE 복귀 — 다음 턴 대기 카드 정상 표시)
         binding.tvWait.visibility = View.GONE
         recordedFile = null
         stopTts()
@@ -271,7 +272,7 @@ class ProblemActivity : AppCompatActivity() {
             // SHADOWING: 3초 → TTS 재생 → 재생 종료 후 3초 → 녹음 시작. [다시 듣기] 없음 (마이크 오염 방지)
             binding.btnTts.visibility = View.GONE
             binding.tvWait.visibility = View.VISIBLE
-            startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true)
+            startWaitCountdown(WAIT_LISTEN_SECONDS, isListen = true, isShadowing = true)
         } else {
             // SELF_TALK: 5초 사진 관찰 → 녹음 시작
             binding.tvWait.visibility = View.VISIBLE
@@ -304,24 +305,31 @@ class ProblemActivity : AppCompatActivity() {
 
     /**
      * 대기 카운트다운 — 종료 직후 TTS 재생(LISTEN·SHADOWING) 또는 녹음 시작(음성형).
-     * D-8-C1 시안 WaitCountdown 카드: 원형 숫자(tvWaitNumber) + 메시지(tvWaitMessage).
-     * 문구는 기획(strings_d7 wait_*_fmt) 우선 — 시안 문구와 대조해 기획 적용.
+     * D-8-C2 A-1: 카운트다운 숫자는 버블 원형(tvWaitNumber) 하나로 통일 —
+     * 메시지(tvWaitMessage)는 strings_d8c wait_*_card_fmt (숫자 없는 고정 문구) 사용.
+     * 종료 시 GONE 대신 INVISIBLE — 공간 유지로 텍스트·이미지 점프 방지 (사용자 확정).
      */
-    private fun startWaitCountdown(seconds: Int, isListen: Boolean) {
+    private fun startWaitCountdown(seconds: Int, isListen: Boolean, isShadowing: Boolean = false) {
         var remaining = seconds
-        val fmt = if (isListen) R.string.wait_listen_fmt else R.string.wait_record_fmt
+        // D-8-C2 A-1: 메시지에서 카운트다운 숫자 제거 — 버블 숫자만 갱신
+        val fmt = when {
+            isListen && isShadowing -> R.string.wait_shadow_card_fmt
+            isListen -> R.string.wait_listen_card_fmt
+            seconds >= WAIT_RECORD_SECONDS -> R.string.wait_record_card_fmt
+            else -> R.string.wait_record2_card_fmt
+        }
         binding.tvWaitNumber.text = remaining.toString()
-        binding.tvWaitMessage.text = getString(fmt, remaining)
+        binding.tvWaitMessage.text = getString(fmt)
 
         waitRunnable = object : Runnable {
             override fun run() {
                 remaining--
                 if (remaining > 0) {
                     binding.tvWaitNumber.text = remaining.toString()
-                    binding.tvWaitMessage.text = getString(fmt, remaining)
                     mainHandler.postDelayed(this, 1000)
                 } else {
-                    binding.tvWait.visibility = View.GONE
+                    // A-1: INVISIBLE — 공간 유지 (GONE이면 아래 콘텐츠가 점프)
+                    binding.tvWait.visibility = View.INVISIBLE
                     onWaitFinished()
                 }
             }
