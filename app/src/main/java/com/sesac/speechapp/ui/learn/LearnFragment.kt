@@ -1,5 +1,6 @@
 package com.sesac.speechapp.ui.learn
 
+import android.animation.ObjectAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -16,16 +17,19 @@ import com.sesac.speechapp.ui.learning.LearningSessionLoadingActivity
 import android.widget.LinearLayout
 import android.widget.TextView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 
 /**
- * 홈 탭 (구 Learn) — 오늘의 학습 카드 + 홈 통계 2카드 + 실력 지표 방사형 그래프.
+ * 홈 탭 (구 Learn) — D-8-C1 시안 home.tsx 전면 재작성.
  * D-7 1.4: 오늘의 학습 → POST /sessions/today (EXTRA_THEMA 미전달 = today 분기)
  * D-8②b: 홈 통계 2카드(연속 학습/평균 점수) 실데이터 — GET /users/me/stats (05a §8.4).
- *         조회 실패 시 카드 유지 + 값 자리 "-" (로딩 실패가 화면을 깨지 않게).
- *         onResume 재조회 — 학습 완료 후 복귀 시 즉시 반영.
- * D-8③: 실력 지표 레이더는 홈에서 제거 (사용자 확정 — 최근 학습 결과 리스트로 대체).
- *         최근 학습 결과 = GET /users/me/sessions/history 최근 3개 (터치 → 세부 보고서).
+ * D-8③: 최근 학습 결과 = GET /users/me/sessions/history 최근 3개 (터치 → 세부 보고서).
+ * D-8-C1: 날짜 헤더(서버 날짜 API 부재 — 기기 로컬 표시, 시안 근사) + 인사 닉네임
+ *         (GET /users/me — ProfileViewModel 공용) + FAB(시안 반영 예외 허용 — ChatActivity 연결).
  */
 class LearnFragment : Fragment() {
 
@@ -46,7 +50,7 @@ class LearnFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         repository = SessionFlowRepository(requireContext())
 
-        // 오늘의 학습 카드/버튼 탭 → 세션 로딩 화면 (스텁 2~3초 대기, D-7 1.4: /today 분기)
+        // 오늘의 학습 카드/버튼 탭 → 세션 로딩 화면
         binding.cardHero.setOnClickListener {
             startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
         }
@@ -54,8 +58,69 @@ class LearnFragment : Fragment() {
             startActivity(Intent(requireContext(), LearningSessionLoadingActivity::class.java))
         }
 
-        // 최근 학습 결과 3개 — onResume에서 조회 (탭 재진입 반영)
+        // 최근 학습 결과 3개 — onResume에서 조회
         binding.containerRecent.removeAllViews()
+
+        bindDateHeader()
+        bindFab()
+        loadNickname()
+    }
+
+    /**
+     * 시안 헤더 "9월 3일 목요일" — 서버 날짜 API 부재로 기기 로컬 표시 (시안 근사).
+     * 기획 우선: 서버 날짜와 불일치 가능성은 보고서 리스크 표기.
+     */
+    private fun bindDateHeader() {
+        val today = LocalDate.now()
+        val monthDay = DateTimeFormatter.ofPattern("M월 d일", Locale.KOREA).format(today)
+        val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.KOREA)
+        binding.tvHomeDate.text = "$monthDay $dayOfWeek"
+    }
+
+    /**
+     * 시안 FAB(우하단): 말풍선 "덕분이와 함께 대화해요" + 오리 원형 버튼 → ChatActivity.
+     * FAB는 시안 반영으로 예외 허용 (사용자 확정 "design 기준" — 지시문 §4).
+     */
+    private fun bindFab() {
+        binding.fabChat.setOnClickListener {
+            startActivity(Intent(requireContext(), com.sesac.speechapp.ui.chat.ChatActivity::class.java))
+        }
+        // 터치 피드백: active scale 0.96 (시안 Btn active:scale 근사)
+        binding.fabChat.setOnTouchListener { v, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> v.animate().scaleX(0.96f).scaleY(0.96f).setDuration(80).start()
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL ->
+                    v.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+            }
+            false
+        }
+    }
+
+    /**
+     * 인사 "덕분님, 오늘도 반가워요" — GET /users/me 닉네임 (기존 ProfileViewModel 재사용 대신
+     * 가벼운 직접 호출 — Fragment별 뷰모델 의존 최소화).
+     * 실패 시 기본 문구 유지 (닉네임 로딩 실패가 홈을 깨지 않게).
+     */
+    private fun loadNickname() {
+        lifecycleScope.launch {
+            try {
+                val response = withContext(kotlinx.coroutines.Dispatchers.IO) {
+                    com.sesac.speechapp.data.remote.RetrofitClient.apiService.getMyProfile()
+                }
+                val nickname = if (response.isSuccessful) {
+                    val body = response.body()
+                    val inner = body?.data
+                    // GET /users/me 응답: ApiResponse<UserDto> — inner가 UserDto 그 자체
+                    if (body != null && body.success && inner != null) inner.nickname else null
+                } else null
+                binding.tvTitle.text = getString(
+                    R.string.home_greeting_nickname_fmt,
+                    nickname?.takeIf { it.isNotBlank() } ?: "덕분님"
+                )
+            } catch (_: Exception) {
+                // 기본 문구 유지
+            }
+        }
     }
 
     override fun onResume() {
@@ -66,7 +131,6 @@ class LearnFragment : Fragment() {
 
     /**
      * D-8③ 홈 최근 학습 결과 — history 상위 3개 카드 (시안 home.tsx).
-     * 터치 → 세부 보고서. 실패/빈 목록 시 빈 상태 문구 (카드 유지 — ②b 폴백 방침 동일).
      */
     private fun loadRecent() {
         lifecycleScope.launch {
@@ -105,8 +169,7 @@ class LearnFragment : Fragment() {
 
     /**
      * D-8②b 홈 통계 2카드 — GET /users/me/stats.
-     * 실패 시 카드는 유지하고 값 자리만 "-" (null 케이스와 동일 폴백).
-     * deltaScore null이면 증감 TextView 숨김. 부호 포맷(+3.4/−2.1)은 클라 담당.
+     * 실패 시 카드는 유지하고 값 자리만 "-". deltaScore null이면 증감 TextView 숨김.
      */
     private fun loadStats() {
         lifecycleScope.launch {
@@ -119,7 +182,7 @@ class LearnFragment : Fragment() {
                 } ?: getString(R.string.home_stat_placeholder)
                 if (stats.deltaScore != null) {
                     val delta = stats.deltaScore
-                    val sign = if (delta >= 0) "+" else "\u2212" // −(U+2212) 음수 기호
+                    val sign = if (delta >= 0) "+" else "\u2212"
                     binding.containerStats.tvDeltaValue.text = sign + String.format(Locale.US, "%.1f", kotlin.math.abs(delta))
                     binding.containerStats.tvDeltaValue.visibility = View.VISIBLE
                 } else {

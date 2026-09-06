@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -20,13 +21,15 @@ import com.sesac.speechapp.data.repository.SessionFlowRepository
 import kotlinx.coroutines.launch
 
 /**
- * 대시보드 탭 — D-7 3.2 실데이터화 (stub 제거).
+ * 기록 탭 — D-7 3.2 실데이터화 + D-8-C1 시안 records.tsx 재작성.
  *
- * - 방사형: GET /users/me/scores → 대표점수 4축 (null이면 0 표시 + 폴백 문구) — AQ는 큰 숫자 표시
- * - 이력 카드: GET /users/me/sessions/history → RecyclerView (sessionName / YYYY.mm.dd / AQ nn점)
- *   빈 목록 시 "아직 학습 기록이 없어요" 빈 상태
- * - 카드 터치 → 세부 보고서 화면(3.3)으로 sessionId 전달
- * - 탭 재진입 시마다 재조회 (학습 완료 → [홈으로] → 대시보드 반영 — D-7 3.5)
+ * - (2) AI 대화 요약 배너: 최근 세션의 talk 피드백 — API에 배너 전용 필드가 없어
+ *   기존 기획 문구(strings_d8c dash_ai_banner_d8c) 유지 (기획 우선 적용).
+ * - (3) AQ 카드: 대표점수 4축 방사형 + AQ 큰 숫자(40sp) + 4지표 2열 칩
+ *   (지표명 muted + "점수 / 만점" bold — RadarChartView 데이터에서 병행 표기)
+ * - (4) 지난 보고서: GET /users/me/sessions/history → RecyclerView
+ *   행 = [테마 제목 / 날짜 · AQ n | chevron] → 세부 보고서
+ * - 탭 재진입 시마다 재조회 (D-7 3.5)
  */
 class DashboardFragment : Fragment() {
 
@@ -63,12 +66,11 @@ class DashboardFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // D-7 3.5: 탭 재진입 시 재조회 — 새 세션이 카드에 뜨는 흐름 유지
         loadDashboard()
     }
 
     private fun loadDashboard() {
-        // 방사형: 대표점수 (null 폴백 — §8.1)
+        // 방사형 + AQ 큰 숫자 + 4지표 칩 (null 폴백 — §8.1)
         lifecycleScope.launch {
             try {
                 val scores = repository.getMyScores()
@@ -81,17 +83,22 @@ class DashboardFragment : Fragment() {
                     )
                 )
                 binding.tvAqBig.text = scores.userAq?.toString() ?: "0"
-                // 전부 null → "학습을 시작해보세요" 폴백 문구
                 val allNull = scores.listen == null && scores.naming == null &&
                     scores.shadowing == null && scores.selfTalk == null
                 binding.tvAqFallback.visibility = if (allNull) View.VISIBLE else View.GONE
+
+                // 4지표 2열 칩: 지표명 + 점수/만점 (§8.1 대표점수 100 환산 아님 — 원 점수 표기)
+                bindChip(binding.chipListen, getString(R.string.metric_listen), scores.listen)
+                bindChip(binding.chipNaming, getString(R.string.metric_naming), scores.naming)
+                bindChip(binding.chipShadowing, getString(R.string.metric_shadowing), scores.shadowing)
+                bindChip(binding.chipSelfTalk, getString(R.string.metric_selftalk), scores.selfTalk)
             } catch (e: Exception) {
                 binding.tvAqFallback.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
             }
         }
 
-        // 이력 카드 (§8.2 — stubList 제거, 실데이터)
+        // 이력 카드 (§8.2 실데이터)
         lifecycleScope.launch {
             try {
                 val data = repository.getSessionHistory()
@@ -105,14 +112,29 @@ class DashboardFragment : Fragment() {
                     )
                 }
                 historyAdapter.submitList(items)
-                // 빈 목록 → 빈 상태 문구
                 binding.tvHistoryEmpty.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+
+                // AQ 기준일 = 최근 세션 날짜 (시안 "9월 2일 기준" — 이력 첫 행 날짜 근사)
+                val latest = data.sessions.firstOrNull()
+                if (latest != null) {
+                    val dashDate = DateFormats.toDashDate(latest.createdAt)
+                    binding.tvDashDate.text = getString(R.string.dash_aq_basis_fmt, dashDate)
+                    binding.tvDashDate.visibility = View.VISIBLE
+                } else {
+                    binding.tvDashDate.visibility = View.GONE
+                }
             } catch (e: Exception) {
                 historyAdapter.submitList(emptyList())
                 binding.tvHistoryEmpty.visibility = View.VISIBLE
                 Toast.makeText(requireContext(), e.message, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    /** 지표 칩: "알아듣기  8" 형태 — null이면 "-" (점수 전부 null 폴백과 동일) */
+    private fun bindChip(view: TextView, label: String, score: Double?) {
+        val value = score?.let { if (it == it.toLong().toDouble()) it.toLong().toString() else "%.1f".format(it) } ?: "-"
+        view.text = "$label  $value"
     }
 
     override fun onDestroyView() {
