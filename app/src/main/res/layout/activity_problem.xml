@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  D-8-C1: 문제 풀이 화면 (시안 learn.$themeId StepView 재작성 — 기존 유형별 전환 로직 유지).
-  공통 헤더[X 44dp | 진행바 flex-1 | n/total] → 유형 배지+지문 → WaitCountdown 카드
-  (원형 80dp secondary + 숫자 32sp extrabold accent + 메시지 16sp) → 재생 카드(원형 64dp
-  gradient-brand 스피커) → SubmitCountdown(보더 2dp pill 배지, 위험 상태 색 반전) →
-  선택지 리스트(텍스트 세로 64dp / 이미지 2열 h-32=128dp) → RecordPanel(원형 96dp accent
-  마이크 pulse + "녹음 중이에요 · 남은 시간 N초" + [녹음 완료]) → SubmitResult(체크 원형 40dp).
-  ID 보존 전수: tvProgress/tvTypeBadge/progressBar/tvPassage/tvWait/tvSubmitCountdown/btnTts/
-    cardImage/ivProblem/tvChoicesTitle/containerChoices/tvHint/containerRecord/tvTimer/
-    fabRecord/btnHint/btnSubmitRecording/tvRecordingHint/containerSubmitted/btnNext/scoringOverlay.
-  시간값(3초/5초/30초)은 기획 06 v1.7 유지 — 시안과 동일해 그대로.
+  D-8-C1/C2: 문제 풀이 화면 (시안 learn.$themeId StepView 재작성).
+  D-8-C2 A-1: 카운트다운은 버블 원형 숫자만 갱신 (메시지는 고정 문구), 종료 시 INVISIBLE 자리 유지.
+  D-8-C2 A-2: 녹음 UI = 시안 RecordPanel 카드 (원형 96dp accent + 마이크 40dp pulse + 상태 semibold
+  + [녹음 완료] 전폭) + 보조 행([녹음 완료]·[힌트 보기]) — tvRecordingHint→tvRecordingStatus/
+  tvTimer→tvRecordingTimer 개명 (kt 동기 수정).
+  ID: tvProgress/tvTypeBadge/progressBar/tvPassage/tvWait/tvSubmitCountdown/btnTts/
+    cardImage/ivProblem/tvChoicesTitle/containerChoices/cardRecord/containerRecord/
+    tvRecordingStatus/tvRecordingTimer/fabRecord/containerRecordActions/btnHint/
+    btnSubmitRecording/tvHint/containerHint/containerSubmitted/btnNext/scoringOverlay.
+  시간값(3초/5초/30초)은 기획 06 v1.7 유지.
 -->
 <FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -242,93 +242,111 @@
         app:layout_constraintTop_toBottomOf="@id/tvChoicesTitle" />
 
     <!-- ─── 녹음/제출 (NAMING/SHADOWING/SELF_TALK + LISTEN 제출 버튼 공용) ─── -->
-    <!-- 시안 RecordPanel: 원형 96dp accent 마이크 + "녹음 중이에요 · 남은 시간 N초" + [녹음 완료] -->
-    <LinearLayout
-        android:id="@+id/containerRecord"
+    <!-- D-8-C2 A-2: 시안 RecordPanel 카드 재현 — 카드 중앙 정렬·gap 16dp·상하 padding 32dp:
+         원형 96dp accent + 마이크 40dp(pulse 코드) + "녹음 중이에요 · 남은 시간 N초" 16sp semibold
+         + [녹음 완료] 전폭 primary. 힌트/타이머는 기획 요소로 카드 외부(아래) 배치. -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardRecord"
+        style="@style/Widget.SeSAC.Card.D8C"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardImage">
 
-        <FrameLayout
-            android:layout_width="@dimen/record_mic_size"
-            android:layout_height="@dimen/record_mic_size"
-            android:background="@drawable/bg_mic_circle_accent">
-
-            <ImageView
-                android:id="@+id/ivRecordMic"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_gravity="center"
-                android:contentDescription="녹음"
-                android:src="@drawable/ic_mic_filled_24" />
-        </FrameLayout>
-
-        <TextView
-            android:id="@+id/tvRecordingHint"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/recording_now"
-            android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow" />
-
-        <!-- 녹음 시간 (기존 체계 유지 — 시안에 없지만 타이머 표시는 기획 요소) -->
-        <TextView
-            android:id="@+id/tvTimer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/recording_timer_default"
-            android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
-            android:textColor="@color/text_secondary" />
-
-        <!-- D-8③ 시니어 UI 유지: 텍스트 버튼 (시안 [녹음 완료] 텍스트 근사) -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/fabRecord"
-            style="@style/Widget.SeSAC.Button.D8C.Primary"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/btn_height"
-            android:layout_marginTop="16dp"
-            android:minWidth="220dp"
-            android:text="@string/btn_recording_start"
-            app:cornerRadius="@dimen/radius_xl" />
-
         <LinearLayout
+            android:id="@+id/containerRecord"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
+            android:gravity="center_horizontal"
+            android:orientation="vertical"
+            android:paddingHorizontal="24dp"
+            android:paddingVertical="32dp">
+
+            <FrameLayout
+                android:id="@+id/frameMicPulse"
+                android:layout_width="@dimen/record_mic_size"
+                android:layout_height="@dimen/record_mic_size"
+                android:background="@drawable/bg_mic_circle_accent">
+
+                <ImageView
+                    android:id="@+id/ivRecordMic"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="녹음"
+                    android:src="@drawable/ic_mic_filled_24"
+                    app:tint="@color/brand_on_primary" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tvRecordingStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/recording_now"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.SettingRow"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvRecordingTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="@string/recording_timer_default"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.RowDate"
+                android:textColor="@color/text_secondary" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnHint"
-                style="@style/Widget.SeSAC.Button.D8C.Outline"
-                android:layout_width="0dp"
-                android:layout_height="@dimen/btn_height"
-                android:layout_marginEnd="8dp"
-                android:layout_weight="1"
-                android:drawableStart="@drawable/ic_lightbulb_24"
-                android:drawablePadding="6dp"
-                android:drawableTint="@color/brand_on_primary"
-                android:text="@string/hint_request"
-                android:textSize="15sp"
-                android:visibility="gone"
-                app:cornerRadius="@dimen/radius_xl" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSubmitRecording"
+                android:id="@+id/fabRecord"
                 style="@style/Widget.SeSAC.Button.D8C.Primary"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="@dimen/btn_height"
-                android:layout_weight="1"
-                android:enabled="false"
-                android:text="@string/btn_recording_stop"
+                android:layout_marginTop="16dp"
+                android:text="@string/btn_recording_start"
                 app:cornerRadius="@dimen/radius_xl" />
         </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- 기존 보조 버튼 행 ([녹음 완료]·[힌트 보기]) — 시안 유지 요소 + 기획 힌트 (카드 아래) -->
+    <LinearLayout
+        android:id="@+id/containerRecordActions"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardRecord">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnHint"
+            style="@style/Widget.SeSAC.Button.D8C.Outline"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:drawableStart="@drawable/ic_lightbulb_24"
+            android:drawablePadding="6dp"
+            android:drawableTint="@color/brand_on_primary"
+            android:text="@string/hint_request"
+            android:textSize="15sp"
+            android:visibility="gone"
+            app:cornerRadius="@dimen/radius_xl" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSubmitRecording"
+            style="@style/Widget.SeSAC.Button.D8C.Primary"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/btn_height"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="@string/btn_recording_stop"
+            app:cornerRadius="@dimen/radius_xl" />
     </LinearLayout>
 
     <!-- ─── 힌트 표시 (NAMING) — DuckSays 패턴 ─── -->
@@ -342,7 +360,7 @@
         android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/containerRecord">
+        app:layout_constraintTop_toBottomOf="@id/containerRecordActions">
 
         <ImageView
             android:layout_width="48dp"

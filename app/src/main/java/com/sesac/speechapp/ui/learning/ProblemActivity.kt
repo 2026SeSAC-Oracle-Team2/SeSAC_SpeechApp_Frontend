@@ -75,6 +75,9 @@ class ProblemActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private var recordedFile: File? = null
 
+    /** D-8-C2 A-2: 마이크 pulse 애니메이터 — 녹음 중에만 활성 */
+    private var micPulseAnimator: android.animation.ObjectAnimator? = null
+
     /** 현재 턴 제출 진행 상태 — 카운트다운/제출 흐름 제어 */
     private var submittedThisTurn = false
     /** LISTEN: 이번 턴에 유저가 선택한 최근 order (미선택=null) */
@@ -113,7 +116,7 @@ class ProblemActivity : AppCompatActivity() {
 
         repository = SessionFlowRepository(this)
         recordingHelper = RecordingHelper(this) { seconds ->
-            binding.tvTimer.text = String.format("%02d:%02d", seconds / 60, seconds % 60)
+            binding.tvRecordingTimer.text = String.format("%02d:%02d", seconds / 60, seconds % 60)
         }
 
         sessionId = intent.getLongExtra(EXTRA_SESSION_ID, -1)
@@ -154,6 +157,7 @@ class ProblemActivity : AppCompatActivity() {
 
         // 늦은 콜백 가드용: 턴 전환 시 진행 중인 녹음/미디어/타이머 정리 (지시문 4.5)
         cancelAllTimers()
+        stopMicPulse()
         if (recordingHelper.recording) {
             recordingHelper.stop()
             recordedFile = null
@@ -188,7 +192,10 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvChoicesTitle.visibility = View.GONE
         binding.containerChoices.visibility = View.GONE
         binding.containerChoices.removeAllViews()
+        binding.cardRecord.visibility = View.GONE
         binding.containerRecord.visibility = View.GONE
+        binding.containerRecordActions.visibility = View.GONE
+        stopMicPulse()
         binding.tvHint.visibility = View.GONE
         binding.btnHint.visibility = View.GONE
         binding.tvHint.text = ""
@@ -199,6 +206,33 @@ class ProblemActivity : AppCompatActivity() {
         binding.tvWait.visibility = View.GONE
         recordedFile = null
         stopTts()
+    }
+
+    // ─── D-8-C2 A-2: 마이크 pulse 애니메이션 (시안 animate-pulse 근사) ───
+
+    /** 녹음 시작 시 pulse — 원형 프레임 scale 1.0↔1.08 왕복 (시니어 저강도) */
+    private fun startMicPulse() {
+        stopMicPulse()
+        val pulse = android.animation.ObjectAnimator.ofFloat(
+            binding.frameMicPulse, View.SCALE_X, View.SCALE_Y, 1f, 1.08f
+        ).apply {
+            duration = 700
+            repeatMode = android.animation.ValueAnimator.REVERSE
+            repeatCount = android.animation.ValueAnimator.INFINITE
+            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
+        }
+        pulse.start()
+        micPulseAnimator = pulse
+    }
+
+    /** pulse 정지 + 스케일 원복 — 녹음 종료·제출 완료·턴 전환 */
+    private fun stopMicPulse() {
+        micPulseAnimator?.cancel()
+        micPulseAnimator = null
+        if (this::binding.isInitialized) {
+            binding.frameMicPulse.scaleX = 1f
+            binding.frameMicPulse.scaleY = 1f
+        }
     }
 
     /** LISTEN — 대기 카운트다운 3초 후 TTS, 선택지 탭 → 제출 상태 진입 */
@@ -293,12 +327,15 @@ class ProblemActivity : AppCompatActivity() {
     }
 
     private fun showRecordingUI(showHintButton: Boolean) {
+        // D-8-C2 A-2: 시안 RecordPanel 카드 + 보조 행 동시 표시
+        binding.cardRecord.visibility = View.VISIBLE
         binding.containerRecord.visibility = View.VISIBLE
+        binding.containerRecordActions.visibility = View.VISIBLE
         binding.btnHint.visibility = if (showHintButton) View.VISIBLE else View.GONE
         binding.btnSubmitRecording.isEnabled = false
         binding.btnSubmitRecording.text = getString(R.string.btn_recording_start)
-        binding.tvRecordingHint.text = getString(R.string.recording_now)
-        binding.tvTimer.text = getString(R.string.recording_timer_default)
+        binding.tvRecordingStatus.text = getString(R.string.recording_now)
+        binding.tvRecordingTimer.text = getString(R.string.recording_timer_default)
     }
 
     // ─── 대기 카운트다운 (3초/5초) ────────────────────────────────
@@ -399,7 +436,8 @@ class ProblemActivity : AppCompatActivity() {
             )
             binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
             binding.btnSubmitRecording.isEnabled = true
-            binding.tvRecordingHint.text = getString(R.string.recording_now)
+            binding.tvRecordingStatus.text = getString(R.string.recording_now)
+            startMicPulse()
             startSubmitCountdown()
         } else {
             Toast.makeText(this, "녹음 시작 실패", Toast.LENGTH_SHORT).show()
@@ -474,6 +512,7 @@ class ProblemActivity : AppCompatActivity() {
     private fun forceSubmitRecording() {
         if (recordingHelper.recording) {
             recordedFile = recordingHelper.stop()
+            stopMicPulse()
         }
         val file = recordedFile
         if (file == null || !file.exists()) {
@@ -511,6 +550,7 @@ class ProblemActivity : AppCompatActivity() {
     private fun toggleRecording() {
         if (recordingHelper.recording) {
             recordedFile = recordingHelper.stop()
+            stopMicPulse()
             // 녹음 종료 — 버튼 원복
             binding.fabRecord.text = getString(R.string.btn_recording_start)
             binding.fabRecord.backgroundTintList = android.content.res.ColorStateList.valueOf(
@@ -531,7 +571,8 @@ class ProblemActivity : AppCompatActivity() {
                 )
                 binding.btnSubmitRecording.text = getString(R.string.btn_recording_stop)
                 binding.btnSubmitRecording.isEnabled = true
-                binding.tvRecordingHint.text = getString(R.string.recording_now)
+                binding.tvRecordingStatus.text = getString(R.string.recording_now)
+                startMicPulse()
                 startSubmitCountdown()
             } else {
                 Toast.makeText(this, "녹음 시작 실패", Toast.LENGTH_SHORT).show()
@@ -600,8 +641,11 @@ class ProblemActivity : AppCompatActivity() {
         binding.scoringOverlay.visibility = View.GONE
         binding.tvSubmitCountdown.visibility = View.GONE
         binding.containerSubmitted.visibility = View.VISIBLE
+        binding.cardRecord.visibility = View.GONE
         binding.containerRecord.visibility = View.GONE
+        binding.containerRecordActions.visibility = View.GONE
         binding.containerChoices.visibility = View.GONE
+        stopMicPulse()
     }
 
     private fun hideSubmitProgress() {
@@ -725,6 +769,7 @@ class ProblemActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cancelAllTimers()
+        stopMicPulse()
         recordingHelper.release()
         releasePlayer()
     }
