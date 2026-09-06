@@ -52,7 +52,31 @@ class SurveyActivity : AppCompatActivity() {
     ).all { it.checkedRadioButtonId != View.NO_ID }
 
     private fun updateSubmitEnabled() {
-        binding.btnSubmit.isEnabled = allAnswered()
+        val answered = allAnswered()
+        binding.btnSubmit.isEnabled = answered
+
+        // D-8-C1 시안: 진행바 + "n / 5 문항" (선택 시 칸 배경 강조 — bg_survey_choice_selected)
+        val done = listOf(
+            binding.rgQuestion1, binding.rgQuestion2, binding.rgQuestion3,
+            binding.rgQuestion4, binding.rgQuestion5
+        ).count { it.checkedRadioButtonId != View.NO_ID }
+        binding.progressBar.progress = done * 100 / SURVEY_QUESTION_COUNT
+        binding.tvProgressCnt.text = getString(R.string.survey_progress_fmt, done, SURVEY_QUESTION_COUNT)
+
+        // 선택 칸 배경 상태 갱신 (시안: 선택 칸 = primary 보더 + secondary 배경)
+        listOf(
+            binding.rgQuestion1, binding.rgQuestion2, binding.rgQuestion3,
+            binding.rgQuestion4, binding.rgQuestion5
+        ).forEach { group ->
+            val checkedId = group.checkedRadioButtonId
+            for (i in 0 until group.childCount) {
+                val btn = group.getChildAt(i) as? android.widget.RadioButton ?: continue
+                btn.setBackgroundResource(
+                    if (btn.id == checkedId && checkedId != View.NO_ID) R.drawable.bg_survey_choice_selected
+                    else R.drawable.bg_survey_choice
+                )
+            }
+        }
     }
 
     private fun observeQuestionGroups() {
