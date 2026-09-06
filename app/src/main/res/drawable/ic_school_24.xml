@@ -4,7 +4,26 @@
     android:viewportWidth="24"
     android:viewportHeight="24"
     android:tint="?attr/colorControlNormal">
+    <!-- lucide GraduationCap (stroke 2.2) -->
     <path
-        android:fillColor="@android:color/white"
-        android:pathData="M5,13.18v4L12,21l7,-3.82v-4L12,17l-7,-3.82zM12,3L1,9l11,6 9,-4.91V17h2V9L12,3z" />
+        android:pathData="M21.42,10.922a1,1 0,0 0,-0.019 -1.838L12.83,5.18a2,2 0,0 0,-1.66 0L2.6,9.08a1,1 0,0 0,0 1.832l8.57,3.908a2,2 0,0 0,1.66 0z"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent" />
+    <path
+        android:pathData="M22,10v6"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent" />
+    <path
+        android:pathData="M6,12.5V16a6,3 0,0 0,12 0v-3.5"
+        android:strokeColor="@android:color/white"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="@android:color/transparent" />
 </vector>
