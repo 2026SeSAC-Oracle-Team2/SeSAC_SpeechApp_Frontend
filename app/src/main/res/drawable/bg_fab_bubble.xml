@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: FAB 말풍선 (brand-yellow 배경 22dp radius) — 꼬리는 별도 뷰로 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_yellow" />
+    <corners android:radius="@dimen/radius_xl" />
+</shape>

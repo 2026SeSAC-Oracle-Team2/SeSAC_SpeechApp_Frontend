@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 4지표 칩 (secondary 배경 rounded 18dp) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_secondary" />
+    <corners android:radius="@dimen/radius_lg" />
+</shape>

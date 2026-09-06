@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 선택지 선택 상태 (primary 보더 + secondary 배경) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_secondary" />
+    <corners android:radius="@dimen/radius_md" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/primary" />
+</shape>

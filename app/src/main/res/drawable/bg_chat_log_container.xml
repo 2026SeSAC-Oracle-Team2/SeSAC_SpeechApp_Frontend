@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 채팅 로그 컨테이너 (secondary 50% rounded 30dp) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_secondary_50" />
+    <corners android:radius="@dimen/radius_3xl" />
+</shape>

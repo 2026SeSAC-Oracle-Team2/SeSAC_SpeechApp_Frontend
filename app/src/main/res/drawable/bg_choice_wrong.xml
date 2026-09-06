@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- D-8-C1: 선택지 오답 상태 (destructive 보더 + destructive 10% 배경) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/brand_error_10" />
+    <corners android:radius="@dimen/radius_md" />
+    <stroke
+        android:width="2dp"
+        android:color="@color/error" />
+</shape>
