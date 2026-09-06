@@ -82,6 +82,8 @@ class ProblemActivity : AppCompatActivity() {
     private var submittedThisTurn = false
     /** LISTEN: 이번 턴에 유저가 선택한 최근 order (미선택=null) */
     private var selectedChoice: ChoiceDto? = null
+    /** D-8-C2 A-5: 이번 제출이 30초 도달 강제 제출인지 — 제출 완료 문구 분기 플래그 */
+    private var recordingWasForcedSubmit = false
     /** LISTEN 미선택 오답 제출용 — choices 최대 order + 1 (서버 정답 ref와 절대 일치하지 않는 값) */
     private var noChoiceSentinel = 0
 
@@ -239,6 +241,13 @@ class ProblemActivity : AppCompatActivity() {
     private fun renderListen(turn: TurnDto) {
         binding.tvChoicesTitle.visibility = View.VISIBLE
         binding.containerChoices.visibility = View.VISIBLE
+        // D-8-C2 A-4: LISTEN에도 [제출] 버튼 제공 — 시안 ListenStep 전폭 primary, 선택 전 disabled.
+        // 기존 버그: containerRecordActions을 열지 않아 btnSubmitRecording이 VISIBLE이어도
+        // 부모가 GONE이라 버튼이 화면에 없었음. 녹음 카드(cardRecord)는 LISTEN에서 미표시.
+        binding.containerRecordActions.visibility = View.VISIBLE
+        binding.btnHint.visibility = View.GONE
+        binding.btnSubmitRecording.text = getString(R.string.btn_listen_submit)
+        binding.btnSubmitRecording.isEnabled = false
 
         val choices = turn.choices.orEmpty()
         // D-8-C1 시안: 이미지 모드 = 2열 그리드 / 텍스트 모드 = 세로 행
@@ -378,8 +387,8 @@ class ProblemActivity : AppCompatActivity() {
         val turn = turns.getOrNull(currentIndex) ?: return
         when (turn.type) {
             "LISTEN", "LISTEN_TEXT", "LISTEN_PICTURE" -> {
-                playTts()
-                startSubmitCountdown()
+                // D-8-C2 A-3: TTS 재생 완료 후 제출 카운트다운 시작 (재생 중 표시/감소 없음)
+                playTtsWithCompletion { startSubmitCountdown() }
             }
             "SHADOWING" -> {
                 playTtsWithCompletion { startShadowingPreRecord() }
@@ -390,7 +399,11 @@ class ProblemActivity : AppCompatActivity() {
         }
     }
 
-    /** SHADOWING 전용: TTS 재생 종료 → 3초 후 녹음 시작 (06 §3) */
+    /**
+     * SHADOWING 전용: TTS 재생 종료 → 3초 후 녹음 시작 (06 §3).
+     * D-8-C2 A-3: playTtsWithCompletion이 SHADOWING의 postDelay(3초)를 담당하므로
+     * LISTEN도 이 함수를 재사용하되 콜백에서 즉시(추가 지연 없이) 카운트다운 시작.
+     */
     private fun playTtsWithCompletion(onComplete: () -> Unit) {
         val turn = turns.getOrNull(currentIndex) ?: return
         val ttsUrl = turn.ttsUrl ?: run {
@@ -404,8 +417,14 @@ class ProblemActivity : AppCompatActivity() {
                 setOnPreparedListener { it.start() }
                 setOnCompletionListener {
                     releasePlayer()
-                    shadowingPreRecordRunnable = Runnable { onComplete() }.also {
-                        mainHandler.postDelayed(it, SHADOWING_PRE_RECORD_SECONDS * 1000L)
+                    if (turns.getOrNull(currentIndex)?.type?.startsWith("LISTEN") == true) {
+                        // D-8-C2 A-3: LISTEN — TTS 완료 즉시 카운트다운 (3초 재대기 없음)
+                        onComplete()
+                    } else {
+                        // SHADOWING — 재생 종료 후 3초 재대기 후 녹음 (기존 구현 유지)
+                        shadowingPreRecordRunnable = Runnable { onComplete() }.also {
+                            mainHandler.postDelayed(it, SHADOWING_PRE_RECORD_SECONDS * 1000L)
+                        }
                     }
                 }
                 prepareAsync()
@@ -490,7 +509,7 @@ class ProblemActivity : AppCompatActivity() {
         }
     }
 
-    /** 30초 도달 — 타입별 강제 제출 (06 §3) */
+    /** 30초 도달 — 타입별 강제 제출 (06 §3). D-8-C2 A-5: 강제 제출은 타임오버 문구 표시 */
     private fun onSubmitTimeUp() {
         if (submittedThisTurn) return
         val turn = turns.getOrNull(currentIndex) ?: return
@@ -499,9 +518,10 @@ class ProblemActivity : AppCompatActivity() {
                 // CASE 2: 선택 누름=마지막 선택지로 제출 / CASE 3: 미선택=오답(0) 제출
                 val choice = selectedChoice
                 if (choice != null) {
-                    submitListen(choice.order)
+                    submitListen(choice.order, byTimeout = true)
                 } else {
-                    submitListen(noChoiceSentinel) // 오답 처리 — 서버가 0점 자체 채점
+                    // 미선택 자동 제출도 사용자 선택 없이 흘러간 것 — 강제 제출로 간주 (A-5)
+                    submitListen(noChoiceSentinel, byTimeout = true)
                 }
             }
             "NAMING", "SHADOWING", "SELF_TALK" -> forceSubmitRecording()
@@ -521,6 +541,7 @@ class ProblemActivity : AppCompatActivity() {
             Toast.makeText(this, "녹음 파일이 준비되지 않았어요", Toast.LENGTH_SHORT).show()
             return
         }
+        recordingWasForcedSubmit = true
         submitRecording()
     }
 
@@ -580,7 +601,10 @@ class ProblemActivity : AppCompatActivity() {
         }
     }
 
-    private fun submitListen(selected: Int) {
+    /**
+     * LISTEN 제출 — byTimeout=true면 A-5 타임오버 문구로 표시 (정상 제출은 기존 문구 유지).
+     */
+    private fun submitListen(selected: Int, byTimeout: Boolean = false) {
         if (submittedThisTurn) return
         submittedThisTurn = true
         val turn = turns[currentIndex]
@@ -592,7 +616,7 @@ class ProblemActivity : AppCompatActivity() {
                 val data = repository.submitListen(sessionId, turn.turnId, selected)
                 turnScores.add(data.score)
                 turnTypes.add(turn.type)
-                showSubmittedState()
+                showSubmittedState(byTimeout)
             } catch (e: Exception) {
                 submittedThisTurn = false
                 hideSubmitProgress()
@@ -610,6 +634,9 @@ class ProblemActivity : AppCompatActivity() {
         val turn = turns[currentIndex]
         cancelSubmitCountdown()
         showSubmitProgress()
+        // D-8-C2 A-5: 강제 제출(30초 도달) 경로로 진입했는지 플래그 — 제출 완료 문구 분기용
+        val recordingWasForced = recordingWasForcedSubmit
+        recordingWasForcedSubmit = false
 
         lifecycleScope.launch {
             try {
@@ -621,7 +648,7 @@ class ProblemActivity : AppCompatActivity() {
                 }
                 turnScores.add(data.score.toInt())
                 turnTypes.add(turn.type)
-                showSubmittedState()
+                showSubmittedState(byTimeout = recordingWasForced)
             } catch (e: Exception) {
                 hideSubmitProgress()
                 Toast.makeText(this@ProblemActivity, e.message, Toast.LENGTH_SHORT).show()
@@ -636,15 +663,22 @@ class ProblemActivity : AppCompatActivity() {
         binding.scoringOverlay.visibility = View.VISIBLE
     }
 
-    /** 제출 완료 상태: "답안이 제출되었어요" + [다음으로] 등장 (2단계 — 버튼 분리) */
-    private fun showSubmittedState() {
+    /**
+     * 제출 완료 상태 — D-8-C2 A-5: 강제 제출(타임오버·미선택 자동 제출)은
+     * "이런! 시간이 초과되었어요!"로 표시해 시간 초과를 인지시킨다. 정상 제출은 기존 문구 유지.
+     */
+    private fun showSubmittedState(byTimeout: Boolean = false) {
         binding.scoringOverlay.visibility = View.GONE
         binding.tvSubmitCountdown.visibility = View.GONE
+        binding.tvSubmittedStatus.text = getString(
+            if (byTimeout) R.string.submit_timeout_msg else R.string.submitted_answer
+        )
         binding.containerSubmitted.visibility = View.VISIBLE
         binding.cardRecord.visibility = View.GONE
         binding.containerRecord.visibility = View.GONE
         binding.containerRecordActions.visibility = View.GONE
         binding.containerChoices.visibility = View.GONE
+        binding.tvChoicesTitle.visibility = View.GONE
         stopMicPulse()
     }
 

@@ -132,6 +132,8 @@
     <string name="wait_record2_card_fmt">3초 후에 녹음이 시작돼요.</string>
     <string name="shadowing_play_now">문장을 들려드리고 있어요</string>
     <string name="record_panel_fmt">녹음 중이에요 · 남은 시간 %1$d초</string>
+    <!-- D-8-C2 A-5: 타임오버 강제 제출 전용 문구 (정상 제출=submitted_answer 유지) -->
+    <string name="submit_timeout_msg">이런! 시간이 초과되었어요!</string>
 
     <!-- ═══ 보고서 (시안 report.tsx — 지표명은 기획 4지표) ═══ -->
     <string name="report_page_title_d8c">오늘의 보고서</string>
