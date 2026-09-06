@@ -9,6 +9,9 @@ import android.content.SharedPreferences
  */
 class TokenManager(context: Context) {
 
+    // D-8-C2 B-1: 만료 브로드캐스트용 application Context 보관 (Activity 유출 방지)
+    private val appContext: Context = context.applicationContext
+
     private val prefs: SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
@@ -52,4 +55,9 @@ class TokenManager(context: Context) {
     }
 
     fun isLoggedIn(): Boolean = getAccessToken() != null
+
+    /**
+     * D-8-C2 B-1: application Context 반환 — TokenAuthenticator 만료 브로드캐스트용.
+     */
+    fun appContextOrNull(): android.content.Context? = appContext
 }

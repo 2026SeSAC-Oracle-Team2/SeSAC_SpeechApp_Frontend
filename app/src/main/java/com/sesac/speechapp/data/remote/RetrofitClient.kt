@@ -32,7 +32,13 @@ object RetrofitClient {
     fun initTokenManager(tokenManager: TokenManager) {
         tokenManagerRef = tokenManager
         tokenProvider = { tokenManager.getAccessToken() }
+        // D-8-C2 B-1: 만료 브로드캐스트용 context 주입 (TokenAuthenticator 시그니처 확장)
+        appContextRef = tokenManager.appContextOrNull()
     }
+
+    /** B-1 주입용 — TokenManager가 Context를 보관하므로 경유 획득 (순환의존 회피) */
+    @Volatile
+    private var appContextRef: android.content.Context? = null
 
     /** 하위호환: 기존 provider 주입 방식 */
     fun initTokenProvider(provider: () -> String?) {
@@ -84,7 +90,7 @@ object RetrofitClient {
 
         // TokenManager 주입 전 lazy 초기화 방지 — SpeechApplication.onCreate에서 주입 후 첫 호출
         if (tm != null) {
-            builder.authenticator(TokenAuthenticator(tm, ::refreshAccessToken))
+            builder.authenticator(TokenAuthenticator(tm, ::refreshAccessToken, appContextRef))
         }
 
         builder.build()

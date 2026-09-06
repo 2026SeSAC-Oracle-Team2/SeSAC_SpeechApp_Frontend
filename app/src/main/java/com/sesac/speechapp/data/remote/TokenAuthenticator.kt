@@ -1,5 +1,7 @@
 package com.sesac.speechapp.data.remote
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import com.sesac.speechapp.data.local.TokenManager
 import com.sesac.speechapp.data.remote.dto.TokenRefreshRequest
@@ -26,7 +28,9 @@ import okhttp3.Route
  */
 class TokenAuthenticator(
     private val tokenManager: TokenManager,
-    private val refreshCall: suspend (refreshToken: String) -> String?
+    private val refreshCall: suspend (refreshToken: String) -> String?,
+    /** D-8-C2 B-1: 만료 브로드캐스트용 appContext — RetrofitClient.initTokenManager에서 주입 */
+    private val appContext: Context? = null
 ) : Authenticator {
 
     companion object {
@@ -90,7 +94,15 @@ class TokenAuthenticator(
         }
     }
 
+    /**
+     * D-8-C2 B-1: 세션 만료 브로드캐스트 실전송 — 기존은 로그만 출력(버그).
+     * MainActivity가 수신해 로그인 화면으로 라우팅한다 (세션 중간 만료 대응).
+     * 브로드캐스트는 앱 스코프(exported=false 무관 — 동일 앱 내 수신).
+     */
     private fun notifySessionExpired() {
-        android.util.Log.w(TAG, "세션 만료 이벤트 발행 — 앱이 로그인 화면으로 안내해야 함")
+        Log.w(TAG, "세션 만료 이벤트 발행 — 브로드캐스트 전송 (B-1)")
+        appContext?.let { ctx ->
+            ctx.sendBroadcast(Intent(ACTION_SESSION_EXPIRED).setPackage(ctx.packageName))
+        }
     }
 }
