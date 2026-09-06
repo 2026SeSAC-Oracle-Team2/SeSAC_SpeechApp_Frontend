@@ -1,78 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  D-8-C1: 홈 탭 (시안 home.tsx 112행 기준 전면 재작성 — "레이아웃은 전적으로 design 기준").
+  D-8-C1/C2: 홈 탭 (시안 home.tsx 기준).
+  D-8-C2 C-3: FAB를 NestedScrollView 외부(화면 고정 우하단)로 이동 — 리스트와 스크롤
+  따라다니지 않음 + 컨테이너 clipChildren=false로 음영 잘림 방지 + 하단 margin 축소.
   구성 순서: (1) 날짜+인사 헤더 → (2) DuckSays → (3) 2열 통계 카드 → (4) 오늘의 학습 카드
-  → (5) 최근 학습 결과 → (6) 최근 3건 리스트 → (7) FAB(말풍선+오리).
+  → (5) 최근 학습 결과 → (6) 최근 3건 리스트 → (7) FAB(고정).
   ID 보존: tvTitle/cardHero/btnStart/containerStats(tvStreakValue·tvAvgValue·tvDeltaValue)/
            containerRecent/tvRecentEmpty/tvMoreHint (Binding 파손 방지 — 지시문 §5).
 -->
-<androidx.core.widget.NestedScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_grad_warm"
-    android:fillViewport="true">
+    android:background="@drawable/bg_grad_warm">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollHome"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingHorizontal="@dimen/d8c_screen_h"
-        android:paddingBottom="160dp">
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:fillViewport="true">
 
-        <!-- (7) FAB: 말풍선 + 오리 원형 버튼 (시안 home.tsx 우하단 — ChatActivity 연결) -->
-        <LinearLayout
-            android:id="@+id/fabChat"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            android:paddingHorizontal="@dimen/d8c_screen_h"
+            android:paddingBottom="160dp">
 
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_fab_bubble"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="10dp"
-                    android:text="@string/fab_speech_bubble"
-                    android:textAppearance="@style/TextAppearance.SeSAC.D8C.FabBubble" />
-
-                <!-- 꼬리(회전 사각) -->
-                <View
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="-6dp"
-                    android:background="@drawable/bg_fab_bubble_tail"
-                    android:rotation="45" />
-            </FrameLayout>
-
-            <FrameLayout
-                android:layout_width="@dimen/fab_duck_size"
-                android:layout_height="@dimen/fab_duck_size"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/bg_fab_circle"
-                android:elevation="6dp">
-
-                <ImageView
-                    android:layout_width="@dimen/fab_duck_inner"
-                    android:layout_height="@dimen/fab_duck_inner"
-                    android:layout_gravity="center"
-                    android:contentDescription="@string/fab_chat_desc"
-                    android:src="@drawable/img_duck" />
-            </FrameLayout>
-        </LinearLayout>
-
-        <!-- (1) 헤더: 오늘 날짜 + 인사 -->
+            <!-- (1) 헤더: 오늘 날짜 + 인사 -->
         <TextView
             android:id="@+id/tvHomeDate"
             android:layout_width="wrap_content"
@@ -244,4 +202,60 @@
             app:layout_constraintTop_toBottomOf="@id/containerRecent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- (7) FAB: 말풍선 + 오리 원형 버튼 — C-3: 스크롤 외부 고정 (리스트와 겹침 완화·음영 온전) -->
+    <LinearLayout
+        android:id="@+id/fabChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:elevation="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_fab_bubble"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="10dp"
+                android:text="@string/fab_speech_bubble"
+                android:textAppearance="@style/TextAppearance.SeSAC.D8C.FabBubble" />
+
+            <!-- 꼬리(회전 사각) -->
+            <View
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="-6dp"
+                android:background="@drawable/bg_fab_bubble_tail"
+                android:rotation="45" />
+        </FrameLayout>
+
+        <FrameLayout
+            android:layout_width="@dimen/fab_duck_size"
+            android:layout_height="@dimen/fab_duck_size"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:background="@drawable/bg_fab_circle"
+            android:elevation="6dp">
+
+            <ImageView
+                android:layout_width="@dimen/fab_duck_inner"
+                android:layout_height="@dimen/fab_duck_inner"
+                android:layout_gravity="center"
+                android:contentDescription="@string/fab_chat_desc"
+                android:src="@drawable/img_duck" />
+        </FrameLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

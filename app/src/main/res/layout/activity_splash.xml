@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 덕담 스플래시 — 그라데이션 배경 + 마스코트(임시 텍스트 로고) + 로딩 인디케이터 -->
+<!--
+  덕담 스플래시 — D-8-C2 C-2: 로그인 화면(activity_login.xml) 구조 기준 정렬 통일.
+  오리 200dp 중앙(vertical chainStyle packed) + 하단 로딩 스피너.
+  텍스트 색상: 흰색(#CCFFFFFF) 폐기 → text_primary/text_secondary (크림 배경 대비 다크 글자).
+  tvSplashLogo는 gone 상태 유지 (오리 이미지만 표시).
+  ID 보존: imgDuckSplash/tvSplashLogo/tvSplashSubtitle/splashSpinner (SplashActivity 로직 무변경).
+-->
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -7,21 +13,14 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_splash">
 
-        <ImageView
-        android:id="@+id/imgDuckSplash"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:contentDescription="덕담 마스코트"
-        android:src="@drawable/img_duck" />
-
-    <!-- 마스코트 임시: 텍스트 로고 "덕담 🦆" (에셋 확보 시 ImageView로 교체) -->
+    <!-- 마스코트 임시: 텍스트 로고 — ID 보존, gone -->
     <TextView
         android:id="@+id/tvSplashLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/splash_title"
         android:visibility="gone"
-        android:textColor="@android:color/white"
+        android:textColor="@color/text_primary"
         android:textSize="56sp"
         android:textStyle="bold"
         android:letterSpacing="0.05"
@@ -31,25 +30,40 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.42" />
 
+    <!-- C-2: 오리 200dp — 로그인 화면과 동일한 vertical chainStyle=packed 중앙 배치 -->
+    <ImageView
+        android:id="@+id/imgDuckSplash"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:contentDescription="덕담 마스코트"
+        android:src="@drawable/img_duck"
+        app:layout_constraintBottom_toTopOf="@id/tvSplashSubtitle"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <!-- 서브타이틀: 필요시 색만 교체 (흰색 → text_secondary) -->
     <TextView
         android:id="@+id/tvSplashSubtitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="@string/splash_subtitle"
-        android:textColor="#CCFFFFFF"
+        android:textColor="@color/text_secondary"
         android:textSize="15sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSplashLogo" />
+        app:layout_constraintTop_toBottomOf="@id/imgDuckSplash" />
 
+    <!-- 하단 로딩 스피너: 흰색 → primary (크림 배경 가독) -->
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/splashSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="64dp"
         android:indeterminate="true"
-        app:indicatorColor="@android:color/white"
+        app:indicatorColor="@color/primary"
         app:indicatorSize="36dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
