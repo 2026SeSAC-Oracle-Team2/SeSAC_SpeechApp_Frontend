@@ -1,6 +1,9 @@
-# SeSAC 발화 연습
+# 덕담 (Duck談) — Android 클라이언트 (개발 히스토리 레포)
 
-실어증 환자 대상 AI 발화 연습 앱 (Android)
+> LLM 기반 발화·대화 훈련 보조 서비스 **덕담**의 Android 클라이언트
+> 최종 배포 버전은 [SeSAC_SpeechApp_Client_Android](https://github.com/2026SeSAC-Oracle-Team2/SeSAC_SpeechApp_Client_Android) 레포로 통합되었습니다.
+
+SeSAC TEAM 545 — 김윤혁 문현아 서지원 손승운 우연희
 
 ---
 
@@ -122,8 +125,7 @@ Gradle Sync 시 `BuildConfig.SERVER_BASE_URL`가 자동 생성됩니다.
 
 | 브랜치 | 설명 |
 |--------|------|
-| `main` | 안정 버전 |
-| `feature/*` | 기능 개발 |
+| `main` | 안정 버전 — 프로젝트 종료 기준 단일 브랜치 운영 (2026-09-12) |
 
 ---
 
@@ -131,22 +133,22 @@ Gradle Sync 시 `BuildConfig.SERVER_BASE_URL`가 자동 생성됩니다.
 
 ```
 app/src/main/java/com/sesac/speechapp/
-├── MainActivity.kt
+├── MainActivity.kt / SpeechApplication.kt
 ├── data/
+│   ├── local/          # TokenManager (JWT 저장)
 │   ├── model/          # 데이터 모델
 │   ├── remote/
 │   │   ├── api/        # Retrofit 인터페이스
 │   │   ├── dto/        # API 요청/응답 DTO
-│   │   └── websocket/  # WebSocket Manager
+│   │   └── TokenAuthenticator.kt  # 403 무음 토큰 갱신
 │   └── repository/     # 데이터 레이어
 └── ui/
-    ├── splash/
-    ├── login/
-    ├── chat/
-    ├── learn/
-    ├── history/
-    ├── dashboard/
-    └── profile/
+    ├── splash/ · login/ · signup/ · survey/   # 진입 플로우
+    ├── dashboard/ · learn/ · practice/        # 홈·학습 진입
+    ├── learning/                              # 세션 (문항·녹음·AI대화·로딩·가이드)
+    ├── detail/ · history/                     # 리포트·기록
+    ├── profile/ · record/                     # 프로필·녹음 유틸
+    └── chat/
 ```
 
 ---
@@ -162,4 +164,4 @@ app/src/main/java/com/sesac/speechapp/
 
 ## 📄 라이선스
 
-SeSAC Team Project
+SeSAC Team Project — TEAM 545
